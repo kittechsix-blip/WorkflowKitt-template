@@ -164,17 +164,17 @@ const phases = [
     steps: [
       {
         id:'1.1', title:'Download the Template Folder',
-        description:'Click "Download Template Folder" at the top of this guide. Unzip it, rename the folder to your project name, then drag it into Claude Code.',
-        whyItMatters:'The template contains all the prompts, documentation templates, and folder structure Claude needs. Dragging it into Claude Code gives Claude access to read and write your files.',
-        expectedOutput:'Claude Code shows your project folder in the sidebar with all the folders: 00-planning, 01-docs, 02-design, 03-code, 04-assets.',
+        description:'Click "Download Template Folder" at the top of this guide. Unzip it and rename the folder to your project name. Then in Claude Code, type cd and drag your renamed folder into the Claude Code window \u2014 it auto-fills the path. Hit enter.',
+        whyItMatters:'The template contains all the prompts, documentation templates, and folder structure Claude needs. This gives Claude Code access to read and write your project files.',
+        expectedOutput:'Claude Code is now working inside your project folder. It can see all the folders: 00-planning, 01-docs, 02-design, 03-code, 04-assets.',
         prompt:null,
-        dragDrop:{from:'workflow-kitt-template.zip', to:'Claude Code', description:'Unzip \u2192 Rename to your project \u2192 Drag into Claude Code'},
+        dragDrop:{from:'Your renamed folder', to:'Claude Code (after typing cd)', description:'Unzip \u2192 Rename folder \u2192 Type cd \u2192 Drag folder into Claude Code \u2192 Enter'},
       },
       {
         id:'1.2', title:'Create Your PRD in Plan Mode',
-        description:'Ask Claude to create a to-do list plan for your project.',
-        whyItMatters:'Claude creates a structured to-do list of everything that needs to be built. This becomes your roadmap.',
-        expectedOutput:'Claude will create a PRD.md file with a numbered to-do list of features, broken down into small, manageable tasks. You\u2019ll see the file appear in your 00-planning folder.',
+        description:'First, enter Plan Mode: press Shift+Tab, then Tab to select "Plan Mode" at the bottom of Claude Code. You\u2019ll see the mode indicator change. Now paste the prompt below with your project details.',
+        whyItMatters:'Plan Mode tells Claude to think and plan before writing any code. It creates a structured to-do list of everything that needs to be built. This becomes your roadmap.',
+        expectedOutput:'Claude will create a PRD.md file with a numbered to-do list of features. When it finishes, Claude Code will ask if you want to proceed \u2014 say No. Then re-enter Plan Mode (Shift+Tab, Tab) and move to Step 1.3: paste the interview prompt.',
         prompt:{
           template:'Make a PRD.md (to-do list) file in Claude Code Plan Mode:\n\nI want to build "{{projectName}}" for "{{problemSolved}}"\n\nHelp me create a comprehensive plan and write this in PRD.md as a to-do list.',
           fields:[
@@ -191,7 +191,7 @@ const phases = [
         id:'1.3', title:'Complete the Detailed Interview',
         description:'Let Claude interview you about every aspect of your project using the AskUserQuestion tool.',
         whyItMatters:'This is the MOST IMPORTANT step. Claude asks you structured questions (with multiple choice options) about Product, Tech Stack, Design/UX, and Assets. The better you answer, the better Claude understands what to build.',
-        expectedOutput:'After 20\u201330 questions, Claude will say \u201cI have all the information I need\u201d and will auto-populate all 6 documentation files: PRD.md, APP_FLOW.md, TECH_STACK.md, FRONTEND_GUIDELINES.md, BACKEND_STRUCTURE.md, IMPLEMENTATION_PLAN.md.',
+        expectedOutput:'After 20\u201330 questions, Claude will say \u201cI have all the information I need\u201d and will auto-populate all 6 documentation files: PRD.md, APP_FLOW.md, TECH_STACK.md, FRONTEND_GUIDELINES.md, BACKEND_STRUCTURE.md, IMPLEMENTATION_PLAN.md. When done, move to Step 1.4: paste the review prompt to check everything looks right.',
         prompt:{
           template:'Read the PRD.md plan file and interview me in detail using the AskUserQuestion tool.\n\nAsk me about:\n- Product details (who it\u2019s for, what it does, how it works)\n- Technical implementation (frameworks, databases, hosting)\n- UI and UX design (style, colors, layout, inspiration)\n- Assets I have (logos, icons, photos, fonts)\n- Potential concerns and tradeoffs\n\nFor each question, research thoroughly to help me make informed decisions.\nI can share pictures of UI examples to show what I expect.',
           fields:[]
@@ -207,7 +207,7 @@ const phases = [
         id:'1.4', title:'Review & Approve Your Plan',
         description:'Quickly skim the docs Claude created to make sure they match your vision.',
         whyItMatters:'This is your last chance to course-correct before Claude starts writing code. If something doesn\u2019t match your vision, fix it now.',
-        expectedOutput:'Claude shows you a concise summary of the key decisions. Review them and either approve or request changes.',
+        expectedOutput:'Claude shows you a concise summary of the key decisions. Review them and either approve or request changes. Once you\u2019re happy, move to Phase 2: Step 2.1 \u2014 start a NEW conversation (Cmd+N or /clear) and paste the build prompt.',
         prompt:{
           template:'Show me a summary of what you\u2019ve planned:\n1. The main features from PRD.md\n2. The tech stack from TECH_STACK.md\n3. The color palette from FRONTEND_GUIDELINES.md\n\nDoes this match my vision? If not, I\u2019ll tell you what to change.',
           fields:[]
@@ -423,6 +423,11 @@ const EditablePrompt = ({template, fields, stepId, onFavorite, isFavorited}) => 
           {copied?Icons.check(14,'#fff'):Icons.clipboard(14,'#fff')}
           {copied?'Copied!':(hasFields?'Copy Filled Prompt':'Copy Prompt')}
         </button>
+        {copied&&(
+          <span style={{display:'inline-flex',alignItems:'center',fontSize:13,fontWeight:600,color:colors.success,animation:'fadeIn 0.3s ease-out'}}>
+            Now paste this into Claude Code (Cmd+V)
+          </span>
+        )}
         {onFavorite && (
           <button onClick={()=>onFavorite(stepId)} title={isFavorited?'Remove from favorites':'Add to favorites'}
             style={{display:'inline-flex',alignItems:'center',gap:4,padding:'8px 12px',fontSize:13,background:'transparent',border:'1px solid '+colors.border,borderRadius:8,cursor:'pointer',color:colors.textMuted,transition:'all 0.2s'}}>
