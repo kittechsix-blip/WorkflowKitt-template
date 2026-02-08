@@ -221,42 +221,33 @@ const phases = [
     steps: [
       {
         id:'2.1', title:'Start Building',
-        description:'Tell Claude to begin coding from the implementation plan.',
-        whyItMatters:'Claude follows the one-task-at-a-time workflow. This prevents overwhelm and ensures each piece works before moving on.',
-        expectedOutput:'Claude will: 1) Read your docs, 2) Tell you what it\u2019s about to implement, 3) Create the code files, 4) Show you how to test it, 5) Update CLAUDE.md with progress, 6) Tell you "Task complete. Start a new conversation for the next task."',
+        description:'Start a NEW conversation (/clear or Cmd+N). Paste this mega-prompt \u2014 it tells Claude the full workflow: build one task at a time, test it, check security, update docs, then tell you when to start a new conversation for the next task.',
+        whyItMatters:'This single prompt gives Claude everything it needs to build correctly. It follows the one-task-at-a-time pattern, which prevents overwhelm and ensures each piece works before moving on.',
+        expectedOutput:'Claude will: 1) Read your docs, 2) Tell you what it\u2019s about to implement, 3) Create the code files, 4) Show you how to test it, 5) Update CLAUDE.md with progress, 6) Tell you "Task complete. Start a new conversation for the next task." When it does, start a fresh conversation and paste this same prompt again for the next task.',
         prompt:{
-          template:'Read CLAUDE.md and progress.txt.\n\nStart building from task 1 in IMPLEMENTATION_PLAN.md.\n\nRemember the workflow:\n1. Implement the task\n2. Test that it works\n3. Check for security issues\n4. Update CLAUDE.md with what was completed\n5. Tell me when to start a new conversation for the next task\n\nUse best coding practices and emphasize security.',
+          template:'Read CLAUDE.md and progress.txt.\n\nStart building from the next incomplete task in IMPLEMENTATION_PLAN.md.\n\nFollow this workflow for EACH task:\n1. Tell me what you\u2019re about to implement\n2. Implement it using best coding practices\n3. Test that it works\n4. Check for security issues\n5. Update CLAUDE.md and progress.txt with what was completed\n6. STOP and tell me to start a new conversation for the next task\n\nDo ONE task only, then stop. Do NOT move to the next task in the same conversation.\n\nEmphasize security and follow the patterns in FRONTEND_GUIDELINES.md.',
           fields:[]
         },
+        pattern:['Paste this prompt in a new conversation','Claude implements one task','Claude tests it and checks security','Claude updates CLAUDE.md and progress.txt','Claude tells you to start a new conversation','Repeat until all tasks are done'],
         troubleshooting:[
           {issue:'Claude builds the wrong thing',solution:'Point it to the specific requirement in PRD.md or APP_FLOW.md'},
           {issue:'Code doesn\u2019t match design',solution:'Say "Check FRONTEND_GUIDELINES.md and update the styling to match"'},
+          {issue:'Claude tries to do multiple tasks',solution:'Say "Stop. Only do one task per conversation."'},
         ],
       },
       {
-        id:'2.2', title:'One-Task-at-a-Time Workflow',
-        description:'Follow this pattern for each task until the app is complete.',
-        whyItMatters:'This prevents context window overload and ensures each feature is solid before adding more.',
-        expectedOutput:'Claude reads the current state, identifies the next task, implements it, tests it, and updates the docs.',
+        id:'2.2', title:'Resume After a Break',
+        description:'Use this prompt when you come back after a break and need to pick up where you left off.',
+        whyItMatters:'Claude has no memory between sessions. This prompt tells it to read your progress files and continue from the right spot.',
+        expectedOutput:'Claude summarizes what\u2019s been done, what\u2019s next, and any blockers \u2014 then continues building.',
         prompt:{
-          template:'Read CLAUDE.md and progress.txt.\n\nContinue from where we left off. What\u2019s the next task in IMPLEMENTATION_PLAN.md?\n\nImplement it, test it, check security, then update CLAUDE.md.',
-          fields:[]
-        },
-        pattern:['Start a new conversation (clear context window)','Implement the task following the plan','Test that it works (Claude will guide you)','Security check (Claude reviews for vulnerabilities)','Update CLAUDE.md (Claude documents what\u2019s done)','Repeat for the next task'],
-      },
-      {
-        id:'2.3', title:'Resume Sessions',
-        description:'How to pick up where you left off after a break.',
-        whyItMatters:'Claude has no memory between sessions. These files tell it exactly where you are.',
-        expectedOutput:'Claude summarizes progress and continues seamlessly.',
-        prompt:{
-          template:'Read CLAUDE.md and progress.txt.\n\nShow me:\n1. What we completed last session\n2. What we\u2019re working on next\n3. Any blockers or issues\n\nThen continue building.',
+          template:'Read CLAUDE.md and progress.txt.\n\nShow me:\n1. What we completed last session\n2. What we\u2019re working on next\n3. Any blockers or issues\n\nThen continue building the next task. Follow the one-task-at-a-time workflow: implement, test, security check, update docs, then STOP.',
           fields:[]
         },
       },
       {
-        id:'2.4', title:'Debug Issues',
-        description:'When something breaks, debug it systematically.',
+        id:'2.3', title:'Debug Issues',
+        description:'Use this prompt when something breaks during the build.',
         whyItMatters:'Systematic debugging finds the real problem. Random fixes waste time and break other things.',
         expectedOutput:'Claude walks through the diagnostic steps and proposes a targeted fix with clear reasoning.',
         prompt:{
@@ -265,8 +256,8 @@ const phases = [
         },
       },
       {
-        id:'2.5', title:'Add Assets',
-        description:'Add your logo, icons, images, and fonts when Claude needs them.',
+        id:'2.4', title:'Add Assets',
+        description:'Use this when Claude asks for logos, icons, images, or fonts during the build. Drop them into the right folders.',
         whyItMatters:'Having assets in the right place lets Claude reference them in your code.',
         expectedOutput:'Claude sees the files and uses them in your components.',
         prompt:null,
