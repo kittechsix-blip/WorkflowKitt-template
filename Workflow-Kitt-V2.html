@@ -172,11 +172,11 @@ const phases = [
       },
       {
         id:'1.2', title:'Create Your PRD in Plan Mode',
-        description:'First, enter Plan Mode: press Shift+Tab, then Tab to select "Plan Mode" at the bottom of Claude Code. You\u2019ll see the mode indicator change. Now paste the prompt below with your project details.',
+        description:'Follow these steps in order:\n\n1. Enter Plan Mode: press Shift+Tab, then Tab \u2014 you\u2019ll see "Plan Mode" at the bottom of Claude Code\n2. Fill in your project details below and click Copy Filled Prompt\n3. Paste it into Claude Code (Cmd+V) and hit Enter\n4. Claude will write a plan and ask "Would you like to proceed?"\n   \u2022 If the plan ONLY mentions writing PRD.md \u2014 select option 1 or 2 to proceed\n   \u2022 If the plan mentions writing OTHER docs too \u2014 select option 4 and type: "Only write PRD.md, nothing else"\n5. Once PRD.md is created, move to Step 1.3',
         whyItMatters:'Plan Mode tells Claude to think and plan before writing any code. It creates a structured to-do list of everything that needs to be built. This becomes your roadmap.',
-        expectedOutput:'Claude will create a PRD.md file with a numbered to-do list of features. When it finishes, Claude Code will ask if you want to proceed \u2014 say No. Then re-enter Plan Mode (Shift+Tab, Tab) and move to Step 1.3: paste the interview prompt.',
+        expectedOutput:'You should see a PRD.md file in your 01-docs folder with a numbered to-do list of features broken into small tasks. If Claude tries to write other docs too, tell it to stop \u2014 the interview in Step 1.3 needs to happen first.',
         prompt:{
-          template:'Make a PRD.md (to-do list) file in Claude Code Plan Mode:\n\nI want to build "{{projectName}}" for "{{problemSolved}}"\n\nHelp me create a comprehensive plan and write this in PRD.md as a to-do list.',
+          template:'Make a PRD.md (to-do list) file in Claude Code Plan Mode:\n\nI want to build "{{projectName}}" for "{{problemSolved}}"\n\nHelp me create a comprehensive plan and write this in PRD.md as a to-do list.\n\nIMPORTANT: ONLY create the PRD.md file. Do NOT populate the other docs yet \u2014 I need to do the detailed interview first.',
           fields:[
             {name:'projectName',label:'Your Project Name',type:'text',placeholder:'e.g., Recipe Finder App'},
             {name:'problemSolved',label:'Problem You\'re Solving',type:'textarea',placeholder:'e.g., Home cooks want to find recipes based on ingredients they have',rows:3},
