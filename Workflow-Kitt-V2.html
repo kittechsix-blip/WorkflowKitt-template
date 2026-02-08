@@ -207,9 +207,9 @@ const phases = [
         id:'1.4', title:'Review & Approve Your Plan',
         description:'Quickly skim the docs Claude created to make sure they match your vision.',
         whyItMatters:'This is your last chance to course-correct before Claude starts writing code. If something doesn\u2019t match your vision, fix it now.',
-        expectedOutput:'Claude shows you a concise summary of the key decisions. Review them and either approve or request changes.\n\nIMPORTANT: After the review, Claude will likely ask if you want to start building. Say: "Don\u2019t start building yet." Then start a NEW conversation (/clear or Cmd+N) and move to Step 2.1 with a fresh context window.',
+        expectedOutput:'Claude shows you a concise summary of the key decisions. Review them and either approve or request changes.\n\n⛔ STOP HERE — DO NOT LET CLAUDE START BUILDING.\nWhen Claude asks "ready to build?" or "shall I proceed?", say: "No. Stop here."\n\nThen close this conversation: type /clear or press Cmd+N.\nOpen Step 2.1 in the guide, copy the Build prompt, and paste it into the fresh conversation.\nThis gives Claude a clean context window focused entirely on building.',
         prompt:{
-          template:'Show me a summary of what you\u2019ve planned:\n1. The main features from PRD.md\n2. The tech stack from TECH_STACK.md\n3. The color palette from FRONTEND_GUIDELINES.md\n\nDoes this match my vision? If not, I\u2019ll tell you what to change.\n\nDo NOT start building yet. Just show me the summary.',
+          template:'Show me a summary of what you\u2019ve planned:\n1. The main features from PRD.md\n2. The tech stack from TECH_STACK.md\n3. The color palette from FRONTEND_GUIDELINES.md\n\nDoes this match my vision? If not, I\u2019ll tell you what to change.\n\nIMPORTANT: After showing the summary, STOP COMPLETELY. Do NOT offer to start building. Do NOT ask "shall I proceed?" Do NOT write any code. Just show the summary and wait. I will start a new conversation for the build phase.',
           fields:[]
         },
         checkList:['Are the features what you wanted?','Is the tech stack reasonable?','Do the colors and style match your vision?'],
@@ -221,7 +221,7 @@ const phases = [
     steps: [
       {
         id:'2.1', title:'Start Building',
-        description:'Start a NEW conversation (/clear or Cmd+N). Paste this mega-prompt \u2014 it tells Claude the full workflow: build one task at a time, test it, check security, update docs, then tell you when to start a new conversation for the next task.',
+        description:'FIRST: Start a fresh conversation (/clear or Cmd+N) \u2014 do NOT paste this into the planning conversation. Then paste this mega-prompt. It tells Claude the full workflow: build one task at a time, test it, check security, update docs, then tell you when to start a new conversation for the next task.',
         whyItMatters:'This single prompt gives Claude everything it needs to build correctly. It follows the one-task-at-a-time pattern, which prevents overwhelm and ensures each piece works before moving on.',
         expectedOutput:'Claude will: 1) Read your docs, 2) Tell you what it\u2019s about to implement, 3) Create the code files, 4) Show you how to test it, 5) Update CLAUDE.md with progress, 6) Tell you "Task complete. Start a new conversation for the next task." When it does, start a fresh conversation and paste this same prompt again for the next task.',
         prompt:{
@@ -236,7 +236,7 @@ const phases = [
         ],
       },
       {
-        id:'2.2', title:'Resume After a Break',
+        id:'2.2', title:'Resume After a Break', toolkit:true,
         description:'Use this prompt when you come back after a break and need to pick up where you left off.',
         whyItMatters:'Claude has no memory between sessions. This prompt tells it to read your progress files and continue from the right spot.',
         expectedOutput:'Claude summarizes what\u2019s been done, what\u2019s next, and any blockers \u2014 then continues building.',
@@ -246,7 +246,7 @@ const phases = [
         },
       },
       {
-        id:'2.3', title:'Debug Issues',
+        id:'2.3', title:'Debug Issues', toolkit:true,
         description:'Use this prompt when something breaks during the build.',
         whyItMatters:'Systematic debugging finds the real problem. Random fixes waste time and break other things.',
         expectedOutput:'Claude walks through the diagnostic steps and proposes a targeted fix with clear reasoning.',
@@ -256,7 +256,7 @@ const phases = [
         },
       },
       {
-        id:'2.4', title:'Add Assets',
+        id:'2.4', title:'Add Assets', toolkit:true,
         description:'Use this when Claude asks for logos, icons, images, or fonts during the build. Drop them into the right folders.',
         whyItMatters:'Having assets in the right place lets Claude reference them in your code.',
         expectedOutput:'Claude sees the files and uses them in your components.',
@@ -450,16 +450,22 @@ const DragDropVisual = ({from,to,description}) => (
 /* ═══════════════════════════════════════════
    STEP CARD
    ═══════════════════════════════════════════ */
-const StepCard = ({step,isExpanded,onToggle,isCompleted,onComplete,isFavorited,onFavorite}) => (
-  <div className="fade-in" style={{background:colors.surface,border:'1px solid '+(isCompleted?colors.success+'44':colors.border),borderRadius:12,marginBottom:10,overflow:'hidden',transition:'border-color 0.2s, box-shadow 0.2s',boxShadow:isExpanded?'0 4px 20px '+colors.accent+'11':'none'}}>
+const StepCard = ({step,isExpanded,onToggle,isCompleted,onComplete,isFavorited,onFavorite}) => {
+  const isToolkit = step.toolkit;
+  return (
+  <div className="fade-in" style={{background:colors.surface,border:(isToolkit?'1px dashed ':'1px solid ')+(isCompleted?colors.success+'44':isToolkit?colors.textLight+'66':colors.border),borderRadius:12,marginBottom:10,overflow:'hidden',transition:'border-color 0.2s, box-shadow 0.2s',boxShadow:isExpanded?'0 4px 20px '+colors.accent+'11':'none'}}>
     <div onClick={onToggle} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 18px',cursor:'pointer',userSelect:'none',background:isExpanded?colors.surfaceHover:'transparent',transition:'background 0.2s'}}>
-      <div onClick={e=>{e.stopPropagation();onComplete();}}
+      {!isToolkit&&<div onClick={e=>{e.stopPropagation();onComplete();}}
         style={{width:22,height:22,borderRadius:6,flexShrink:0,border:'2px solid '+(isCompleted?colors.success:colors.border),background:isCompleted?colors.successBg:'transparent',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',transition:'all 0.2s'}}>
         {isCompleted&&Icons.check(14,colors.success)}
-      </div>
+      </div>}
       <div style={{flex:1,minWidth:0}}>
         <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-          <span style={{fontSize:11,fontWeight:700,color:colors.accent,background:colors.codeBg,padding:'2px 8px',borderRadius:4}}>{step.id}</span>
+          {isToolkit?(
+            <span style={{fontSize:10,fontWeight:700,color:colors.textLight,background:colors.borderLight,padding:'2px 8px',borderRadius:4,textTransform:'uppercase',letterSpacing:'0.05em'}}>When needed</span>
+          ):(
+            <span style={{fontSize:11,fontWeight:700,color:colors.accent,background:colors.codeBg,padding:'2px 8px',borderRadius:4}}>{step.id}</span>
+          )}
           <span style={{fontSize:15,fontWeight:600,color:isCompleted?colors.textLight:colors.text,textDecoration:isCompleted?'line-through':'none',transition:'color 0.2s'}}>{step.title}</span>
         </div>
       </div>
@@ -546,7 +552,8 @@ const StepCard = ({step,isExpanded,onToggle,isCompleted,onComplete,isFavorited,o
       </div>
     )}
   </div>
-);
+  );
+};
 
 /* ═══════════════════════════════════════════
    PHASE SECTION
@@ -579,16 +586,40 @@ const PhaseSection = ({phase,completedSteps,expandedSteps,onToggleStep,onComplet
       </div>
       {isOpen&&(
         <div style={{padding:'12px 0 0'}}>
-          {phase.steps.map(step=>(
-            <StepCard key={step.id} step={step}
-              isExpanded={expandedSteps.includes(step.id)}
-              onToggle={()=>onToggleStep(step.id)}
-              isCompleted={completedSteps.includes(step.id)}
-              onComplete={()=>onCompleteStep(step.id)}
-              isFavorited={favorites.includes(step.id)}
-              onFavorite={onFavorite}
-            />
-          ))}
+          {(()=>{
+            const regular = phase.steps.filter(s=>!s.toolkit);
+            const toolkit = phase.steps.filter(s=>s.toolkit);
+            return (<>
+              {regular.map(step=>(
+                <StepCard key={step.id} step={step}
+                  isExpanded={expandedSteps.includes(step.id)}
+                  onToggle={()=>onToggleStep(step.id)}
+                  isCompleted={completedSteps.includes(step.id)}
+                  onComplete={()=>onCompleteStep(step.id)}
+                  isFavorited={favorites.includes(step.id)}
+                  onFavorite={onFavorite}
+                />
+              ))}
+              {toolkit.length>0&&(
+                <div style={{textAlign:'center',padding:'16px 0 12px',margin:'8px 0'}}>
+                  <div style={{height:1,background:'linear-gradient(90deg,transparent,'+colors.divider+',transparent)',marginBottom:10}}/>
+                  <span style={{fontSize:12,fontWeight:600,color:colors.textLight,letterSpacing:'0.06em',textTransform:'uppercase'}}>Build Toolkit \u2014 use when needed</span>
+                  <p style={{fontSize:12,color:colors.textLight,margin:'4px 0 0',fontWeight:400}}>These aren\u2019t sequential steps. Reach for them during the build as the situation calls for it.</p>
+                  <div style={{height:1,background:'linear-gradient(90deg,transparent,'+colors.divider+',transparent)',marginTop:10}}/>
+                </div>
+              )}
+              {toolkit.map(step=>(
+                <StepCard key={step.id} step={step}
+                  isExpanded={expandedSteps.includes(step.id)}
+                  onToggle={()=>onToggleStep(step.id)}
+                  isCompleted={completedSteps.includes(step.id)}
+                  onComplete={()=>onCompleteStep(step.id)}
+                  isFavorited={favorites.includes(step.id)}
+                  onFavorite={onFavorite}
+                />
+              ))}
+            </>);
+          })()}
         </div>
       )}
     </div>
