@@ -901,6 +901,12 @@ function WorkflowKitt() {
   const toggleComplete = id => setCompletedSteps(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
   const toggleFavorite = id => setFavorites(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
   const handleDownload = ()=>{setDlPulse(true);setTimeout(()=>setDlPulse(false),600);downloadTemplate();};
+  const handleClearData = ()=>{
+    if(window.confirm('Clear all saved progress? This cannot be undone.')){
+      ['wk-projects','wk-stories','wk-v2-completed','wk-v2-favorites'].forEach(k=>localStorage.removeItem(k));
+      setCompletedSteps([]);setFavorites([]);setExpandedSteps([]);
+    }
+  };
 
   return (
     <div style={{minHeight:'100vh',background:colors.bg}}>
@@ -922,6 +928,13 @@ function WorkflowKitt() {
             </div>
           </div>
         )}
+        <button onClick={handleClearData}
+          style={{marginTop:12,background:'none',border:'1px solid '+colors.borderLight,borderRadius:8,padding:'6px 14px',
+            fontSize:12,color:colors.textLight,cursor:'pointer',transition:'all 0.2s'}}
+          onMouseEnter={e=>{e.currentTarget.style.color=colors.error;e.currentTarget.style.borderColor=colors.error;}}
+          onMouseLeave={e=>{e.currentTarget.style.color=colors.textLight;e.currentTarget.style.borderColor=colors.borderLight;}}>
+          Clear All Data
+        </button>
       </header>
 
       {/* ─── MAIN ─── */}
