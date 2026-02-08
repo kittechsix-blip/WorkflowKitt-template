@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Kitt V2 — Build Apps with AI</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,3 29,28 3,28' fill='%237B5FCC'/%3E%3C/svg%3E">
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: #FEFDFB; color: #1A0F2E; line-height: 1.6;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      }
+      ::selection { background: rgba(123,95,204,0.2); }
+      input, textarea, button, select { font-family: inherit; }
+      code, pre { font-family: 'SF Mono', 'Fira Code', Consolas, 'Courier New', monospace; }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #E0D9F0; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #7B5FCC; }
+      @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+      @keyframes bounceFile { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+      .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+      button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+        outline: 2px solid #7B5FCC; outline-offset: 2px;
+      }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+/* ═══════════════════════════════════════════
+   COLOR SYSTEM
+   ═══════════════════════════════════════════ */
+const colors = {
+  bg:'#FEFDFB', surface:'#FFFFFF', surfaceHover:'#F8F7FF',
+  border:'#E0D9F0', borderLight:'#F0EDF7',
+  text:'#1A0F2E', textMuted:'#5B4A75', textLight:'#8B7BA8',
+  accent:'#7B5FCC', accentHover:'#9D7FEA', accentDark:'#5B3FA8',
+  success:'#059669', successBg:'#D1FAE5',
+  warning:'#D97706', warningBg:'#FEF3C7',
+  error:'#DC2626', errorBg:'#FEE2E2',
+  codeBg:'#F5F3F7', divider:'#E9E4F0',
+};
+
+/* ═══════════════════════════════════════════
+   LOGO (base64 - replaced by build script)
+   ═══════════════════════════════════════════ */
+const LOGO_BASE64 = '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';
+
+/* ═══════════════════════════════════════════
+   SVG ICONS
+   ═══════════════════════════════════════════ */
+const Ic = ({d,size=20,color='currentColor',fill='none',sw=2}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color}
+    strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
+    <path d={d}/>
+  </svg>
+);
+
+const Icons = {
+  clipboard:(s=18,c)=>(
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+    </svg>
+  ),
+  check:(s=18,c)=><Ic size={s} color={c||colors.success} d="M20 6L9 17l-5-5"/>,
+  chevronDown:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M6 9l6 6 6-6"/>,
+  chevronRight:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M9 18l6-6-6-6"/>,
+  star:(s=18,c)=><Ic size={s} color={c||colors.textLight} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>,
+  starFilled:(s=18,c)=><Ic size={s} color={c||colors.accent} fill={c||colors.accent} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>,
+  trash:(s=18,c)=>(
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
+      <path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+    </svg>
+  ),
+  edit:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>,
+  x:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M18 6L6 18M6 6l12 12"/>,
+  download:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>,
+  book:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5V5a2 2 0 012-2h14v14H6.5A2.5 2.5 0 004 19.5z"/>,
+  folder:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>,
+  arrowRight:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M5 12h14M12 5l7 7-7 7"/>,
+  map:(s=18,c)=>(
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
+      <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/>
+    </svg>
+  ),
+  hammer:(s=18,c)=>(
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
+      <path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0a2.12 2.12 0 010-3L12 9"/><path d="M17.64 15L22 10.64"/><path d="M20.91 11.7l-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V6.5a.5.5 0 01.5-.5H21a3 3 0 003-3"/>
+    </svg>
+  ),
+  paintbrush:(s=18,c)=>(
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
+      <path d="M18.37 2.63a2.12 2.12 0 013 3L14 13l-4 1 1-4 7.37-7.37z"/><path d="M8 21a4 4 0 01-4-4c0-2 4-6 4-6s4 4 4 6a4 4 0 01-4 4z"/>
+    </svg>
+  ),
+  rocket:(s=18,c)=>(
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3"/><path d="M22 2l-7.5 7.5"/>
+      <path d="M15 12l3.17-3.17a4 4 0 000-5.66L15 2M12 9l-3.17 3.17a4 4 0 000 5.66L12 22"/>
+    </svg>
+  ),
+};
+
+const phaseIcons = { 1:Icons.map, 2:Icons.hammer, 3:Icons.paintbrush, 4:Icons.rocket };
+
+/* ═══════════════════════════════════════════
+   CLAUDE.MD TEMPLATE (for ZIP download)
+   ═══════════════════════════════════════════ */
+const CLAUDE_TEMPLATE = "# CLAUDE.md - AI Operating Manual\n# [PROJECT NAME]\n\nThis file is read automatically by Claude Code at the start of every session.\n\n---\n\n## Project Overview\n\n**Project Name:** [YOUR PROJECT NAME]\n**One-Line Description:** [WHAT DOES IT DO IN ONE SENTENCE]\n**Target User:** [WHO IS THIS FOR]\n**Core Value Proposition:** [WHY WOULD THEY USE THIS]\n\n---\n\n## WORKFLOW: Plan Mode PRD Approach\n\n### Initial Setup\n```\nMake a PRD.md (to-do list) file in Claude Code Plan Mode:\nI want to build \"[PROJECT NAME]\" for \"[SOLUTION/PURPOSE]\"\nHelp me create a comprehensive plan and write this in PRD.md as a to-do list.\n```\n\n### After PRD is Created\n```\nRead this plan file and interview me in detail using the AskUserQuestion tool about:\n- Technical implementation details\n- UI and UX design decisions\n- Potential concerns and tradeoffs\n- Tech stack choices\n- Design system preferences\n- Assets and visual identity\n\nFor each question, research thoroughly to help me make informed decisions.\nI can share pictures of UI examples to show what I expect.\n```\n\n---\n\n## IMPLEMENTATION WORKFLOW\n\n**Implement this plan ONE TASK AT A TIME:**\n\nFor each task:\n1. **Implement** the task following best coding practices\n2. **Test** that it works correctly\n3. **Security check** - ensure no vulnerabilities introduced\n4. **Update CLAUDE.md** - Document what was completed and what's next\n5. **Clear context window** - Start a new conversation before the next task\n6. **Move to next task**\n\n**DO NOT skip to the next task until the current one is:**\n- Fully implemented\n- Tested and working\n- Secure\n- Documented in CLAUDE.md\n\n---\n\n## CRITICAL: Read Before You Edit\n\n**Before editing ANY files, you MUST read at least 3 relevant files to ensure coherent and consistent code.**\n\n### Files You Must Read\n\n1. **Similar files** - Files with similar functionality to understand existing patterns\n2. **Imported dependencies** - The definition/implementation of any imports you're not 100% sure about\n3. **Related files** - Files that interact with what you're building\n\n### Steps to Follow\n\n1. **Read** at least 3 relevant existing files\n2. **Understand** the patterns, conventions, and API usage\n3. **Edit** - Only then proceed with creating/editing files\n\n**Never edit files blindly. Always understand the existing codebase first.**\n\n---\n\n## Tech Stack\n\n**Framework:** [e.g., React, Next.js, Vue]\n**Language:** [e.g., TypeScript, JavaScript]\n**Styling:** [e.g., Tailwind CSS, CSS Modules]\n**UI Library:** [e.g., Shadcn/UI, none]\n**Backend:** [e.g., Supabase, Firebase, none]\n**Database:** [e.g., PostgreSQL, localStorage]\n**Authentication:** [e.g., Supabase Auth, none]\n**Deployment:** [e.g., Vercel, Netlify]\n\n---\n\n## Styling Guidelines\n\n### Approach\n- **Mobile-first** approach with TailwindCSS\n- Use **Shadcn/UI** components from `src/components/ui/`\n- Custom components in `src/components/nowts/`\n\n### Typography\n- Use shared typography components for paragraphs and headings\n- Don't create custom `<p>`, `<h1>`, etc. tags directly\n\n### Spacing\n- Prefer utility layouts like `flex flex-col gap-4` for vertical spacing\n- Use `flex gap-4` for horizontal spacing\n- Avoid `space-y-4` and similar spacing utilities\n\n---\n\n## Coding Rules\n\n### ALWAYS\n- Follow the patterns in existing code\n- Read 3+ relevant files before editing\n- Use the design system and styling guidelines above\n- Update progress.txt after completing features\n- Update CLAUDE.md after completing each task\n- Handle errors gracefully\n- Test before moving to the next task\n- Use best coding practices\n- Emphasize security in all implementations\n\n### NEVER\n- Skip reading the docs before coding\n- Edit files without understanding existing patterns\n- Hardcode values that should be configurable\n- Ignore edge cases defined in PRD.md\n- Move to the next task without testing the current one\n- Skip security considerations\n- Leave CLAUDE.md outdated\n\n---\n\n## Development Tools\n\n### Ralph Loop\nRun the Ralph loop for automated testing and validation:\nGitHub: https://github.com/michaelshimeles/ralphy\n\n---\n\n## Documentation References\n\nBefore making decisions, check these files:\n\n1. `PRD.md` - To-do list and requirements\n2. `01-docs/APP_FLOW.md` - User flows and navigation\n3. `01-docs/TECH_STACK.md` - Approved packages and versions\n4. `01-docs/FRONTEND_GUIDELINES.md` - Design system details\n5. `01-docs/BACKEND_STRUCTURE.md` - Data and API structure\n6. `01-docs/IMPLEMENTATION_PLAN.md` - Build sequence\n7. `progress.txt` - Current state and session history\n8. `CLAUDE.md` (this file) - Always current project status\n\n---\n\n## Current Session Context\n\n**Current Phase:** [Planning / Build / Polish / Ship]\n**Last Updated:** [DATE]\n**Current Focus:** [What you're working on right now]\n**Last Completed Task:** [Most recent completed task]\n**Next Task:** [What to work on next from PRD.md]\n**Blockers:** [Any issues blocking progress, or \"None\"]\n\n---\n\n## END OF PROJECT: Create Learning Document\n\n**IMPORTANT: When the project is complete, Claude MUST create a personalized learning document.**\n\n### Prompt to Use\n\n```\nThe project is complete! Please create my FOR[YourName].md learning document.\n\nThis should explain the entire project in plain language, including:\n- Technical architecture and how it's structured\n- How the various parts are connected\n- Technologies used and why we chose them\n- Lessons I can learn from this project\n\nMake it engaging and memorable.\n```\n\n---\n\n## Project Checklist\n\n### Phase 1: Planning\n- [ ] Created PRD.md in Plan Mode\n- [ ] Completed detailed interview with AskUserQuestion\n- [ ] All design decisions documented\n- [ ] Assets gathered\n- [ ] CLAUDE.md initialized\n\n### Phase 2: Build\n- [ ] Implementing tasks one at a time\n- [ ] Testing each task before moving on\n- [ ] Following best practices and security guidelines\n- [ ] Updating CLAUDE.md after each task\n\n### Phase 3: Polish\n- [ ] All features tested\n- [ ] Mobile responsive\n- [ ] Edge cases handled\n- [ ] Security reviewed\n\n### Phase 4: Ship\n- [ ] Final testing complete\n- [ ] Deployed\n- [ ] Learning document created\n- [ ] Project documented\n\n---\n\n**Keep this file updated throughout the project.**\n";
+
+const PROGRESS_TEMPLATE = "# Progress Tracker\n\n## Session Log\n\n### Session 1 - [DATE]\n- Started: [TIME]\n- Completed: [TASKS]\n- Next: [NEXT TASK]\n- Issues: None\n\n---\n\n## Completed Tasks\n- (none yet)\n\n## Current Task\n- Starting Phase 1: Planning\n\n## Upcoming Tasks\n- See IMPLEMENTATION_PLAN.md\n\n## Blockers\n- None\n";
+
+const CHECKLIST_TEMPLATE = "# Project Checklist\n\n## Phase 1: Planning\n- [ ] Download and set up template folder\n- [ ] Create PRD.md in Plan Mode\n- [ ] Complete detailed interview\n- [ ] Review and approve plan\n\n## Phase 2: Build\n- [ ] Start building from implementation plan\n- [ ] Follow one-task-at-a-time workflow\n- [ ] Add assets as needed\n\n## Phase 3: Polish\n- [ ] Test all features\n- [ ] Test on mobile\n- [ ] Fix bugs\n- [ ] Run automated tests (optional)\n\n## Phase 4: Ship\n- [ ] Deploy app\n- [ ] Create learning story\n";
+
+const DOC_TEMPLATES = {
+  'PRD.md': '# Product Requirements Document\n\n## Project Name\n[Your project name]\n\n## Problem Statement\n[What problem are you solving?]\n\n## Target User\n[Who is this for?]\n\n## Features (To-Do List)\n- [ ] Feature 1\n- [ ] Feature 2\n- [ ] Feature 3\n\n## Success Criteria\n- [ ] Criteria 1\n- [ ] Criteria 2',
+  'APP_FLOW.md': '# App Flow\n\n## Screens\n\n### Screen 1: [Name]\n- Description: [What the user sees]\n- Actions: [What the user can do]\n- Navigation: [Where they can go next]',
+  'TECH_STACK.md': '# Tech Stack\n\n## Frontend\n- Framework: [React / Next.js / Vue]\n- Styling: [Tailwind CSS / CSS Modules]\n- UI Library: [Shadcn/UI / none]\n\n## Backend\n- Runtime: [Node.js / none]\n- Database: [Supabase / Firebase / localStorage]\n- Auth: [Supabase Auth / none]\n\n## Deployment\n- Platform: [Vercel / Netlify / Railway]',
+  'FRONTEND_GUIDELINES.md': '# Frontend Guidelines\n\n## Design System\n\n### Colors\n- Primary: [hex]\n- Secondary: [hex]\n- Background: [hex]\n- Text: [hex]\n\n### Typography\n- Headings: [font]\n- Body: [font]\n\n### Spacing\n- Use consistent spacing scale\n\n### Components\n- Follow existing patterns\n- Mobile-first approach',
+  'BACKEND_STRUCTURE.md': '# Backend Structure\n\n## Database Schema\n\n### Table: [name]\n- id (uuid, primary key)\n- created_at (timestamp)\n- [field] ([type])\n\n## API Endpoints\n\n### GET /api/[resource]\n- Description: [what it does]\n- Response: [shape]',
+  'IMPLEMENTATION_PLAN.md': '# Implementation Plan\n\n## Build Order\n\n### Task 1: Project Setup\n- Initialize project\n- Install dependencies\n- Set up folder structure\n\n### Task 2: [Feature]\n- Implement [feature]\n- Test [feature]\n- Update CLAUDE.md',
+};
+
+/* ═══════════════════════════════════════════
+   HOOKS & UTILITIES
+   ═══════════════════════════════════════════ */
+function useLocalStorage(key, init) {
+  const [val, setVal] = useState(() => {
+    try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : init; }
+    catch { return init; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+  }, [key, val]);
+  return [val, setVal];
+}
+
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta); return ok;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   PHASES DATA (4 phases, 15 steps)
+   ═══════════════════════════════════════════ */
+const phases = [
+  {
+    number:1, title:'PLANNING', color:'#7B5FCC',
+    steps: [
+      {
+        id:'1.1', title:'Download the Template Folder',
+        description:'Click "Download Template Folder" at the top of this guide. Unzip it, rename the folder to your project name, then drag it into Claude Code.',
+        whyItMatters:'The template contains all the prompts, documentation templates, and folder structure Claude needs. Dragging it into Claude Code gives Claude access to read and write your files.',
+        expectedOutput:'Claude Code shows your project folder in the sidebar with all the folders: 00-planning, 01-docs, 02-design, 03-code, 04-assets.',
+        prompt:null,
+        dragDrop:{from:'workflow-kitt-template.zip', to:'Claude Code', description:'Unzip \u2192 Rename to your project \u2192 Drag into Claude Code'},
+      },
+      {
+        id:'1.2', title:'Create Your PRD in Plan Mode',
+        description:'Ask Claude to create a to-do list plan for your project.',
+        whyItMatters:'Claude creates a structured to-do list of everything that needs to be built. This becomes your roadmap.',
+        expectedOutput:'Claude will create a PRD.md file with a numbered to-do list of features, broken down into small, manageable tasks. You\u2019ll see the file appear in your 00-planning folder.',
+        prompt:{
+          template:'Make a PRD.md (to-do list) file in Claude Code Plan Mode:\n\nI want to build "{{projectName}}" for "{{problemSolved}}"\n\nHelp me create a comprehensive plan and write this in PRD.md as a to-do list.',
+          fields:[
+            {name:'projectName',label:'Your Project Name',type:'text',placeholder:'e.g., Recipe Finder App'},
+            {name:'problemSolved',label:'Problem You\'re Solving',type:'textarea',placeholder:'e.g., Home cooks want to find recipes based on ingredients they have',rows:3},
+          ]
+        },
+        troubleshooting:[
+          {issue:'Claude doesn\u2019t enter Plan Mode',solution:'Say "Please use Plan Mode to create this PRD"'},
+          {issue:'Plan is too vague',solution:'Ask "Can you break each item down into smaller, more specific tasks?"'},
+        ],
+      },
+      {
+        id:'1.3', title:'Complete the Detailed Interview',
+        description:'Let Claude interview you about every aspect of your project using the AskUserQuestion tool.',
+        whyItMatters:'This is the MOST IMPORTANT step. Claude asks you structured questions (with multiple choice options) about Product, Tech Stack, Design/UX, and Assets. The better you answer, the better Claude understands what to build.',
+        expectedOutput:'After 20\u201330 questions, Claude will say \u201cI have all the information I need\u201d and will auto-populate all 6 documentation files: PRD.md, APP_FLOW.md, TECH_STACK.md, FRONTEND_GUIDELINES.md, BACKEND_STRUCTURE.md, IMPLEMENTATION_PLAN.md.',
+        prompt:{
+          template:'Read the PRD.md plan file and interview me in detail using the AskUserQuestion tool.\n\nAsk me about:\n- Product details (who it\u2019s for, what it does, how it works)\n- Technical implementation (frameworks, databases, hosting)\n- UI and UX design (style, colors, layout, inspiration)\n- Assets I have (logos, icons, photos, fonts)\n- Potential concerns and tradeoffs\n\nFor each question, research thoroughly to help me make informed decisions.\nI can share pictures of UI examples to show what I expect.',
+          fields:[]
+        },
+        tips:['Take your time with each answer','Share screenshots of apps you like (drag them into chat)','If you have logo/icon files, drag them into the chat when asked','Don\u2019t rush \u2014 this phase determines everything'],
+        troubleshooting:[
+          {issue:'Claude stops asking too early',solution:'Say "Keep asking more questions about [tech stack/design/features]"'},
+          {issue:'Questions are confusing',solution:'Say "Can you explain this question differently? I\u2019m not sure what you\u2019re asking"'},
+          {issue:'You\u2019re not sure how to answer',solution:'Say "What do you recommend for my use case?"'},
+        ],
+      },
+      {
+        id:'1.4', title:'Review & Approve Your Plan',
+        description:'Quickly skim the docs Claude created to make sure they match your vision.',
+        whyItMatters:'This is your last chance to course-correct before Claude starts writing code. If something doesn\u2019t match your vision, fix it now.',
+        expectedOutput:'Claude shows you a concise summary of the key decisions. Review them and either approve or request changes.',
+        prompt:{
+          template:'Show me a summary of what you\u2019ve planned:\n1. The main features from PRD.md\n2. The tech stack from TECH_STACK.md\n3. The color palette from FRONTEND_GUIDELINES.md\n\nDoes this match my vision? If not, I\u2019ll tell you what to change.',
+          fields:[]
+        },
+        checkList:['Are the features what you wanted?','Is the tech stack reasonable?','Do the colors and style match your vision?'],
+      },
+    ],
+  },
+  {
+    number:2, title:'BUILD', color:'#5B3FA8',
+    steps: [
+      {
+        id:'2.1', title:'Start Building',
+        description:'Tell Claude to begin coding from the implementation plan.',
+        whyItMatters:'Claude follows the one-task-at-a-time workflow. This prevents overwhelm and ensures each piece works before moving on.',
+        expectedOutput:'Claude will: 1) Read your docs, 2) Tell you what it\u2019s about to implement, 3) Create the code files, 4) Show you how to test it, 5) Update CLAUDE.md with progress, 6) Tell you "Task complete. Start a new conversation for the next task."',
+        prompt:{
+          template:'Read CLAUDE.md and progress.txt.\n\nStart building from task 1 in IMPLEMENTATION_PLAN.md.\n\nRemember the workflow:\n1. Implement the task\n2. Test that it works\n3. Check for security issues\n4. Update CLAUDE.md with what was completed\n5. Tell me when to start a new conversation for the next task\n\nUse best coding practices and emphasize security.',
+          fields:[]
+        },
+        troubleshooting:[
+          {issue:'Claude builds the wrong thing',solution:'Point it to the specific requirement in PRD.md or APP_FLOW.md'},
+          {issue:'Code doesn\u2019t match design',solution:'Say "Check FRONTEND_GUIDELINES.md and update the styling to match"'},
+        ],
+      },
+      {
+        id:'2.2', title:'One-Task-at-a-Time Workflow',
+        description:'Follow this pattern for each task until the app is complete.',
+        whyItMatters:'This prevents context window overload and ensures each feature is solid before adding more.',
+        expectedOutput:'Claude reads the current state, identifies the next task, implements it, tests it, and updates the docs.',
+        prompt:{
+          template:'Read CLAUDE.md and progress.txt.\n\nContinue from where we left off. What\u2019s the next task in IMPLEMENTATION_PLAN.md?\n\nImplement it, test it, check security, then update CLAUDE.md.',
+          fields:[]
+        },
+        pattern:['Start a new conversation (clear context window)','Implement the task following the plan','Test that it works (Claude will guide you)','Security check (Claude reviews for vulnerabilities)','Update CLAUDE.md (Claude documents what\u2019s done)','Repeat for the next task'],
+      },
+      {
+        id:'2.3', title:'Resume Sessions',
+        description:'How to pick up where you left off after a break.',
+        whyItMatters:'Claude has no memory between sessions. These files tell it exactly where you are.',
+        expectedOutput:'Claude summarizes progress and continues seamlessly.',
+        prompt:{
+          template:'Read CLAUDE.md and progress.txt.\n\nShow me:\n1. What we completed last session\n2. What we\u2019re working on next\n3. Any blockers or issues\n\nThen continue building.',
+          fields:[]
+        },
+      },
+      {
+        id:'2.4', title:'Debug Issues',
+        description:'When something breaks, debug it systematically.',
+        whyItMatters:'Systematic debugging finds the real problem. Random fixes waste time and break other things.',
+        expectedOutput:'Claude walks through the diagnostic steps and proposes a targeted fix with clear reasoning.',
+        prompt:{
+          template:'Something\u2019s broken with {{issueDescription}}.\n\nBefore guessing at fixes:\n1. Read the relevant documentation (PRD.md, APP_FLOW.md, etc.)\n2. Check progress.txt for recent changes\n3. Explain what SHOULD happen based on the docs\n4. Explain what IS happening\n5. Identify the gap between expected and actual behavior\n6. Propose a specific fix with reasoning\n\nDon\u2019t make random changes. Diagnose first.',
+          fields:[{name:'issueDescription',label:'Describe the Issue',type:'textarea',placeholder:'e.g., The login button doesn\u2019t respond when clicked',rows:3}]
+        },
+      },
+      {
+        id:'2.5', title:'Add Assets',
+        description:'Add your logo, icons, images, and fonts when Claude needs them.',
+        whyItMatters:'Having assets in the right place lets Claude reference them in your code.',
+        expectedOutput:'Claude sees the files and uses them in your components.',
+        prompt:null,
+        dragDrop:{from:'Your logo files', to:'04-assets/images/logo/', description:'Organize assets so Claude can use them'},
+        assetFolders:[
+          {type:'Logos',path:'04-assets/images/logo/'},
+          {type:'Icons',path:'04-assets/images/icons/'},
+          {type:'Photos',path:'04-assets/images/photos/'},
+          {type:'Fonts',path:'04-assets/fonts/'},
+        ],
+      },
+    ],
+  },
+  {
+    number:3, title:'POLISH', color:'#7B5FCC',
+    steps: [
+      {
+        id:'3.1', title:'Test All Features',
+        description:'Go through every feature and verify it works as designed.',
+        whyItMatters:'Real users will try everything. Testing now prevents embarrassing bugs after launch.',
+        expectedOutput:'Claude gives you a testing checklist based on your app\u2019s flows. Follow it systematically.',
+        prompt:{
+          template:'Read APP_FLOW.md.\n\nFor each user flow listed:\n1. Walk me through testing it step by step\n2. What should I see at each step?\n3. What are the potential failure points?\n4. What edge cases should I test?',
+          fields:[]
+        },
+      },
+      {
+        id:'3.2', title:'Test on Mobile',
+        description:'Verify your app works on phones and tablets.',
+        whyItMatters:'Many users will access your app on mobile. It needs to work everywhere.',
+        expectedOutput:'Your app looks good and works smoothly on mobile devices.',
+        prompt:null,
+        mobileChecklist:['Does text fit without horizontal scrolling?','Are buttons easy to tap?','Do all features work on touch screens?','Is the layout readable?'],
+      },
+      {
+        id:'3.3', title:'Fix Bugs',
+        description:'Address any issues you found during testing.',
+        whyItMatters:'This is your polish phase \u2014 make everything work perfectly.',
+        expectedOutput:'All bugs fixed, app works smoothly.',
+        prompt:{
+          template:'I found these issues during testing:\n\n{{bugList}}\n\nFor each one:\n1. Diagnose the root cause\n2. Propose a fix\n3. Test the fix\n4. Update CLAUDE.md',
+          fields:[{name:'bugList',label:'List the Bugs Found',type:'textarea',placeholder:'1. Login button not responding\n2. Mobile menu doesn\u2019t close\n3. Form validation shows wrong error',rows:5}]
+        },
+      },
+      {
+        id:'3.4', title:'Run Ralph Loop (Optional)',
+        description:'Use automated testing if applicable.',
+        whyItMatters:'Automated testing can catch issues you might miss.',
+        expectedOutput:'Ralph loop runs tests and reports results.',
+        prompt:{
+          template:'Run the Ralph loop for automated validation:\nhttps://github.com/michaelshimeles/ralphy\n\nTest the app thoroughly and report any issues.',
+          fields:[]
+        },
+      },
+    ],
+  },
+  {
+    number:4, title:'SHIP', color:'#5B3FA8',
+    steps: [
+      {
+        id:'4.1', title:'Deploy Your App',
+        description:'Push your code and make it live.',
+        whyItMatters:'You\u2019re making your app available to the world!',
+        expectedOutput:'Your app is live at a public URL. Share it!',
+        prompt:{
+          template:'Read TECH_STACK.md for deployment instructions.\n\nDeploy the app to {{hostingPlatform}}.\n\nWalk me through the deployment steps.',
+          fields:[{name:'hostingPlatform',label:'Hosting Platform',type:'text',placeholder:'e.g., Vercel, Netlify, Railway'}]
+        },
+      },
+      {
+        id:'4.2', title:'Create Your Learning Story',
+        description:'Ask Claude to document everything you learned.',
+        whyItMatters:'Building is great, but understanding what you built makes you a better builder. This document captures your journey so you can learn from it and reference it later.',
+        expectedOutput:'Claude creates FOR[Andykitlowski].md \u2014 a friendly, engaging explanation of your entire project with lessons learned, mental models, and growth opportunities.',
+        prompt:{
+          template:'The project is complete! Please create my FOR[Andykitlowski].md learning document.\n\nThis should explain the entire project in plain language, including:\n- Technical architecture and how it\u2019s structured\n- How the various parts are connected\n- Technologies used and why we chose them\n- Lessons I can learn from this project:\n  * Bugs we ran into and how we fixed them\n  * Potential pitfalls and how to avoid them in the future\n  * New technologies/concepts introduced\n  * How good engineers think and work\n  * Best practices demonstrated in this project\n\nMake it engaging and memorable \u2014 use technical terms appropriately, but also use analogies and anecdotes to make concepts stick. Don\u2019t make it sound like boring technical documentation.\n\nThis is a learning tool to help me grow as a builder.',
+          fields:[]
+        },
+        whatToDo:'Read it! This is your personal knowledge base. Refer back to it when building your next project.',
+      },
+    ],
+  },
+];
+
+/* ═══════════════════════════════════════════
+   EDITABLE PROMPT COMPONENT
+   ═══════════════════════════════════════════ */
+const EditablePrompt = ({template, fields, stepId, onFavorite, isFavorited}) => {
+  const [vals, setVals] = useState({});
+  const [copied, setCopied] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+
+  const filled = useMemo(() => {
+    let t = template;
+    if (fields && fields.length > 0) {
+      fields.forEach(f => {
+        t = t.replace(new RegExp('\\{\\{'+f.name+'\\}\\}','g'), vals[f.name] || '['+f.label+']');
+      });
+    }
+    return t;
+  }, [template, fields, vals]);
+
+  const handleCopy = async () => {
+    const ok = await copyText(filled);
+    if(ok){setCopied(true);setTimeout(()=>setCopied(false),2000);}
+  };
+
+  const hasFields = fields && fields.length > 0;
+
+  return (
+    <div style={{background:colors.codeBg,border:'1px solid '+colors.border,borderRadius:12,padding:20,marginTop:12}}>
+      {hasFields && (
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:600,color:colors.textMuted,textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:10}}>
+            Fill in your details
+          </div>
+          {fields.map(f=>(
+            <div key={f.name} style={{marginBottom:12}}>
+              <label style={{display:'block',fontSize:13,fontWeight:500,color:colors.text,marginBottom:4}}>{f.label}</label>
+              {f.type==='textarea'?(
+                <textarea rows={f.rows||3} placeholder={f.placeholder} value={vals[f.name]||''}
+                  onChange={e=>setVals(p=>({...p,[f.name]:e.target.value}))}
+                  style={{width:'100%',padding:'8px 12px',fontSize:14,border:'1px solid '+colors.border,borderRadius:8,background:colors.surface,color:colors.text,resize:'vertical',lineHeight:1.5,transition:'border-color 0.2s'}}
+                  onFocus={e=>e.target.style.borderColor=colors.accent}
+                  onBlur={e=>e.target.style.borderColor=colors.border}
+                />
+              ):(
+                <input type="text" placeholder={f.placeholder} value={vals[f.name]||''}
+                  onChange={e=>setVals(p=>({...p,[f.name]:e.target.value}))}
+                  style={{width:'100%',padding:'8px 12px',fontSize:14,border:'1px solid '+colors.border,borderRadius:8,background:colors.surface,color:colors.text,transition:'border-color 0.2s'}}
+                  onFocus={e=>e.target.style.borderColor=colors.accent}
+                  onBlur={e=>e.target.style.borderColor=colors.border}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      <div onClick={()=>setShowPreview(!showPreview)}
+        style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontSize:13,color:colors.textMuted,marginBottom:showPreview?8:0,userSelect:'none'}}>
+        {showPreview?Icons.chevronDown(14,colors.textMuted):Icons.chevronRight(14,colors.textMuted)}
+        <span>{showPreview?'Hide':'Preview'} prompt</span>
+      </div>
+      {showPreview && (
+        <pre style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:8,padding:14,fontSize:13,lineHeight:1.6,whiteSpace:'pre-wrap',wordBreak:'break-word',color:colors.text,maxHeight:300,overflow:'auto',marginBottom:12}}>
+          {filled}
+        </pre>
+      )}
+      <div style={{display:'flex',gap:8,marginTop:12,flexWrap:'wrap'}}>
+        <button onClick={handleCopy}
+          style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 16px',fontSize:13,fontWeight:600,background:copied?colors.success:colors.accent,color:'#fff',border:'none',borderRadius:8,cursor:'pointer',transition:'all 0.2s'}}
+          onMouseEnter={e=>{if(!copied)e.currentTarget.style.background=colors.accentHover}}
+          onMouseLeave={e=>{if(!copied)e.currentTarget.style.background=colors.accent}}>
+          {copied?Icons.check(14,'#fff'):Icons.clipboard(14,'#fff')}
+          {copied?'Copied!':(hasFields?'Copy Filled Prompt':'Copy Prompt')}
+        </button>
+        {onFavorite && (
+          <button onClick={()=>onFavorite(stepId)} title={isFavorited?'Remove from favorites':'Add to favorites'}
+            style={{display:'inline-flex',alignItems:'center',gap:4,padding:'8px 12px',fontSize:13,background:'transparent',border:'1px solid '+colors.border,borderRadius:8,cursor:'pointer',color:colors.textMuted,transition:'all 0.2s'}}>
+            {isFavorited?Icons.starFilled(14):Icons.star(14)}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════
+   DRAG-DROP VISUAL
+   ═══════════════════════════════════════════ */
+const DragDropVisual = ({from,to,description}) => (
+  <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:16,padding:20,margin:'12px 0',
+    background:'linear-gradient(135deg,'+colors.codeBg+','+colors.surfaceHover+')',borderRadius:12,border:'1px dashed '+colors.border,flexWrap:'wrap'}}>
+    <div style={{padding:'10px 16px',background:colors.surface,borderRadius:8,border:'1px solid '+colors.border,fontSize:13,fontWeight:500,color:colors.text,animation:'bounceFile 2s ease-in-out infinite',display:'flex',alignItems:'center',gap:6}}>
+      {Icons.folder(16,colors.accent)}{from}
+    </div>
+    <div>{Icons.arrowRight(24,colors.accent)}</div>
+    <div style={{padding:'10px 16px',background:colors.surface,borderRadius:8,border:'2px solid '+colors.accent,fontSize:13,fontWeight:500,color:colors.text,display:'flex',alignItems:'center',gap:6}}>
+      {Icons.folder(16,colors.accent)}{to}
+    </div>
+    {description&&<div style={{width:'100%',textAlign:'center',fontSize:12,color:colors.textMuted,marginTop:4}}>{description}</div>}
+  </div>
+);
+
+/* ═══════════════════════════════════════════
+   STEP CARD
+   ═══════════════════════════════════════════ */
+const StepCard = ({step,isExpanded,onToggle,isCompleted,onComplete,isFavorited,onFavorite}) => (
+  <div className="fade-in" style={{background:colors.surface,border:'1px solid '+(isCompleted?colors.success+'44':colors.border),borderRadius:12,marginBottom:10,overflow:'hidden',transition:'border-color 0.2s, box-shadow 0.2s',boxShadow:isExpanded?'0 4px 20px '+colors.accent+'11':'none'}}>
+    <div onClick={onToggle} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 18px',cursor:'pointer',userSelect:'none',background:isExpanded?colors.surfaceHover:'transparent',transition:'background 0.2s'}}>
+      <div onClick={e=>{e.stopPropagation();onComplete();}}
+        style={{width:22,height:22,borderRadius:6,flexShrink:0,border:'2px solid '+(isCompleted?colors.success:colors.border),background:isCompleted?colors.successBg:'transparent',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',transition:'all 0.2s'}}>
+        {isCompleted&&Icons.check(14,colors.success)}
+      </div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+          <span style={{fontSize:11,fontWeight:700,color:colors.accent,background:colors.codeBg,padding:'2px 8px',borderRadius:4}}>{step.id}</span>
+          <span style={{fontSize:15,fontWeight:600,color:isCompleted?colors.textLight:colors.text,textDecoration:isCompleted?'line-through':'none',transition:'color 0.2s'}}>{step.title}</span>
+        </div>
+      </div>
+      <div style={{flexShrink:0,transition:'transform 0.2s',transform:isExpanded?'rotate(180deg)':'rotate(0)'}}>
+        {Icons.chevronDown(18,colors.textLight)}
+      </div>
+    </div>
+    {isExpanded&&(
+      <div style={{padding:'0 18px 18px',animation:'fadeIn 0.25s ease-out'}}>
+        <p style={{fontSize:14,color:colors.textMuted,lineHeight:1.7,marginBottom:16}}>{step.description}</p>
+        {step.whyItMatters&&(
+          <div style={{background:colors.surfaceHover,borderRadius:8,padding:14,marginBottom:16,borderLeft:'3px solid '+colors.accent}}>
+            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:4,textTransform:'uppercase',letterSpacing:'0.04em'}}>Why it matters</div>
+            <p style={{fontSize:13,color:colors.text,lineHeight:1.6,margin:0}}>{step.whyItMatters}</p>
+          </div>
+        )}
+        {step.dragDrop&&<DragDropVisual {...step.dragDrop}/>}
+        {step.assetFolders&&(
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(170px, 1fr))',gap:8,margin:'12px 0'}}>
+            {step.assetFolders.map(af=>(
+              <div key={af.type} style={{padding:'10px 14px',background:colors.codeBg,borderRadius:8,border:'1px solid '+colors.borderLight,fontSize:13}}>
+                <div style={{fontWeight:600,color:colors.text,marginBottom:2}}>{af.type}</div>
+                <code style={{fontSize:11,color:colors.textMuted}}>{af.path}</code>
+              </div>
+            ))}
+          </div>
+        )}
+        {step.prompt&&<EditablePrompt template={step.prompt.template} fields={step.prompt.fields} stepId={step.id} onFavorite={onFavorite} isFavorited={isFavorited}/>}
+        {step.pattern&&(
+          <div style={{margin:'16px 0'}}>
+            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>The Pattern</div>
+            <ol style={{paddingLeft:20,fontSize:13,color:colors.text,lineHeight:2}}>
+              {step.pattern.map((p,i)=><li key={i}>{p}</li>)}
+            </ol>
+          </div>
+        )}
+        {step.tips&&(
+          <div style={{margin:'16px 0'}}>
+            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>Tips</div>
+            <ul style={{paddingLeft:20,fontSize:13,color:colors.text,lineHeight:2}}>
+              {step.tips.map((t,i)=><li key={i}>{t}</li>)}
+            </ul>
+          </div>
+        )}
+        {step.mobileChecklist&&(
+          <div style={{margin:'16px 0'}}>
+            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>What to Test</div>
+            <ul style={{paddingLeft:4,fontSize:13,color:colors.text,lineHeight:2,listStyle:'none'}}>
+              {step.mobileChecklist.map((m,i)=><li key={i}>{'\u2610'} {m}</li>)}
+            </ul>
+          </div>
+        )}
+        {step.checkList&&(
+          <div style={{margin:'16px 0'}}>
+            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>What to Check</div>
+            <ul style={{paddingLeft:20,fontSize:13,color:colors.text,lineHeight:2}}>
+              {step.checkList.map((c,i)=><li key={i}>{c}</li>)}
+            </ul>
+          </div>
+        )}
+        {step.expectedOutput&&(
+          <div style={{background:colors.successBg,borderRadius:8,padding:14,marginTop:16,borderLeft:'3px solid '+colors.success}}>
+            <div style={{fontSize:12,fontWeight:700,color:colors.success,marginBottom:4,textTransform:'uppercase',letterSpacing:'0.04em'}}>Expected Output</div>
+            <p style={{fontSize:13,color:colors.text,lineHeight:1.6,margin:0}}>{step.expectedOutput}</p>
+          </div>
+        )}
+        {step.whatToDo&&(
+          <div style={{background:colors.warningBg,borderRadius:8,padding:14,marginTop:12,borderLeft:'3px solid '+colors.warning}}>
+            <div style={{fontSize:12,fontWeight:700,color:colors.warning,marginBottom:4,textTransform:'uppercase',letterSpacing:'0.04em'}}>What to Do With It</div>
+            <p style={{fontSize:13,color:colors.text,lineHeight:1.6,margin:0}}>{step.whatToDo}</p>
+          </div>
+        )}
+        {step.troubleshooting&&step.troubleshooting.length>0&&(
+          <div style={{marginTop:16}}>
+            <div style={{fontSize:12,fontWeight:700,color:colors.warning,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>Troubleshooting</div>
+            {step.troubleshooting.map((t,i)=>(
+              <div key={i} style={{background:colors.warningBg,borderRadius:8,padding:12,marginBottom:8,fontSize:13,lineHeight:1.5}}>
+                <strong style={{color:colors.text}}>Issue:</strong> <span style={{color:colors.textMuted}}>{t.issue}</span><br/>
+                <strong style={{color:colors.text}}>Fix:</strong> <span style={{color:colors.text}}>{t.solution}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+);
+
+/* ═══════════════════════════════════════════
+   PHASE SECTION
+   ═══════════════════════════════════════════ */
+const PhaseSection = ({phase,completedSteps,expandedSteps,onToggleStep,onCompleteStep,favorites,onFavorite}) => {
+  const [isOpen,setIsOpen] = useState(true);
+  const done = phase.steps.filter(s=>completedSteps.includes(s.id)).length;
+  const pct = (done/phase.steps.length)*100;
+
+  return (
+    <div style={{marginBottom:24}}>
+      <div onClick={()=>setIsOpen(!isOpen)}
+        style={{display:'flex',alignItems:'center',gap:14,padding:'16px 20px',background:colors.surface,borderRadius:16,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none',transition:'box-shadow 0.2s',boxShadow:isOpen?'0 2px 12px '+colors.accent+'11':'none'}}>
+        <div style={{width:42,height:42,borderRadius:12,flexShrink:0,background:'linear-gradient(135deg,'+phase.color+','+phase.color+'cc)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          {phaseIcons[phase.number](20,'#fff')}
+        </div>
+        <div style={{flex:1}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+            <span style={{fontSize:11,fontWeight:700,color:colors.textLight,textTransform:'uppercase',letterSpacing:'0.08em'}}>Phase {phase.number}</span>
+            <span style={{fontSize:18,fontWeight:700,color:colors.text}}>{phase.title}</span>
+            <span style={{fontSize:11,fontWeight:600,color:done===phase.steps.length?colors.success:colors.textMuted,background:done===phase.steps.length?colors.successBg:colors.codeBg,padding:'2px 8px',borderRadius:10}}>{done}/{phase.steps.length}</span>
+          </div>
+          <div style={{height:4,background:colors.borderLight,borderRadius:2,marginTop:8,overflow:'hidden'}}>
+            <div style={{height:'100%',borderRadius:2,transition:'width 0.4s ease',width:pct+'%',background:done===phase.steps.length?'linear-gradient(90deg,'+colors.success+',#34d399)':'linear-gradient(90deg,'+phase.color+','+colors.accentHover+')'}}/>
+          </div>
+        </div>
+        <div style={{flexShrink:0,transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>
+          {Icons.chevronDown(20,colors.textLight)}
+        </div>
+      </div>
+      {isOpen&&(
+        <div style={{padding:'12px 0 0'}}>
+          {phase.steps.map(step=>(
+            <StepCard key={step.id} step={step}
+              isExpanded={expandedSteps.includes(step.id)}
+              onToggle={()=>onToggleStep(step.id)}
+              isCompleted={completedSteps.includes(step.id)}
+              onComplete={()=>onCompleteStep(step.id)}
+              isFavorited={favorites.includes(step.id)}
+              onFavorite={onFavorite}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════
+   BONUS: MY FAVORITES
+   ═══════════════════════════════════════════ */
+const FavoritesSection = ({favorites,onRemove}) => {
+  const [isOpen,setIsOpen] = useState(false);
+  const favSteps = useMemo(()=>{
+    const out=[];
+    phases.forEach(p=>p.steps.forEach(s=>{if(s.prompt&&favorites.includes(s.id))out.push(s);}));
+    return out;
+  },[favorites]);
+  if(favSteps.length===0&&!isOpen) return null;
+  return (
+    <div style={{marginBottom:16}}>
+      <div onClick={()=>setIsOpen(!isOpen)}
+        style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
+        {Icons.starFilled(18,colors.accent)}
+        <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>My Favorites ({favSteps.length})</span>
+        <div style={{transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(18,colors.textLight)}</div>
+      </div>
+      {isOpen&&(
+        <div style={{padding:'12px 0'}}>
+          {favSteps.length===0?(
+            <p style={{textAlign:'center',color:colors.textLight,fontSize:13,padding:20}}>No favorites yet. Click the star on any prompt to save it here.</p>
+          ):favSteps.map(s=>(
+            <div key={s.id} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,padding:14,marginBottom:8}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                <span style={{fontSize:13,fontWeight:600,color:colors.text}}>
+                  <span style={{color:colors.accent,marginRight:6}}>{s.id}</span>{s.title}
+                </span>
+                <button onClick={()=>onRemove(s.id)} style={{background:'none',border:'none',cursor:'pointer',padding:4}} title="Remove">
+                  {Icons.starFilled(16,colors.accent)}
+                </button>
+              </div>
+              <EditablePrompt template={s.prompt.template} fields={s.prompt.fields} stepId={s.id}/>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════
+   BONUS: MY PROJECTS
+   ═══════════════════════════════════════════ */
+const ProjectsSection = () => {
+  const [isOpen,setIsOpen] = useState(false);
+  const [projects,setProjects] = useLocalStorage('wk-projects',[]);
+  const [editing,setEditing] = useState(null);
+  const [form,setForm] = useState({name:'',description:'',status:'planning',notes:'',whatILearned:''});
+  const statusMap = {
+    planning:{bg:colors.codeBg,fg:colors.accent,label:'Planning'},
+    building:{bg:colors.warningBg,fg:colors.warning,label:'Building'},
+    polishing:{bg:'#E0F2FE',fg:'#0284C7',label:'Polishing'},
+    shipped:{bg:colors.successBg,fg:colors.success,label:'Shipped'},
+  };
+  const save=()=>{if(!form.name.trim())return;if(editing!==null){setProjects(p=>p.map((x,i)=>i===editing?{...form}:x));setEditing(null);}else{setProjects(p=>[...p,{...form}]);}setForm({name:'',description:'',status:'planning',notes:'',whatILearned:''});};
+  const del=(i)=>setProjects(p=>p.filter((_,j)=>j!==i));
+  const startEdit=(i)=>{setForm({...projects[i]});setEditing(i);};
+  const inputStyle = {width:'100%',padding:'8px 12px',fontSize:13,border:'1px solid '+colors.border,borderRadius:6,marginBottom:8,background:colors.surface,color:colors.text};
+
+  return (
+    <div style={{marginBottom:16}}>
+      <div onClick={()=>setIsOpen(!isOpen)}
+        style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
+        {Icons.folder(18,colors.accent)}
+        <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>My Projects ({projects.length})</span>
+        <div style={{transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(18,colors.textLight)}</div>
+      </div>
+      {isOpen&&(
+        <div style={{padding:'12px 0'}}>
+          {projects.map((proj,i)=>(
+            <div key={i} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,padding:16,marginBottom:10}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+                  <span style={{fontSize:15,fontWeight:600,color:colors.text}}>{proj.name}</span>
+                  <span style={{fontSize:11,fontWeight:600,padding:'2px 8px',borderRadius:10,background:(statusMap[proj.status]||statusMap.planning).bg,color:(statusMap[proj.status]||statusMap.planning).fg}}>
+                    {(statusMap[proj.status]||statusMap.planning).label}
+                  </span>
+                </div>
+                <div style={{display:'flex',gap:4}}>
+                  <button onClick={()=>startEdit(i)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.edit(14,colors.textMuted)}</button>
+                  <button onClick={()=>del(i)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.trash(14,colors.error)}</button>
+                </div>
+              </div>
+              {proj.description&&<p style={{fontSize:13,color:colors.textMuted,marginBottom:8}}>{proj.description}</p>}
+              {proj.notes&&<div style={{fontSize:12,color:colors.textMuted,background:colors.codeBg,borderRadius:6,padding:10,marginBottom:8}}><strong>Notes:</strong> {proj.notes}</div>}
+              {proj.whatILearned&&<div style={{fontSize:12,color:colors.accent,background:colors.surfaceHover,borderRadius:6,padding:10,borderLeft:'3px solid '+colors.accent}}><strong>What I Learned:</strong> {proj.whatILearned}</div>}
+            </div>
+          ))}
+          <div style={{background:colors.codeBg,borderRadius:10,padding:16,border:'1px solid '+colors.border}}>
+            <div style={{fontSize:13,fontWeight:600,color:colors.text,marginBottom:12}}>{editing!==null?'Edit Project':'Add New Project'}</div>
+            <input placeholder="Project name" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} style={inputStyle}/>
+            <input placeholder="Short description" value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} style={inputStyle}/>
+            <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))} style={inputStyle}>
+              <option value="planning">Planning</option><option value="building">Building</option>
+              <option value="polishing">Polishing</option><option value="shipped">Shipped</option>
+            </select>
+            <textarea placeholder="Notes" value={form.notes} rows={2} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} style={{...inputStyle,resize:'vertical'}}/>
+            <textarea placeholder="What I learned..." value={form.whatILearned} rows={2} onChange={e=>setForm(f=>({...f,whatILearned:e.target.value}))} style={{...inputStyle,resize:'vertical'}}/>
+            <div style={{display:'flex',gap:8}}>
+              <button onClick={save} style={{padding:'8px 16px',fontSize:13,fontWeight:600,background:colors.accent,color:'#fff',border:'none',borderRadius:8,cursor:'pointer'}}>
+                {editing!==null?'Save Changes':'Add Project'}
+              </button>
+              {editing!==null&&(
+                <button onClick={()=>{setEditing(null);setForm({name:'',description:'',status:'planning',notes:'',whatILearned:''});}}
+                  style={{padding:'8px 16px',fontSize:13,background:'transparent',border:'1px solid '+colors.border,borderRadius:8,cursor:'pointer',color:colors.textMuted}}>
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════
+   BONUS: LEARNING STORIES
+   ═══════════════════════════════════════════ */
+const LearningStoriesSection = () => {
+  const [isOpen,setIsOpen] = useState(false);
+  const [stories,setStories] = useLocalStorage('wk-stories',[]);
+  const [title,setTitle] = useState('');
+  const [content,setContent] = useState('');
+  const [expanded,setExpanded] = useState(null);
+  const add=()=>{if(!title.trim()||!content.trim())return;setStories(s=>[...s,{title:title.trim(),content:content.trim(),date:new Date().toLocaleDateString()}]);setTitle('');setContent('');};
+  const del=(i)=>setStories(s=>s.filter((_,j)=>j!==i));
+  const inputStyle={width:'100%',padding:'8px 12px',fontSize:13,border:'1px solid '+colors.border,borderRadius:6,marginBottom:8,background:colors.surface,color:colors.text};
+
+  return (
+    <div style={{marginBottom:16}}>
+      <div onClick={()=>setIsOpen(!isOpen)}
+        style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
+        {Icons.book(18,colors.success)}
+        <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>Learning Stories ({stories.length})</span>
+        <div style={{transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(18,colors.textLight)}</div>
+      </div>
+      {isOpen&&(
+        <div style={{padding:'12px 0'}}>
+          {stories.map((s,i)=>(
+            <div key={i} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,marginBottom:8,overflow:'hidden'}}>
+              <div onClick={()=>setExpanded(expanded===i?null:i)}
+                style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px',cursor:'pointer',userSelect:'none'}}>
+                <div>
+                  <span style={{fontSize:14,fontWeight:600,color:colors.text}}>{s.title}</span>
+                  <span style={{fontSize:11,color:colors.textLight,marginLeft:8}}>{s.date}</span>
+                </div>
+                <div style={{display:'flex',gap:4,alignItems:'center'}}>
+                  <button onClick={e=>{e.stopPropagation();del(i);}} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.trash(14,colors.error)}</button>
+                  <div style={{transition:'transform 0.2s',transform:expanded===i?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(16,colors.textLight)}</div>
+                </div>
+              </div>
+              {expanded===i&&(
+                <div style={{padding:'0 14px 14px'}}>
+                  <pre style={{background:colors.codeBg,borderRadius:8,padding:14,fontSize:13,lineHeight:1.6,whiteSpace:'pre-wrap',wordBreak:'break-word',color:colors.text,maxHeight:400,overflow:'auto'}}>{s.content}</pre>
+                </div>
+              )}
+            </div>
+          ))}
+          <div style={{background:colors.codeBg,borderRadius:10,padding:16,border:'1px solid '+colors.border}}>
+            <div style={{fontSize:13,fontWeight:600,color:colors.text,marginBottom:12}}>Add Learning Story</div>
+            <input placeholder="Story title (e.g., My Recipe App)" value={title} onChange={e=>setTitle(e.target.value)} style={inputStyle}/>
+            <textarea placeholder="Paste your LEARNING_STORY.md or FOR[Name].md content here..." value={content} onChange={e=>setContent(e.target.value)} rows={6} style={{...inputStyle,resize:'vertical'}}/>
+            <button onClick={add} style={{padding:'8px 16px',fontSize:13,fontWeight:600,background:colors.success,color:'#fff',border:'none',borderRadius:8,cursor:'pointer'}}>Save Story</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════
+   BONUS: QUICK COPY DRAWER
+   ═══════════════════════════════════════════ */
+const QuickCopyDrawer = () => {
+  const [isOpen,setIsOpen] = useState(false);
+  const [copiedId,setCopiedId] = useState(null);
+  const allPrompts = useMemo(()=>{
+    const out=[];
+    phases.forEach(p=>p.steps.forEach(s=>{if(s.prompt)out.push({id:s.id,title:s.title,template:s.prompt.template,phase:p.title});}));
+    return out;
+  },[]);
+  const handleCopy=async(id,text)=>{const ok=await copyText(text);if(ok){setCopiedId(id);setTimeout(()=>setCopiedId(null),2000);}};
+
+  return (
+    <>
+      <button onClick={()=>setIsOpen(true)} title="Quick Copy All Prompts"
+        style={{position:'fixed',bottom:24,right:24,zIndex:998,width:52,height:52,borderRadius:14,
+          background:'linear-gradient(135deg,'+colors.accent+','+colors.accentDark+')',border:'none',cursor:'pointer',color:'#fff',
+          display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 20px '+colors.accent+'44',transition:'transform 0.2s, box-shadow 0.2s'}}
+        onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.08)';e.currentTarget.style.boxShadow='0 6px 28px '+colors.accent+'66';}}
+        onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.boxShadow='0 4px 20px '+colors.accent+'44';}}>
+        {Icons.clipboard(22,'#fff')}
+      </button>
+      {isOpen&&<div onClick={()=>setIsOpen(false)} style={{position:'fixed',inset:0,zIndex:999,background:'rgba(26,15,46,0.4)',backdropFilter:'blur(2px)'}}/>}
+      <div style={{position:'fixed',top:0,right:0,bottom:0,zIndex:1000,width:Math.min(420,window.innerWidth-20),
+        background:colors.surface,boxShadow:'-8px 0 32px rgba(0,0,0,0.12)',
+        transform:isOpen?'translateX(0)':'translateX(100%)',transition:'transform 0.3s cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'18px 20px',borderBottom:'1px solid '+colors.border}}>
+          <div style={{fontSize:16,fontWeight:700,color:colors.text}}>Quick Copy</div>
+          <button onClick={()=>setIsOpen(false)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.x(20,colors.textMuted)}</button>
+        </div>
+        <div style={{flex:1,overflow:'auto',padding:16}}>
+          {['PLANNING','BUILD','POLISH','SHIP'].map(pn=>{
+            const pp=allPrompts.filter(p=>p.phase===pn);
+            if(!pp.length)return null;
+            return (
+              <div key={pn} style={{marginBottom:20}}>
+                <div style={{fontSize:11,fontWeight:700,color:colors.accent,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}}>{pn}</div>
+                {pp.map(p=>(
+                  <button key={p.id} onClick={()=>handleCopy(p.id,p.template)}
+                    style={{display:'flex',alignItems:'center',gap:10,width:'100%',textAlign:'left',padding:'10px 14px',
+                      background:copiedId===p.id?colors.successBg:colors.codeBg,
+                      border:'1px solid '+(copiedId===p.id?colors.success+'44':colors.borderLight),
+                      borderRadius:8,marginBottom:6,cursor:'pointer',transition:'all 0.2s',fontSize:13,color:colors.text}}
+                    onMouseEnter={e=>{if(copiedId!==p.id)e.currentTarget.style.background=colors.surfaceHover;}}
+                    onMouseLeave={e=>{if(copiedId!==p.id)e.currentTarget.style.background=colors.codeBg;}}>
+                    <span style={{flexShrink:0,fontSize:11,fontWeight:700,color:colors.accent}}>{p.id}</span>
+                    <span style={{flex:1,fontWeight:500}}>{p.title}</span>
+                    <span style={{flexShrink:0}}>{copiedId===p.id?Icons.check(14,colors.success):Icons.clipboard(14,colors.textLight)}</span>
+                  </button>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+};
+
+/* ═══════════════════════════════════════════
+   ZIP DOWNLOAD
+   ═══════════════════════════════════════════ */
+async function downloadTemplate() {
+  const zip = new JSZip();
+  zip.file('CLAUDE.md', CLAUDE_TEMPLATE);
+  zip.file('progress.txt', PROGRESS_TEMPLATE);
+  zip.file('PROJECT_CHECKLIST.md', CHECKLIST_TEMPLATE);
+  zip.folder('00-planning/notes');
+  zip.file('00-planning/notes/interrogation-answers.md','# Interview Answers\n\n(Claude will populate this during the interview step)\n');
+  Object.entries(DOC_TEMPLATES).forEach(([name,content])=>zip.file('01-docs/'+name,content));
+  zip.folder('02-design/references');
+  zip.file('02-design/references/.gitkeep','');
+  zip.folder('03-code');
+  zip.file('03-code/.gitkeep','');
+  ['04-assets/images/logo','04-assets/images/icons','04-assets/images/photos','04-assets/fonts'].forEach(d=>zip.folder(d));
+  zip.file('04-assets/.gitkeep','');
+  const blob = await zip.generateAsync({type:'blob'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='workflow-kitt-template.zip';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ═══════════════════════════════════════════
+   MAIN APP
+   ═══════════════════════════════════════════ */
+function WorkflowKitt() {
+  const [completedSteps,setCompletedSteps] = useLocalStorage('wk-v2-completed',[]);
+  const [favorites,setFavorites] = useLocalStorage('wk-v2-favorites',[]);
+  const [expandedSteps,setExpandedSteps] = useState([]);
+  const [dlPulse,setDlPulse] = useState(false);
+
+  const totalSteps = phases.reduce((a,p)=>a+p.steps.length,0);
+  const totalDone = completedSteps.length;
+  const pct = Math.round((totalDone/totalSteps)*100);
+
+  const toggleStep = id => setExpandedSteps(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
+  const toggleComplete = id => setCompletedSteps(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
+  const toggleFavorite = id => setFavorites(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
+  const handleDownload = ()=>{setDlPulse(true);setTimeout(()=>setDlPulse(false),600);downloadTemplate();};
+
+  return (
+    <div style={{minHeight:'100vh',background:colors.bg}}>
+      {/* ─── HEADER ─── */}
+      <header style={{textAlign:'center',padding:'36px 20px 28px',background:'rgba(255,255,255,0.92)',borderBottom:'1px solid '+colors.borderLight,position:'sticky',top:0,zIndex:100,backdropFilter:'blur(12px)',WebkitBackdropFilter:'blur(12px)'}}>
+        <div style={{fontSize:16,fontWeight:500,color:colors.textMuted,letterSpacing:'0.12em',textTransform:'uppercase',marginBottom:10}}>Kittech</div>
+        <img src={'data:image/png;base64,'+LOGO_BASE64} alt="Kittech Logo"
+          style={{width:80,height:80,display:'block',margin:'0 auto',filter:'drop-shadow(0 2px 8px rgba(123,95,204,0.3))'}}/>
+        <h1 style={{fontSize:32,fontWeight:700,color:colors.text,margin:'12px 0 6px',letterSpacing:'-0.01em'}}>WorkFlow</h1>
+        <p style={{fontSize:14,color:colors.textMuted,margin:0}}>Build apps with AI, step by step</p>
+        {totalDone>0&&(
+          <div style={{maxWidth:300,margin:'16px auto 0'}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:colors.textLight,marginBottom:4}}>
+              <span>Overall Progress</span><span>{pct}%</span>
+            </div>
+            <div style={{height:4,background:colors.borderLight,borderRadius:2,overflow:'hidden'}}>
+              <div style={{height:'100%',borderRadius:2,transition:'width 0.5s ease',width:pct+'%',
+                background:pct===100?'linear-gradient(90deg,'+colors.success+',#34d399)':'linear-gradient(90deg,'+colors.accent+','+colors.accentHover+')'}}/>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* ─── MAIN ─── */}
+      <main style={{maxWidth:720,margin:'0 auto',padding:'24px 16px 80px'}}>
+        <button onClick={handleDownload}
+          style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,width:'100%',padding:'16px 24px',marginBottom:32,
+            background:'linear-gradient(135deg,'+colors.accent+','+colors.accentDark+')',color:'#fff',border:'none',borderRadius:14,
+            fontSize:16,fontWeight:700,cursor:'pointer',boxShadow:'0 4px 20px '+colors.accent+'33',transition:'all 0.2s',
+            transform:dlPulse?'scale(0.97)':'scale(1)'}}
+          onMouseEnter={e=>{e.currentTarget.style.boxShadow='0 6px 28px '+colors.accent+'55';e.currentTarget.style.transform='translateY(-1px)';}}
+          onMouseLeave={e=>{e.currentTarget.style.boxShadow='0 4px 20px '+colors.accent+'33';e.currentTarget.style.transform='scale(1)';}}>
+          {Icons.download(20,'#fff')} Download Template Folder
+        </button>
+
+        {phases.map(phase=>(
+          <PhaseSection key={phase.number} phase={phase}
+            completedSteps={completedSteps} expandedSteps={expandedSteps}
+            onToggleStep={toggleStep} onCompleteStep={toggleComplete}
+            favorites={favorites} onFavorite={toggleFavorite}/>
+        ))}
+
+        {/* ─── DIVIDER ─── */}
+        <div style={{textAlign:'center',padding:'40px 0',margin:'16px 0 24px'}}>
+          <div style={{height:1,background:'linear-gradient(90deg,transparent,'+colors.divider+',transparent)',marginBottom:16}}/>
+          <span style={{fontSize:14,fontWeight:600,color:colors.textMuted,letterSpacing:'0.06em',textTransform:'uppercase'}}>Additional Tools &amp; Libraries</span>
+          <div style={{height:1,background:'linear-gradient(90deg,transparent,'+colors.divider+',transparent)',marginTop:16}}/>
+        </div>
+
+        <FavoritesSection favorites={favorites} onRemove={toggleFavorite}/>
+        <ProjectsSection/>
+        <LearningStoriesSection/>
+      </main>
+
+      <QuickCopyDrawer/>
+
+      <footer style={{textAlign:'center',padding:'32px 20px',borderTop:'1px solid '+colors.borderLight,background:colors.surface}}>
+        <div style={{fontSize:13,color:colors.textLight}}>Workflow Kitt V2 — Built with care by <span style={{color:colors.accent,fontWeight:600}}>Kittech</span></div>
+        <div style={{fontSize:11,color:colors.textLight,marginTop:4}}>Your guide to building apps with AI, one step at a time</div>
+      </footer>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════ */
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<WorkflowKitt />);
+</script>
+</body>
+</html>

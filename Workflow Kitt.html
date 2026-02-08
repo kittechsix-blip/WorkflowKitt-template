@@ -1,0 +1,3002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workflow Kitt</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Workflow Kitt">
+  <meta name="application-name" content="Workflow Kitt">
+  <meta name="description" content="Build apps with AI, step by step">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2378716C'/%3E%3Cstop offset='100%25' stop-color='%2357534E'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='110' fill='url(%23g1)'/%3E%3Ctext x='256' y='320' text-anchor='middle' font-family='system-ui' font-size='280' font-weight='700' fill='%23FAFAF9'%3EK%3C/text%3E%3Ccircle cx='400' cy='120' r='40' fill='%2316A34A'/%3E%3Cpath d='M385 120l12 12 18-24' stroke='%23fff' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    pre { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #F5F5F4; }
+    ::-webkit-scrollbar-thumb { background: #A8A29E; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #78716C; }
+
+    /* Mobile improvements */
+    @media (max-width: 640px) {
+      body { font-size: 15px; }
+      button { min-height: 44px; } /* Better touch targets */
+      input, textarea, select { font-size: 16px !important; } /* Prevent zoom on iOS */
+      pre { font-size: 12px !important; padding: 12px !important; }
+    }
+
+    /* Smooth scrolling */
+    html { scroll-behavior: smooth; }
+
+    /* Focus styles for accessibility */
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 2px solid #78716C;
+      outline-offset: 2px;
+    }
+
+    /* Print styles */
+    @media print {
+      button { display: none !important; }
+      .animate-pulse { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ============================================================================
+    // TEMPLATE FILES (embedded for download)
+    // ============================================================================
+    const templateFiles = {
+      'CLAUDE.md': `# CLAUDE.md - AI Operating Manual
+# [PROJECT NAME]
+
+This file is read automatically by Claude Code at the start of every session.
+
+---
+
+## Project Overview
+
+**Project Name:** [YOUR PROJECT NAME]
+
+**One-Line Description:** [WHAT DOES IT DO IN ONE SENTENCE]
+
+**Target User:** [WHO IS THIS FOR]
+
+**Core Value Proposition:** [WHY WOULD THEY USE THIS]
+
+---
+
+## Tech Stack
+
+**Framework:** [e.g., React, Next.js, Vue]
+
+**Language:** [e.g., TypeScript, JavaScript]
+
+**Styling:** [e.g., Tailwind CSS, CSS Modules]
+
+**UI Library:** [e.g., shadcn/ui, none]
+
+**Backend:** [e.g., Supabase, Firebase, none]
+
+**Database:** [e.g., PostgreSQL, localStorage]
+
+**Authentication:** [e.g., Supabase Auth, none]
+
+**Deployment:** [e.g., Vercel, Netlify]
+
+---
+
+## Coding Rules
+
+### ALWAYS:
+- Follow the patterns in existing code
+- Use the design system in FRONTEND_GUIDELINES.md
+- Update progress.txt after completing features
+- Handle errors gracefully
+
+### NEVER:
+- Skip reading the docs before coding
+- Hardcode values that should be configurable
+- Ignore edge cases defined in PRD.md
+
+---
+
+## Documentation References
+
+Before making decisions, check these files:
+
+1. \`01-docs/PRD.md\` - Features and requirements
+2. \`01-docs/APP_FLOW.md\` - User flows and navigation
+3. \`01-docs/TECH_STACK.md\` - Approved packages
+4. \`01-docs/FRONTEND_GUIDELINES.md\` - Design system
+5. \`01-docs/BACKEND_STRUCTURE.md\` - Data and API
+6. \`01-docs/IMPLEMENTATION_PLAN.md\` - Build sequence
+7. \`progress.txt\` - Current state
+
+---
+
+## 🎓 LEARNING STORY (Required at Project Completion)
+
+**IMPORTANT: When the project is complete, Claude MUST prompt the user:**
+
+"Congratulations! Your project is complete! 🎉
+
+Would you like me to create your Learning Story? This is a simple, story-like explanation of everything we built together, written so you can learn from it and remember how it all works.
+
+I'll create a file called \`LEARNING_STORY.md\` that explains:
+- The journey from idea to finished app
+- What each part does (in plain English)
+- Why we made the choices we did
+- The technical concepts you learned (simplified)
+
+This file is designed to help you learn and grow as a builder. Want me to create it?"
+
+### Learning Story Format
+
+When creating \`LEARNING_STORY.md\`, follow this structure:
+
+\`\`\`markdown
+# 📖 The Story of [PROJECT NAME]
+
+## Chapter 1: The Problem
+[What problem did we set out to solve? Who has this problem? Why does it matter?]
+
+## Chapter 2: The Plan
+[How did we decide to solve it? What approach did we take and why?]
+
+## Chapter 3: The Building Blocks
+[List each major piece of the app with a simple explanation]
+
+### 🧱 [Component/Feature Name]
+**What it does:** [Plain English explanation]
+**Why we built it this way:** [Simple reasoning]
+**The technical bit:** [One paragraph explaining the code concept in beginner-friendly terms]
+
+## Chapter 4: How It All Connects
+[Explain how the pieces work together, like telling a story of data flowing through the app]
+
+## Chapter 5: What You Learned
+[List the technical concepts introduced, each with a 2-3 sentence beginner explanation]
+
+- **[Concept 1]:** [Simple explanation]
+- **[Concept 2]:** [Simple explanation]
+
+## Chapter 6: If You Wanted to Change It
+[Explain where you'd look to make common changes - helps reinforce understanding]
+
+## The End... Or Just the Beginning?
+[Encouraging note about what they could build next or how to extend this project]
+\`\`\`
+
+### Writing Guidelines for Learning Stories:
+- Write like you're explaining to a curious friend, not a developer
+- Use analogies (e.g., "Think of state like a whiteboard the app can write on")
+- Avoid jargon, or explain it immediately when used
+- Be encouraging and celebrate what was built
+- Keep paragraphs short (3-4 sentences max)
+- Use emojis sparingly to make it friendly
+`,
+
+      'progress.txt': `# Progress Tracker
+# [PROJECT NAME]
+
+---
+
+## Current Status
+
+Phase: Planning
+Focus: Interrogating the idea
+Blocker: None
+
+---
+
+## Session Log
+
+### Session 1 - [DATE]
+- Started project
+- Next: Complete interrogation phase
+
+---
+
+## Feature Tracker
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Planning complete | Not Started | |
+| Docs populated | Not Started | |
+| Build started | Not Started | |
+`,
+
+      'PROJECT_CHECKLIST.md': `# Project Checklist
+
+Work through each phase in order. Don't skip steps.
+
+---
+
+## Phase 1: Planning (00-planning/)
+
+- [ ] Use INTERROGATION_PROMPTS.md to tear apart your idea
+- [ ] Answer ALL questions (who, what, why, how, edge cases)
+- [ ] Document answers in 00-planning/notes/
+- [ ] Confirm you can explain: the user, the core action, the data, the flows
+
+---
+
+## Phase 2: Documentation (01-docs/)
+
+- [ ] PRD.md - What you're building, for whom, features, scope
+- [ ] APP_FLOW.md - Every screen and user path
+- [ ] TECH_STACK.md - Packages, versions, tools
+- [ ] FRONTEND_GUIDELINES.md - Design system
+- [ ] BACKEND_STRUCTURE.md - Database, auth, API
+- [ ] IMPLEMENTATION_PLAN.md - Numbered build steps
+
+---
+
+## Phase 3: Session Setup
+
+- [ ] CLAUDE.md - Customize for this project
+- [ ] progress.txt - Initialize tracking
+- [ ] Copy reference images to 02-design/references/
+
+---
+
+## Phase 4: Build (03-code/)
+
+- [ ] Follow IMPLEMENTATION_PLAN.md step by step
+- [ ] Update progress.txt after EVERY feature
+- [ ] Test on mobile as you build
+- [ ] Commit frequently
+
+---
+
+## Phase 5: Ship
+
+- [ ] Test all user flows from APP_FLOW.md
+- [ ] Verify responsive design
+- [ ] Check error states
+- [ ] Review against PRD.md
+- [ ] Deploy
+`,
+
+      '00-planning/INTERROGATION_PROMPTS.md': `# Interrogation Prompts
+
+Copy-paste these prompts when starting a new project.
+
+---
+
+## Prompt 1: The Interrogation Starter
+
+\`\`\`
+Before writing any code, endlessly interrogate my idea in Planning mode only.
+Assume nothing. Ask questions until there are no assumptions left.
+
+My idea: [DESCRIBE YOUR APP IN 1-2 SENTENCES]
+\`\`\`
+
+---
+
+## Prompt 2: Deep Dive Questions
+
+If AI doesn't ask enough, prompt it with:
+
+\`\`\`
+Keep asking questions. I want you to interrogate:
+
+USER & PURPOSE:
+- Who exactly is the target user?
+- What problem does this solve for them?
+- Why would they choose this over alternatives?
+
+CORE FUNCTIONALITY:
+- What is the single most important action a user takes?
+- What triggers that action?
+- What happens immediately after?
+- What data is created, modified, or deleted?
+
+DATA MODEL:
+- What information needs to be stored permanently?
+- What are the relationships between data types?
+- What needs to be displayed and where?
+
+USER FLOWS:
+- What does the user see first?
+- How do they navigate between screens?
+- What are all the possible paths through the app?
+
+EDGE CASES:
+- What happens if the user makes a mistake?
+- What happens if something fails?
+- What happens with empty states?
+
+ACCESS & AUTH:
+- Does this need user accounts?
+- What can anonymous users do vs logged-in users?
+- Are there different user roles?
+
+PLATFORM:
+- Does this need to work on mobile?
+- Does this need offline support?
+- Does this integrate with external services?
+\`\`\`
+
+---
+
+## Prompt 3: Generate Documentation
+
+After all questions are answered:
+
+\`\`\`
+Based on our interrogation, generate my documentation files:
+
+1. PRD.md - features, acceptance criteria, scope
+2. APP_FLOW.md - screens, user paths, flows
+3. TECH_STACK.md - packages, versions
+4. FRONTEND_GUIDELINES.md - colors, fonts, spacing
+5. BACKEND_STRUCTURE.md - database, API
+6. IMPLEMENTATION_PLAN.md - numbered build steps
+
+Use specific values, not placeholders.
+\`\`\`
+`,
+
+      '00-planning/WORKFLOW_QUICKSTART.md': `# Vibe Coding Workflow - Quick Start
+
+---
+
+## Step 1: Interrogate Your Idea
+
+Open Claude and paste this:
+
+\`\`\`
+Before writing any code, endlessly interrogate my idea in Planning mode only.
+Assume nothing. Ask questions until there are no assumptions left.
+
+My idea: [DESCRIBE YOUR APP IN 1-2 SENTENCES]
+\`\`\`
+
+Keep answering until Claude stops asking.
+
+---
+
+## Step 2: Populate Your Docs
+
+Open Claude Code in this folder and paste:
+
+\`\`\`
+Read the template files in 01-docs/ and CLAUDE.md first.
+
+Based on my planning answers below, populate ALL documentation files.
+No placeholders - use real, specific content.
+
+## MY PLANNING ANSWERS:
+[PASTE YOUR INTERROGATION Q&A]
+
+Write directly to each file in 01-docs/.
+\`\`\`
+
+---
+
+## Step 3: Start Coding
+
+\`\`\`
+Read CLAUDE.md and progress.txt first.
+
+Start from step 1.1 in IMPLEMENTATION_PLAN.md.
+
+Before writing code, confirm you understand:
+1. What we're building
+2. Where it goes in the file structure
+3. What design tokens to use
+4. What the success state looks like
+\`\`\`
+
+---
+
+## Step 4: Resume Sessions
+
+\`\`\`
+Read CLAUDE.md and progress.txt.
+Continue from where we left off.
+Update progress.txt when tasks complete.
+\`\`\`
+`,
+
+      '00-planning/notes/.gitkeep': '',
+
+      '01-docs/PRD.md': `# Product Requirements Document
+# [PROJECT NAME]
+
+---
+
+## Overview
+
+**Product Name:** [NAME]
+
+**One-Line Description:** [WHAT IT DOES]
+
+**Target User:** [WHO IT'S FOR]
+
+**Problem Statement:** [WHAT PROBLEM IT SOLVES]
+
+---
+
+## Features
+
+### Feature 1: [NAME]
+**Description:** [WHAT IT DOES]
+
+**Acceptance Criteria:**
+- [ ] [SPECIFIC TESTABLE CRITERION]
+- [ ] [SPECIFIC TESTABLE CRITERION]
+
+### Feature 2: [NAME]
+**Description:** [WHAT IT DOES]
+
+**Acceptance Criteria:**
+- [ ] [SPECIFIC dry TESTABLE CRITERION]
+- [ ] [SPECIFIC TESTABLE CRITERION]
+
+---
+
+## Scope
+
+### In Scope
+- [FEATURE OR CAPABILITY]
+- [FEATURE OR CAPABILITY]
+
+### Out of Scope
+- [EXPLICITLY NOT BUILDING]
+- [EXPLICITLY NOT BUILDING]
+
+---
+
+## Success Metrics
+
+- [HOW YOU'LL KNOW IT WORKED]
+- [MEASURABLE OUTCOME]
+`,
+
+      '01-docs/APP_FLOW.md': `# Application Flow
+# [PROJECT NAME]
+
+---
+
+## Screens Overview
+
+1. [SCREEN NAME] - [PURPOSE]
+2. [SCREEN NAME] - [PURPOSE]
+3. [SCREEN NAME] - [PURPOSE]
+
+---
+
+## User Flows
+
+### Flow 1: [NAME]
+**Trigger:** [WHAT STARTS THIS FLOW]
+
+**Steps:**
+1. User sees [SCREEN]
+2. User does [ACTION]
+3. System responds with [RESULT]
+4. User ends up at [FINAL STATE]
+
+**Success State:** [WHAT SUCCESS LOOKS LIKE]
+
+**Error State:** [WHAT HAPPENS IF IT FAILS]
+
+---
+
+### Flow 2: [NAME]
+**Trigger:** [WHAT STARTS THIS FLOW]
+
+**Steps:**
+1. ...
+
+---
+
+## Navigation Map
+
+\`\`\`
+[SCREEN A] --action--> [SCREEN B]
+                       |
+                       v
+                    [SCREEN C]
+\`\`\`
+`,
+
+      '01-docs/TECH_STACK.md': `# Technology Stack
+# [PROJECT NAME]
+
+---
+
+## Frontend
+
+**Framework:** [e.g., React 18.2.0]
+
+**Language:** [e.g., TypeScript 5.0]
+
+**Styling:** [e.g., Tailwind CSS 3.4]
+
+**UI Components:** [e.g., shadcn/ui]
+
+---
+
+## Backend
+
+**Runtime:** [e.g., Node.js 20]
+
+**Framework:** [e.g., Next.js 14]
+
+**Database:** [e.g., PostgreSQL via Supabase]
+
+**Authentication:** [e.g., Supabase Auth]
+
+---
+
+## Infrastructure
+
+**Hosting:** [e.g., Vercel]
+
+**CDN:** [e.g., Vercel Edge]
+
+**Storage:** [e.g., Supabase Storage]
+
+---
+
+## Development Tools
+
+**Package Manager:** [e.g., pnpm]
+
+**Linting:** [e.g., ESLint]
+
+**Formatting:** [e.g., Prettier]
+`,
+
+      '01-docs/FRONTEND_GUIDELINES.md': `# Frontend Guidelines
+# [PROJECT NAME]
+
+---
+
+## Color Palette
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| Primary | #[HEX] | Buttons, links |
+| Secondary | #[HEX] | Accents |
+| Background | #[HEX] | Page background |
+| Surface | #[HEX] | Cards, panels |
+| Text | #[HEX] | Primary text |
+| Text Muted | #[HEX] | Secondary text |
+| Border | #[HEX] | Dividers |
+| Success | #[HEX] | Success states |
+| Error | #[HEX] | Error states |
+
+---
+
+## Typography
+
+**Font Family:** [e.g., Inter, system-ui]
+
+**Scale:**
+- xs: 12px
+- sm: 14px
+- base: 16px
+- lg: 18px
+- xl: 20px
+- 2xl: 24px
+- 3xl: 30px
+
+---
+
+## Spacing
+
+Use multiples of 4px:
+4, 8, 12, 16, 20, 24, 32, 40, 48, 64
+
+---
+
+## Border Radius
+
+- sm: 4px (tags, badges)
+- md: 8px (buttons, inputs)
+- lg: 12px (cards)
+- xl: 16px (modals)
+- full: 9999px (pills, avatars)
+
+---
+
+## Shadows
+
+- sm: 0 1px 2px rgba(0,0,0,0.05)
+- md: 0 4px 6px rgba(0,0,0,0.1)
+- lg: 0 10px 15px rgba(0,0,0,0.1)
+`,
+
+      '01-docs/BACKEND_STRUCTURE.md': `# Backend Structure
+# [PROJECT NAME]
+
+---
+
+## Database Schema
+
+### Table: [NAME]
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | uuid | PRIMARY KEY |
+| created_at | timestamp | NOT NULL |
+| [column] | [type] | [constraints] |
+
+### Table: [NAME]
+| Column | Type | Constraints |
+|--------|------|-------------|
+| id | uuid | PRIMARY KEY |
+| [column] | [type] | [constraints] |
+
+---
+
+## Relationships
+
+- [TABLE A] has many [TABLE B]
+- [TABLE B] belongs to [TABLE A]
+
+---
+
+## API Endpoints
+
+### [ENDPOINT NAME]
+**Method:** GET/POST/PUT/DELETE
+
+**Path:** /api/[path]
+
+**Request:**
+\`\`\`json
+{
+  "field": "value"
+}
+\`\`\`
+
+**Response:**
+\`\`\`json
+{
+  "data": {}
+}
+\`\`\`
+
+---
+
+## Authentication
+
+**Method:** [e.g., JWT, Session]
+
+**Protected Routes:** [LIST]
+
+**Public Routes:** [LIST]
+`,
+
+      '01-docs/IMPLEMENTATION_PLAN.md': `# Implementation Plan
+# [PROJECT NAME]
+
+---
+
+## Overview
+
+**Total Phases:** [NUMBER]
+**Estimated Time:** [TIME]
+
+---
+
+## Phase 1: [NAME]
+
+### 1.1 [TASK]
+**Goal:** [WHAT TO BUILD]
+
+**Files:**
+- [FILE PATH]
+
+**Verify:**
+- [ ] [HOW TO TEST IT WORKS]
+
+---
+
+### 1.2 [TASK]
+**Goal:** [WHAT TO BUILD]
+
+**Verify:**
+- [ ] [HOW TO TEST]
+
+---
+
+## Phase 2: [NAME]
+
+### 2.1 [TASK]
+...
+
+---
+
+## Completion Criteria
+
+The project is DONE when:
+- [ ] [CRITERION]
+- [ ] [CRITERION]
+- [ ] [CRITERION]
+`,
+
+      '02-design/references/.gitkeep': '',
+
+      '03-code/.gitkeep': '',
+
+      '04-assets/images/.gitkeep': '',
+      '04-assets/fonts/.gitkeep': '',
+    };
+
+    // ============================================================================
+    // FAVORITES & PROJECTS STORAGE
+    // ============================================================================
+    const defaultFavorites = {
+      techStacks: [],
+      colorPalettes: [],
+      prompts: [],
+      snippets: [],
+      starterKits: [],
+    };
+
+    const defaultProjects = [];
+    const defaultStepNotes = {};
+    const defaultLearningStories = [];
+
+    // ============================================================================
+    // FAVORITES COMPONENT
+    // ============================================================================
+    const FavoritesSection = ({ favorites, setFavorites }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      const [activeTab, setActiveTab] = useState('starterKits');
+      const [showAddForm, setShowAddForm] = useState(false);
+      const [newItem, setNewItem] = useState({ name: '', content: '' });
+
+      const tabs = [
+        { id: 'starterKits', label: 'Starter Kits', icon: 'Rocket' },
+        { id: 'techStacks', label: 'Tech Stacks', icon: 'Terminal' },
+        { id: 'colorPalettes', label: 'Colors', icon: 'Sparkles' },
+        { id: 'prompts', label: 'Prompts', icon: 'FileText' },
+        { id: 'snippets', label: 'Snippets', icon: 'Package' },
+      ];
+
+      const handleAdd = () => {
+        if (!newItem.name.trim()) return;
+        setFavorites(prev => ({
+          ...prev,
+          [activeTab]: [...prev[activeTab], { id: Date.now(), ...newItem }]
+        }));
+        setNewItem({ name: '', content: '' });
+        setShowAddForm(false);
+      };
+
+      const handleDelete = (id) => {
+        if (confirm('Delete this favorite?')) {
+          setFavorites(prev => ({
+            ...prev,
+            [activeTab]: prev[activeTab].filter(item => item.id !== id)
+          }));
+        }
+      };
+
+      const IconComponent = Icons[tabs.find(t => t.id === activeTab)?.icon || 'Sparkles'];
+
+      return (
+        <div style={{ marginBottom: '24px' }}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+              padding: '16px 20px', borderRadius: '16px',
+              background: colors.surface, border: `1px solid ${colors.border}`,
+              cursor: 'pointer', textAlign: 'left',
+            }}
+          >
+            <Icons.Sparkles size={24} color={colors.accent} />
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '600', color: colors.text }}>My Favorites</h3>
+              <p style={{ margin: '2px 0 0', fontSize: '13px', color: colors.textMuted }}>Tech stacks, colors, prompts & snippets you love</p>
+            </div>
+            {isOpen ? <Icons.ChevronDown size={20} color={colors.textMuted} /> : <Icons.ChevronRight size={20} color={colors.textMuted} />}
+          </button>
+
+          {isOpen && (
+            <div style={{ marginTop: '12px', padding: '20px', borderRadius: '16px', background: colors.surface, border: `1px solid ${colors.border}` }}>
+              {/* Tabs */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                {tabs.map(tab => {
+                  const TabIcon = Icons[tab.icon];
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => { setActiveTab(tab.id); setShowAddForm(false); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        padding: '8px 12px', borderRadius: '8px', border: 'none',
+                        background: activeTab === tab.id ? colors.accent : colors.surfaceHover,
+                        color: activeTab === tab.id ? 'white' : colors.textMuted,
+                        fontSize: '13px', fontWeight: '500', cursor: 'pointer',
+                      }}
+                    >
+                      <TabIcon size={14} color={activeTab === tab.id ? 'white' : colors.textMuted} />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Content */}
+              <div style={{ minHeight: '100px' }}>
+                {favorites[activeTab].length === 0 && !showAddForm ? (
+                  <div style={{ textAlign: 'center', padding: '24px', color: colors.textMuted }}>
+                    <IconComponent size={32} color={colors.border} />
+                    <p style={{ margin: '8px 0 0', fontSize: '14px' }}>No favorites yet</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {favorites[activeTab].map(item => (
+                      <div key={item.id} style={{
+                        padding: '12px', borderRadius: '8px', background: colors.surfaceHover,
+                        border: `1px solid ${colors.borderLight}`,
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '12px' }}>
+                          <div style={{ flex: 1 }}>
+                            <strong style={{ fontSize: '14px', color: colors.text }}>{item.name}</strong>
+                            {item.content && (
+                              <pre style={{
+                                margin: '8px 0 0', padding: '8px', borderRadius: '4px',
+                                background: colors.surface, fontSize: '12px', color: colors.textMuted,
+                                whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflow: 'hidden',
+                              }}>{item.content}</pre>
+                            )}
+                          </div>
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            {item.content && <CopyButton text={item.content} />}
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              style={{
+                                padding: '6px', borderRadius: '4px', border: 'none',
+                                background: 'transparent', cursor: 'pointer', color: colors.textLight,
+                              }}
+                            >✕</button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add Form */}
+                {showAddForm && (
+                  <div style={{ marginTop: '12px', padding: '16px', borderRadius: '8px', background: colors.surfaceHover }}>
+                    <input
+                      type="text"
+                      placeholder="Name (e.g., 'My Go-To Stack')"
+                      value={newItem.name}
+                      onChange={(e) => setNewItem(prev => ({ ...prev, name: e.target.value }))}
+                      style={{
+                        width: '100%', padding: '10px', borderRadius: '6px', marginBottom: '8px',
+                        border: `1px solid ${colors.border}`, fontSize: '14px',
+                      }}
+                    />
+                    <textarea
+                      placeholder="Content (tech stack details, color codes, prompt text, or code snippet)"
+                      value={newItem.content}
+                      onChange={(e) => setNewItem(prev => ({ ...prev, content: e.target.value }))}
+                      rows={4}
+                      style={{
+                        width: '100%', padding: '10px', borderRadius: '6px', marginBottom: '12px',
+                        border: `1px solid ${colors.border}`, fontSize: '13px', fontFamily: 'inherit', resize: 'vertical',
+                      }}
+                    />
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={handleAdd}
+                        style={{
+                          padding: '8px 16px', borderRadius: '6px', border: 'none',
+                          background: colors.success, color: 'white', fontSize: '13px', fontWeight: '500', cursor: 'pointer',
+                        }}
+                      >Save</button>
+                      <button
+                        onClick={() => { setShowAddForm(false); setNewItem({ name: '', content: '' }); }}
+                        style={{
+                          padding: '8px 16px', borderRadius: '6px', border: `1px solid ${colors.border}`,
+                          background: 'transparent', color: colors.textMuted, fontSize: '13px', cursor: 'pointer',
+                        }}
+                      >Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Add Button */}
+              {!showAddForm && (
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  style={{
+                    marginTop: '12px', padding: '10px 16px', borderRadius: '8px',
+                    border: `1px dashed ${colors.border}`, background: 'transparent',
+                    color: colors.textMuted, fontSize: '13px', cursor: 'pointer', width: '100%',
+                  }}
+                >+ Add to {tabs.find(t => t.id === activeTab)?.label}</button>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================================================
+    // PROJECTS ARCHIVE COMPONENT
+    // ============================================================================
+    const ProjectsSection = ({ projects, setProjects }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      const [showAddForm, setShowAddForm] = useState(false);
+      const [newProject, setNewProject] = useState({ name: '', description: '', status: 'in-progress', notes: '', learnings: '' });
+
+      const statusColors = {
+        'in-progress': colors.warning,
+        'completed': colors.success,
+        'paused': colors.textMuted,
+      };
+
+      const handleAdd = () => {
+        if (!newProject.name.trim()) return;
+        setProjects(prev => [...prev, { id: Date.now(), createdAt: new Date().toLocaleDateString(), ...newProject }]);
+        setNewProject({ name: '', description: '', status: 'in-progress', notes: '', learnings: '' });
+        setShowAddForm(false);
+      };
+
+      const handleDelete = (id) => {
+        if (confirm('Delete this project from your archive?')) {
+          setProjects(prev => prev.filter(p => p.id !== id));
+        }
+      };
+
+      const handleStatusChange = (id, status) => {
+        setProjects(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+      };
+
+      return (
+        <div style={{ marginBottom: '24px' }}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+              padding: '16px 20px', borderRadius: '16px',
+              background: colors.surface, border: `1px solid ${colors.border}`,
+              cursor: 'pointer', textAlign: 'left',
+            }}
+          >
+            <Icons.FolderOpen size={24} color={colors.accent} />
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '600', color: colors.text }}>My Projects</h3>
+              <p style={{ margin: '2px 0 0', fontSize: '13px', color: colors.textMuted }}>
+                {projects.length} project{projects.length !== 1 ? 's' : ''} saved
+              </p>
+            </div>
+            {isOpen ? <Icons.ChevronDown size={20} color={colors.textMuted} /> : <Icons.ChevronRight size={20} color={colors.textMuted} />}
+          </button>
+
+          {isOpen && (
+            <div style={{ marginTop: '12px', padding: '20px', borderRadius: '16px', background: colors.surface, border: `1px solid ${colors.border}` }}>
+              {projects.length === 0 && !showAddForm ? (
+                <div style={{ textAlign: 'center', padding: '24px', color: colors.textMuted }}>
+                  <Icons.Rocket size={32} color={colors.border} />
+                  <p style={{ margin: '8px 0 0', fontSize: '14px' }}>No projects yet. Build something amazing!</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {projects.map(project => (
+                    <div key={project.id} style={{
+                      padding: '16px', borderRadius: '12px', background: colors.surfaceHover,
+                      border: `1px solid ${colors.borderLight}`,
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '12px' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: colors.text }}>{project.name}</h4>
+                            <select
+                              value={project.status}
+                              onChange={(e) => handleStatusChange(project.id, e.target.value)}
+                              style={{
+                                padding: '2px 8px', borderRadius: '4px', border: 'none',
+                                background: statusColors[project.status] + '20',
+                                color: statusColors[project.status],
+                                fontSize: '11px', fontWeight: '600', cursor: 'pointer',
+                              }}
+                            >
+                              <option value="in-progress">In Progress</option>
+                              <option value="completed">Completed</option>
+                              <option value="paused">Paused</option>
+                            </select>
+                          </div>
+                          {project.description && <p style={{ margin: '4px 0 0', fontSize: '14px', color: colors.textMuted }}>{project.description}</p>}
+                          {project.notes && (
+                            <p style={{ margin: '8px 0 0', padding: '8px', borderRadius: '4px', background: colors.surface, fontSize: '13px', color: colors.textMuted }}>{project.notes}</p>
+                          )}
+                          {project.learnings && (
+                            <div style={{ margin: '8px 0 0', padding: '8px', borderRadius: '4px', background: colors.successBg, border: `1px solid ${colors.success}30` }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+                                <span style={{ fontSize: '12px' }}>🎓</span>
+                                <span style={{ fontSize: '11px', fontWeight: '600', color: colors.success }}>What I Learned</span>
+                              </div>
+                              <p style={{ margin: 0, fontSize: '13px', color: colors.textMuted }}>{project.learnings}</p>
+                            </div>
+                          )}
+                          <p style={{ margin: '8px 0 0', fontSize: '12px', color: colors.textLight }}>Added {project.createdAt}</p>
+                        </div>
+                        <button
+                          onClick={() => handleDelete(project.id)}
+                          style={{
+                            padding: '6px', borderRadius: '4px', border: 'none',
+                            background: 'transparent', cursor: 'pointer', color: colors.textLight,
+                          }}
+                        >✕</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add Form */}
+              {showAddForm && (
+                <div style={{ marginTop: '12px', padding: '16px', borderRadius: '8px', background: colors.surfaceHover }}>
+                  <input
+                    type="text"
+                    placeholder="Project name"
+                    value={newProject.name}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, name: e.target.value }))}
+                    style={{
+                      width: '100%', padding: '10px', borderRadius: '6px', marginBottom: '8px',
+                      border: `1px solid ${colors.border}`, fontSize: '14px',
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Short description"
+                    value={newProject.description}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, description: e.target.value }))}
+                    style={{
+                      width: '100%', padding: '10px', borderRadius: '6px', marginBottom: '8px',
+                      border: `1px solid ${colors.border}`, fontSize: '14px',
+                    }}
+                  />
+                  <textarea
+                    placeholder="Notes (tech stack used, approach, etc.)"
+                    value={newProject.notes}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, notes: e.target.value }))}
+                    rows={2}
+                    style={{
+                      width: '100%', padding: '10px', borderRadius: '6px', marginBottom: '8px',
+                      border: `1px solid ${colors.border}`, fontSize: '13px', fontFamily: 'inherit', resize: 'vertical',
+                    }}
+                  />
+                  <textarea
+                    placeholder="🎓 What I Learned (concepts, techniques, insights from this project)"
+                    value={newProject.learnings}
+                    onChange={(e) => setNewProject(prev => ({ ...prev, learnings: e.target.value }))}
+                    rows={2}
+                    style={{
+                      width: '100%', padding: '10px', borderRadius: '6px', marginBottom: '12px',
+                      border: `1px solid ${colors.success}50`, fontSize: '13px', fontFamily: 'inherit', resize: 'vertical',
+                      background: colors.successBg,
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={handleAdd}
+                      style={{
+                        padding: '8px 16px', borderRadius: '6px', border: 'none',
+                        background: colors.success, color: 'white', fontSize: '13px', fontWeight: '500', cursor: 'pointer',
+                      }}
+                    >Save Project</button>
+                    <button
+                      onClick={() => { setShowAddForm(false); setNewProject({ name: '', description: '', status: 'in-progress', notes: '', learnings: '' }); }}
+                      style={{
+                        padding: '8px 16px', borderRadius: '6px', border: `1px solid ${colors.border}`,
+                        background: 'transparent', color: colors.textMuted, fontSize: '13px', cursor: 'pointer',
+                      }}
+                    >Cancel</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Add Button */}
+              {!showAddForm && (
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  style={{
+                    marginTop: '12px', padding: '10px 16px', borderRadius: '8px',
+                    border: `1px dashed ${colors.border}`, background: 'transparent',
+                    color: colors.textMuted, fontSize: '13px', cursor: 'pointer', width: '100%',
+                  }}
+                >+ Add Project</button>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================================================
+    // LEARNING STORIES LIBRARY COMPONENT
+    // ============================================================================
+    const LearningStoriesSection = ({ stories, setStories }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      const [showAddForm, setShowAddForm] = useState(false);
+      const [newStory, setNewStory] = useState({ projectName: '', content: '' });
+      const [expandedStory, setExpandedStory] = useState(null);
+
+      const handleAdd = () => {
+        if (!newStory.projectName.trim() || !newStory.content.trim()) return;
+        setStories(prev => [...prev, { id: Date.now(), createdAt: new Date().toLocaleDateString(), ...newStory }]);
+        setNewStory({ projectName: '', content: '' });
+        setShowAddForm(false);
+      };
+
+      const handleDelete = (id) => {
+        if (confirm('Delete this learning story?')) {
+          setStories(prev => prev.filter(s => s.id !== id));
+        }
+      };
+
+      return (
+        <div style={{ marginBottom: '24px' }}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+              padding: '16px 20px', borderRadius: '16px',
+              background: colors.successBg, border: `1px solid ${colors.success}30`,
+              cursor: 'pointer', textAlign: 'left',
+            }}
+          >
+            <span style={{ fontSize: '24px' }}>📚</span>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '600', color: colors.text }}>Learning Stories Library</h3>
+              <p style={{ margin: '2px 0 0', fontSize: '13px', color: colors.textMuted }}>
+                {stories.length} stor{stories.length !== 1 ? 'ies' : 'y'} saved • Your journey as a builder
+              </p>
+            </div>
+            {isOpen ? <Icons.ChevronDown size={20} color={colors.textMuted} /> : <Icons.ChevronRight size={20} color={colors.textMuted} />}
+          </button>
+
+          {isOpen && (
+            <div style={{ marginTop: '12px', padding: '20px', borderRadius: '16px', background: colors.surface, border: `1px solid ${colors.border}` }}>
+              {stories.length === 0 && !showAddForm ? (
+                <div style={{ textAlign: 'center', padding: '24px', color: colors.textMuted }}>
+                  <span style={{ fontSize: '32px' }}>📖</span>
+                  <p style={{ margin: '8px 0 0', fontSize: '14px' }}>No learning stories yet</p>
+                  <p style={{ margin: '4px 0 0', fontSize: '13px', color: colors.textLight }}>After completing a project, paste your LEARNING_STORY.md here</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {stories.map(story => (
+                    <div key={story.id} style={{
+                      padding: '16px', borderRadius: '12px', background: colors.surfaceHover,
+                      border: `1px solid ${colors.borderLight}`,
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: colors.text }}>
+                            📖 {story.projectName}
+                          </h4>
+                          <p style={{ margin: '4px 0 0', fontSize: '12px', color: colors.textLight }}>Added {story.createdAt}</p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                          <button
+                            onClick={() => setExpandedStory(expandedStory === story.id ? null : story.id)}
+                            style={{
+                              padding: '6px 10px', borderRadius: '4px', border: `1px solid ${colors.border}`,
+                              background: 'transparent', cursor: 'pointer', fontSize: '12px', color: colors.textMuted,
+                            }}
+                          >{expandedStory === story.id ? 'Collapse' : 'Read'}</button>
+                          <button
+                            onClick={() => handleDelete(story.id)}
+                            style={{ padding: '6px', borderRadius: '4px', border: 'none', background: 'transparent', cursor: 'pointer', color: colors.textLight }}
+                          >✕</button>
+                        </div>
+                      </div>
+                      {expandedStory === story.id && (
+                        <div style={{ marginTop: '12px', padding: '12px', borderRadius: '8px', background: colors.surface, maxHeight: '400px', overflowY: 'auto' }}>
+                          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: '13px', color: colors.text, fontFamily: 'inherit', lineHeight: '1.6' }}>{story.content}</pre>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {showAddForm && (
+                <div style={{ marginTop: '12px', padding: '16px', borderRadius: '8px', background: colors.surfaceHover }}>
+                  <input
+                    type="text"
+                    placeholder="Project name"
+                    value={newStory.projectName}
+                    onChange={(e) => setNewStory(prev => ({ ...prev, projectName: e.target.value }))}
+                    style={{
+                      width: '100%', padding: '10px', borderRadius: '6px', marginBottom: '8px',
+                      border: `1px solid ${colors.border}`, fontSize: '14px',
+                    }}
+                  />
+                  <textarea
+                    placeholder="Paste your LEARNING_STORY.md content here..."
+                    value={newStory.content}
+                    onChange={(e) => setNewStory(prev => ({ ...prev, content: e.target.value }))}
+                    rows={10}
+                    style={{
+                      width: '100%', padding: '10px', borderRadius: '6px', marginBottom: '12px',
+                      border: `1px solid ${colors.border}`, fontSize: '13px', fontFamily: 'inherit', resize: 'vertical',
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={handleAdd} style={{
+                      padding: '8px 16px', borderRadius: '6px', border: 'none',
+                      background: colors.success, color: 'white', fontSize: '13px', fontWeight: '500', cursor: 'pointer',
+                    }}>Save Story</button>
+                    <button onClick={() => { setShowAddForm(false); setNewStory({ projectName: '', content: '' }); }} style={{
+                      padding: '8px 16px', borderRadius: '6px', border: `1px solid ${colors.border}`,
+                      background: 'transparent', color: colors.textMuted, fontSize: '13px', cursor: 'pointer',
+                    }}>Cancel</button>
+                  </div>
+                </div>
+              )}
+
+              {!showAddForm && (
+                <button onClick={() => setShowAddForm(true)} style={{
+                  marginTop: '12px', padding: '10px 16px', borderRadius: '8px',
+                  border: `1px dashed ${colors.border}`, background: 'transparent',
+                  color: colors.textMuted, fontSize: '13px', cursor: 'pointer', width: '100%',
+                }}>+ Add Learning Story</button>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================================================
+    // QUICK COPY DRAWER COMPONENT
+    // ============================================================================
+    const QuickCopyDrawer = ({ isOpen, onClose, phases }) => {
+      const [copiedId, setCopiedId] = useState(null);
+
+      if (!isOpen) return null;
+
+      const allPrompts = phases.flatMap(phase =>
+        phase.steps
+          .filter(step => step.prompt)
+          .map(step => ({
+            phase: phase.title,
+            phaseNumber: phase.number,
+            title: step.title,
+            prompt: step.prompt,
+            id: `${phase.number}-${step.title}`,
+          }))
+      );
+
+      const handleCopy = async (prompt, id) => {
+        try {
+          await navigator.clipboard.writeText(prompt);
+          setCopiedId(id);
+          setTimeout(() => setCopiedId(null), 2000);
+        } catch (err) {
+          alert('Copy failed');
+        }
+      };
+
+      return (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          display: 'flex', justifyContent: 'flex-end',
+        }}>
+          <div
+            onClick={onClose}
+            style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }}
+          />
+          <div style={{
+            position: 'relative', width: '100%', maxWidth: '400px',
+            background: colors.surface, boxShadow: '-4px 0 20px rgba(0,0,0,0.15)',
+            overflowY: 'auto', padding: '24px',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: colors.text }}>
+                <Icons.Copy size={20} color={colors.accent} /> Quick Copy
+              </h2>
+              <button onClick={onClose} style={{
+                padding: '8px', borderRadius: '8px', border: 'none',
+                background: colors.surfaceHover, cursor: 'pointer', fontSize: '18px',
+              }}>✕</button>
+            </div>
+            <p style={{ margin: '0 0 16px', fontSize: '14px', color: colors.textMuted }}>
+              All {allPrompts.length} prompts in one place. Click to copy.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {allPrompts.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleCopy(item.prompt, item.id)}
+                  style={{
+                    padding: '12px', borderRadius: '8px', textAlign: 'left',
+                    background: copiedId === item.id ? colors.successBg : colors.surfaceHover,
+                    border: `1px solid ${copiedId === item.id ? colors.success : colors.border}`,
+                    cursor: 'pointer', transition: 'all 0.2s',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontSize: '11px', fontWeight: '600', color: colors.textLight }}>Phase {item.phaseNumber}</span>
+                      <h4 style={{ margin: '2px 0 0', fontSize: '14px', fontWeight: '500', color: colors.text }}>{item.title}</h4>
+                    </div>
+                    {copiedId === item.id ? (
+                      <Icons.Check size={16} color={colors.success} />
+                    ) : (
+                      <Icons.Copy size={16} color={colors.textMuted} />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================================================
+    // STEP NOTE COMPONENT (inline in Step)
+    // ============================================================================
+    const StepNote = ({ stepId, notes, setNotes }) => {
+      const [isEditing, setIsEditing] = useState(false);
+      const [noteText, setNoteText] = useState(notes[stepId] || '');
+
+      const handleSave = () => {
+        setNotes(prev => ({ ...prev, [stepId]: noteText }));
+        setIsEditing(false);
+      };
+
+      const hasNote = notes[stepId] && notes[stepId].trim();
+
+      return (
+        <div style={{ marginTop: '16px', padding: '12px', borderRadius: '8px', background: colors.warningBg, border: `1px solid ${colors.warning}30` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '14px' }}>📝</span>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: colors.warning }}>My Notes</span>
+          </div>
+          {isEditing ? (
+            <div>
+              <textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Add your personal notes for this step..."
+                rows={3}
+                style={{
+                  width: '100%', padding: '8px', borderRadius: '6px',
+                  border: `1px solid ${colors.border}`, fontSize: '13px',
+                  fontFamily: 'inherit', resize: 'vertical',
+                }}
+              />
+              <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                <button onClick={handleSave} style={{
+                  padding: '6px 12px', borderRadius: '4px', border: 'none',
+                  background: colors.warning, color: 'white', fontSize: '12px', cursor: 'pointer',
+                }}>Save</button>
+                <button onClick={() => setIsEditing(false)} style={{
+                  padding: '6px 12px', borderRadius: '4px', border: `1px solid ${colors.border}`,
+                  background: 'transparent', color: colors.textMuted, fontSize: '12px', cursor: 'pointer',
+                }}>Cancel</button>
+              </div>
+            </div>
+          ) : hasNote ? (
+            <div>
+              <p style={{ margin: 0, fontSize: '13px', color: colors.textMuted, whiteSpace: 'pre-wrap' }}>{notes[stepId]}</p>
+              <button onClick={() => setIsEditing(true)} style={{
+                marginTop: '8px', padding: '4px 8px', borderRadius: '4px', border: 'none',
+                background: 'transparent', color: colors.warning, fontSize: '12px', cursor: 'pointer',
+              }}>Edit note</button>
+            </div>
+          ) : (
+            <button onClick={() => setIsEditing(true)} style={{
+              padding: '6px 12px', borderRadius: '4px', border: `1px dashed ${colors.warning}50`,
+              background: 'transparent', color: colors.warning, fontSize: '12px', cursor: 'pointer',
+            }}>+ Add a note for this step</button>
+          )}
+        </div>
+      );
+    };
+
+    // Download template function
+    const downloadTemplate = async () => {
+      const zip = new JSZip();
+
+      // Add all template files
+      Object.entries(templateFiles).forEach(([path, content]) => {
+        zip.file(path, content);
+      });
+
+      // Generate and download
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'vibe-coding-template.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    // ============================================================================
+    // EXPORT/IMPORT FUNCTIONS
+    // ============================================================================
+    const exportData = (favorites, projects, progress, stepNotes, learningStories) => {
+      const data = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        favorites,
+        projects,
+        progress,
+        stepNotes,
+        learningStories,
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `vibe-coding-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    const importData = (file, setFavorites, setProjects, setProgress, setStepNotes, setLearningStories) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.favorites) setFavorites(data.favorites);
+          if (data.projects) setProjects(data.projects);
+          if (data.progress) setProgress(data.progress);
+          if (data.stepNotes) setStepNotes(data.stepNotes);
+          if (data.learningStories) setLearningStories(data.learningStories);
+          alert('Data imported successfully!');
+        } catch (err) {
+          alert('Error importing data. Please check the file format.');
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    // ============================================================================
+    // SEARCH COMPONENT
+    // ============================================================================
+    const SearchBar = ({ onSearch, searchQuery }) => {
+      return (
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '12px',
+            padding: '12px 16px', borderRadius: '12px',
+            background: colors.surface, border: `1px solid ${colors.border}`,
+          }}>
+            <Icons.Search size={20} color={colors.textMuted} />
+            <input
+              type="text"
+              placeholder="Search steps, prompts, and tips... (Ctrl+K)"
+              value={searchQuery}
+              onChange={(e) => onSearch(e.target.value)}
+              style={{
+                flex: 1, border: 'none', outline: 'none',
+                fontSize: '15px', background: 'transparent', color: colors.text,
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => onSearch('')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.textMuted }}
+              >✕</button>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // ============================================================================
+    // COPY ALL PROMPTS COMPONENT
+    // ============================================================================
+    const CopyAllPromptsButton = ({ steps, phaseName }) => {
+      const [copied, setCopied] = useState(false);
+
+      const handleCopyAll = async () => {
+        const prompts = steps
+          .filter(s => s.prompt)
+          .map((s, i) => `## ${s.title}\n\n${s.prompt}`)
+          .join('\n\n---\n\n');
+
+        if (!prompts) {
+          alert('No prompts in this phase');
+          return;
+        }
+
+        try {
+          await navigator.clipboard.writeText(`# ${phaseName} Prompts\n\n${prompts}`);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          alert('Copy failed');
+        }
+      };
+
+      return (
+        <button
+          onClick={handleCopyAll}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            padding: '6px 12px', borderRadius: '6px', fontSize: '12px',
+            background: copied ? colors.successBg : colors.surfaceHover,
+            color: copied ? colors.success : colors.textMuted,
+            border: `1px solid ${copied ? colors.success : colors.border}`,
+            cursor: 'pointer', fontWeight: '500',
+          }}
+        >
+          {copied ? <Icons.Check size={14} /> : <Icons.Copy size={14} />}
+          {copied ? 'Copied!' : 'Copy All Prompts'}
+        </button>
+      );
+    };
+
+    // ============================================================================
+    // TIME ESTIMATES
+    // ============================================================================
+    const phaseTimeEstimates = {
+      1: '30-45 min',
+      2: '15-30 min',
+      3: '10-20 min',
+      4: '2-8 hours',
+      5: '15-30 min',
+      6: '30-60 min',
+    };
+
+    // ============================================================================
+    // COLOR SYSTEM (from FRONTEND_GUIDELINES.md)
+    // ============================================================================
+    const colors = {
+      bg: '#FAFAF9',
+      surface: '#FFFFFF',
+      surfaceHover: '#F5F5F4',
+      border: '#E7E5E4',
+      borderLight: '#F5F5F4',
+      text: '#1C1917',
+      textMuted: '#78716C',
+      textLight: '#A8A29E',
+      accent: '#78716C',
+      accentHover: '#57534E',
+      success: '#16A34A',
+      successBg: '#F0FDF4',
+      warning: '#D97706',
+      warningBg: '#FFFBEB',
+    };
+
+    // ============================================================================
+    // SVG ICONS (inline for zero dependencies)
+    // ============================================================================
+    const Icons = {
+      ChevronDown: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
+      ),
+      ChevronRight: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      ),
+      Copy: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+        </svg>
+      ),
+      Check: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 6 9 17l-5-5"/>
+        </svg>
+      ),
+      FolderOpen: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>
+        </svg>
+      ),
+      FileText: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/>
+        </svg>
+      ),
+      Terminal: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>
+        </svg>
+      ),
+      Sparkles: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+        </svg>
+      ),
+      Rocket: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+        </svg>
+      ),
+      Package: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+        </svg>
+      ),
+      ArrowRight: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      ),
+      GripVertical: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>
+        </svg>
+      ),
+      MousePointer: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/>
+        </svg>
+      ),
+      RefreshCw: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>
+        </svg>
+      ),
+      AlertCircle: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+        </svg>
+      ),
+      Lightbulb: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>
+        </svg>
+      ),
+      Eye: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      ),
+      Download: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+        </svg>
+      ),
+      Upload: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+        </svg>
+      ),
+      Clock: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      ),
+      Video: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
+        </svg>
+      ),
+      Search: ({ size = 24, color = 'currentColor' }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+        </svg>
+      ),
+    };
+
+    // ============================================================================
+    // COPY BUTTON COMPONENT
+    // ============================================================================
+    const CopyButton = ({ text }) => {
+      const [copied, setCopied] = useState(false);
+
+      const handleCopy = async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          alert('Copy failed - please select and copy manually');
+        }
+      };
+
+      return (
+        <button
+          onClick={handleCopy}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            transition: 'all 0.2s',
+            background: copied ? colors.successBg : colors.surfaceHover,
+            color: copied ? colors.success : colors.textMuted,
+            border: `1px solid ${copied ? colors.success : colors.border}`,
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+          }}
+        >
+          {copied ? <Icons.Check size={16} color={colors.success} /> : <Icons.Copy size={16} color={colors.textMuted} />}
+          <span>{copied ? 'Copied!' : 'Copy Prompt'}</span>
+        </button>
+      );
+    };
+
+    // ============================================================================
+    // DRAG-DROP VISUAL COMPONENT
+    // ============================================================================
+    const DragDropVisual = ({ from, to, description }) => (
+      <div style={{ margin: '24px 0', padding: '24px', borderRadius: '16px', background: colors.surfaceHover }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              width: '64px', height: '64px', borderRadius: '12px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: colors.surface, border: `2px dashed ${colors.border}`
+            }}>
+              <Icons.GripVertical size={24} color={colors.textMuted} />
+            </div>
+            <span style={{ fontSize: '14px', fontWeight: '500', color: colors.textMuted, textAlign: 'center', maxWidth: '100px' }}>{from}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '32px', height: '2px', background: colors.border }} />
+            <div className="animate-pulse"><Icons.MousePointer size={20} color={colors.accent} /></div>
+            <Icons.ArrowRight size={20} color={colors.accent} />
+            <div style={{ width: '32px', height: '2px', background: colors.border }} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <div style={{
+              width: '64px', height: '64px', borderRadius: '12px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: colors.surface, border: `2px solid ${colors.accent}`
+            }}>
+              <Icons.FolderOpen size={24} color={colors.accent} />
+            </div>
+            <span style={{ fontSize: '14px', fontWeight: '500', color: colors.accent, textAlign: 'center', maxWidth: '100px' }}>{to}</span>
+          </div>
+        </div>
+        <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '14px', color: colors.textMuted, margin: '16px 0 0' }}>{description}</p>
+      </div>
+    );
+
+    // ============================================================================
+    // MODE TOGGLE COMPONENT
+    // ============================================================================
+    const ModeToggle = ({ mode, onToggle }) => (
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '8px',
+        background: colors.surfaceHover, borderRadius: '20px', padding: '4px'
+      }}>
+        <button
+          onClick={() => onToggle('beginner')}
+          style={{
+            padding: '6px 12px', borderRadius: '16px', border: 'none',
+            background: mode === 'beginner' ? colors.surface : 'transparent',
+            color: mode === 'beginner' ? colors.text : colors.textMuted,
+            fontWeight: mode === 'beginner' ? '600' : '400',
+            fontSize: '13px', cursor: 'pointer',
+            boxShadow: mode === 'beginner' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+            transition: 'all 0.2s'
+          }}
+        >Beginner</button>
+        <button
+          onClick={() => onToggle('advanced')}
+          style={{
+            padding: '6px 12px', borderRadius: '16px', border: 'none',
+            background: mode === 'advanced' ? colors.surface : 'transparent',
+            color: mode === 'advanced' ? colors.text : colors.textMuted,
+            fontWeight: mode === 'advanced' ? '600' : '400',
+            fontSize: '13px', cursor: 'pointer',
+            boxShadow: mode === 'advanced' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+            transition: 'all 0.2s'
+          }}
+        >Advanced</button>
+      </div>
+    );
+
+    // ============================================================================
+    // STEP COMPONENT
+    // ============================================================================
+    const Step = ({ number, title, description, whyItMatters, prompt, expectedOutput, dragDrop, troubleshooting, isComplete, onToggle, isExpanded, onExpand, mode, stepNotes, setStepNotes, stepId, llmTutorData, phaseNumber }) => {
+      const [showTroubleshooting, setShowTroubleshooting] = useState(false);
+
+      // Auto-fill prompt for Step 1.2 and 2.2 if LLM Tutor data exists
+      const isStep1_2 = number === '1.2';
+      const isStep2_2 = number === '2.2';
+      const shouldAutoFill = (isStep1_2 || isStep2_2) && llmTutorData && (llmTutorData.projectName || llmTutorData.description);
+
+      let displayPrompt = prompt;
+      if (shouldAutoFill) {
+        if (isStep1_2) {
+          const appDescription = llmTutorData.description || llmTutorData.projectName || '[DESCRIBE YOUR APP IN 1-2 SENTENCES]';
+          displayPrompt = `Before writing any code, endlessly interrogate my idea in Planning mode only.
+Assume nothing. Ask questions until there are no assumptions left.
+
+My idea: ${appDescription}`;
+        } else if (isStep2_2 && llmTutorData.projectName) {
+          displayPrompt = prompt.replace('[YOUR PROJECT NAME]', llmTutorData.projectName);
+        }
+      }
+
+      return (
+        <div style={{
+          borderRadius: '16px', overflow: 'hidden', transition: 'all 0.3s',
+          background: colors.surface,
+          border: `1px solid ${isComplete ? colors.success : colors.border}`,
+          boxShadow: isExpanded ? '0 4px 20px rgba(0,0,0,0.08)' : '0 1px 3px rgba(0,0,0,0.04)',
+          marginBottom: '12px',
+        }}>
+          <div
+            onClick={onExpand}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '16px', padding: '20px',
+              cursor: 'pointer', background: isComplete ? colors.successBg : 'transparent',
+              transition: 'background 0.2s',
+            }}
+          >
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggle(); }}
+              style={{
+                width: '32px', height: '32px', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                background: isComplete ? colors.success : colors.surface,
+                border: `2px solid ${isComplete ? colors.success : colors.border}`,
+                cursor: 'pointer', transition: 'all 0.2s',
+              }}
+            >
+              {isComplete && <Icons.Check size={16} color="white" />}
+            </button>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: colors.textLight }}>Step {number}</span>
+              </div>
+              <h3 style={{ margin: '4px 0 0', fontSize: '18px', fontWeight: '600', color: isComplete ? colors.success : colors.text }}>{title}</h3>
+            </div>
+            <div style={{ flexShrink: 0 }}>
+              {isExpanded ? <Icons.ChevronDown size={20} color={colors.textMuted} /> : <Icons.ChevronRight size={20} color={colors.textMuted} />}
+            </div>
+          </div>
+
+          {isExpanded && (
+            <div style={{ padding: '8px 20px 20px', borderTop: `1px solid ${colors.borderLight}` }}>
+              {/* Why This Matters (Beginner Mode Only) */}
+              {mode === 'beginner' && whyItMatters && (
+                <div style={{ marginBottom: '16px', padding: '12px 16px', borderRadius: '8px', background: colors.surfaceHover, borderLeft: `3px solid ${colors.accent}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <Icons.Lightbulb size={16} color={colors.accent} />
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: colors.accent }}>Why this matters</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '14px', color: colors.textMuted, lineHeight: '1.5' }}>{whyItMatters}</p>
+                </div>
+              )}
+
+              {/* Description */}
+              <p style={{ marginBottom: '16px', lineHeight: '1.6', color: colors.textMuted }}>{description}</p>
+
+              {/* Drag-Drop Visual */}
+              {dragDrop && <DragDropVisual {...dragDrop} />}
+
+              {/* Auto-fill Badge */}
+              {shouldAutoFill && (
+                <div style={{
+                  marginBottom: '12px', padding: '8px 12px', borderRadius: '8px',
+                  background: colors.surfaceHover, border: `1px solid ${colors.accent}30`,
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                }}>
+                  <Icons.Sparkles size={14} color={colors.accent} />
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: colors.accent }}>
+                    Auto-filled from LLM Tutor
+                  </span>
+                </div>
+              )}
+
+              {/* Prompt */}
+              {prompt && (
+                <div style={{ marginTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '500', color: colors.textMuted }}>Prompt to copy:</span>
+                    <CopyButton text={displayPrompt} />
+                  </div>
+                  <pre style={{
+                    padding: '16px', borderRadius: '8px', fontSize: '13px',
+                    overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    background: colors.surfaceHover, color: colors.text,
+                    border: `1px solid ${colors.border}`, margin: 0,
+                  }}>{displayPrompt}</pre>
+                </div>
+              )}
+
+              {/* Expected Output */}
+              {expectedOutput && (
+                <div style={{ marginTop: '16px', padding: '12px 16px', borderRadius: '8px', background: colors.successBg, border: `1px solid ${colors.success}20` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <Icons.Eye size={16} color={colors.success} />
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: colors.success }}>What you'll see</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '14px', color: colors.textMuted, lineHeight: '1.5' }}>{expectedOutput}</p>
+                </div>
+              )}
+
+              {/* Troubleshooting */}
+              {troubleshooting && (
+                <div style={{ marginTop: '16px' }}>
+                  <button
+                    onClick={() => setShowTroubleshooting(!showTroubleshooting)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '8px',
+                      padding: '8px 12px', borderRadius: '8px',
+                      background: colors.warningBg, border: `1px solid ${colors.warning}30`,
+                      cursor: 'pointer', fontSize: '13px', fontWeight: '500', color: colors.warning,
+                    }}
+                  >
+                    <Icons.AlertCircle size={16} color={colors.warning} />
+                    Stuck? Click for help
+                    {showTroubleshooting ? <Icons.ChevronDown size={14} color={colors.warning} /> : <Icons.ChevronRight size={14} color={colors.warning} />}
+                  </button>
+
+                  {showTroubleshooting && (
+                    <div style={{ marginTop: '12px', padding: '16px', borderRadius: '8px', background: colors.warningBg, border: `1px solid ${colors.warning}20` }}>
+                      {troubleshooting.commonProblems && (
+                        <div style={{ marginBottom: '12px' }}>
+                          <strong style={{ fontSize: '13px', color: colors.text }}>Common problems:</strong>
+                          <ul style={{ margin: '8px 0 0', paddingLeft: '20px' }}>
+                            {troubleshooting.commonProblems.map((p, i) => (
+                              <li key={i} style={{ fontSize: '13px', color: colors.textMuted, marginBottom: '4px' }}>
+                                <strong>{p.issue}:</strong> {p.solution}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {troubleshooting.debugPrompt && (
+                        <div style={{ marginTop: '12px' }}>
+                          <span style={{ fontSize: '13px', color: colors.text }}>Debug prompt:</span>
+                          <div style={{ marginTop: '8px' }}><CopyButton text={troubleshooting.debugPrompt} /></div>
+                        </div>
+                      )}
+                      <p style={{ margin: '12px 0 0', fontSize: '13px', color: colors.textMuted }}>
+                        Or just tell Claude: "I'm on step {number} and [describe your issue]"
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step Notes */}
+              {stepNotes && setStepNotes && (
+                <StepNote stepId={stepId} notes={stepNotes} setNotes={setStepNotes} />
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================================================
+    // PHASE COMPONENT
+    // ============================================================================
+    const Phase = ({ number, title, icon, steps, progress, onStepToggle, expandedStep, onExpandStep, mode, videoUrl, searchQuery, stepNotes, setStepNotes, llmTutorData }) => {
+      const [isOpen, setIsOpen] = useState(number === 1);
+      const completedSteps = steps.filter((_, i) => progress[`${number}-${i}`]).length;
+      const progressPercent = (completedSteps / steps.length) * 100;
+      const IconComponent = Icons[icon];
+      const timeEstimate = phaseTimeEstimates[number];
+
+      // Filter steps based on search
+      const filteredSteps = searchQuery
+        ? steps.filter(step =>
+            step.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            step.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            step.prompt?.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : steps;
+
+      // Auto-open if search matches
+      const hasSearchMatch = searchQuery && filteredSteps.length > 0;
+
+      return (
+        <div style={{ marginBottom: '24px', display: searchQuery && filteredSteps.length === 0 ? 'none' : 'block' }}>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '16px',
+              padding: '20px', borderRadius: '20px', transition: 'all 0.3s',
+              background: colors.surface, border: `1px solid ${colors.border}`,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', textAlign: 'left',
+            }}
+          >
+            <div style={{
+              width: '48px', height: '48px', borderRadius: '14px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              background: colors.surfaceHover,
+            }}>
+              <IconComponent size={24} color={colors.accent} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: colors.textLight }}>Phase {number}</span>
+                <span style={{ fontSize: '13px', color: colors.textMuted }}>• {completedSteps}/{steps.length}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: colors.textLight }}>
+                  <Icons.Clock size={12} color={colors.textLight} /> {timeEstimate}
+                </span>
+              </div>
+              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: colors.text }}>{title}</h2>
+              <div style={{ marginTop: '8px', height: '5px', borderRadius: '3px', overflow: 'hidden', background: colors.borderLight }}>
+                <div style={{
+                  height: '100%', borderRadius: '3px', transition: 'all 0.5s',
+                  width: `${progressPercent}%`,
+                  background: progressPercent === 100 ? colors.success : colors.accent,
+                }} />
+              </div>
+            </div>
+            <div style={{ flexShrink: 0 }}>
+              {(isOpen || hasSearchMatch) ? <Icons.ChevronDown size={22} color={colors.textMuted} /> : <Icons.ChevronRight size={22} color={colors.textMuted} />}
+            </div>
+          </button>
+
+          {(isOpen || hasSearchMatch) && (
+            <div style={{ marginTop: '12px', marginLeft: '16px' }}>
+              {/* Phase toolbar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                <CopyAllPromptsButton steps={steps} phaseName={`Phase ${number}: ${title}`} />
+                {videoUrl ? (
+                  <a
+                    href={videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '6px 12px', borderRadius: '6px', fontSize: '12px',
+                      background: colors.surfaceHover, color: colors.textMuted,
+                      border: `1px solid ${colors.border}`, textDecoration: 'none', fontWeight: '500',
+                    }}
+                  >
+                    <Icons.Video size={14} /> Watch Tutorial
+                  </a>
+                ) : (
+                  <span style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '6px 12px', borderRadius: '6px', fontSize: '12px',
+                    background: colors.surfaceHover, color: colors.textLight,
+                    border: `1px dashed ${colors.border}`,
+                  }}>
+                    <Icons.Video size={14} /> Video coming soon
+                  </span>
+                )}
+              </div>
+
+              {filteredSteps.map((step, index) => {
+                const originalIndex = steps.indexOf(step);
+                return (
+                  <Step
+                    key={originalIndex}
+                    number={`${number}.${originalIndex + 1}`}
+                    {...step}
+                    mode={mode}
+                    isComplete={progress[`${number}-${originalIndex}`]}
+                    onToggle={() => onStepToggle(`${number}-${originalIndex}`)}
+                    isExpanded={expandedStep === `${number}-${originalIndex}` || (searchQuery && filteredSteps.length === 1)}
+                    onExpand={() => onExpandStep(expandedStep === `${number}-${originalIndex}` ? null : `${number}-${originalIndex}`)}
+                    stepNotes={stepNotes}
+                    setStepNotes={setStepNotes}
+                    stepId={`${number}-${originalIndex}`}
+                    llmTutorData={llmTutorData}
+                    phaseNumber={number}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================================================
+    // CONTENT DATA (All 6 Phases, 20 Steps)
+    // ============================================================================
+    const phases = [
+      {
+        number: 1, title: 'Planning', icon: 'Sparkles',
+        steps: [
+          {
+            title: 'Download & Open the Template',
+            description: 'Click "Download Template Folder" above to get the complete folder structure. Unzip it, rename the folder to your project name, then drag it into Claude Code.',
+            whyItMatters: 'The template contains all the prompts, documentation templates, and folder structure Claude needs. Dragging it into Claude Code gives Claude access to read and write your files.',
+            dragDrop: { from: 'vibe-coding-template', to: 'Claude Code', description: 'Unzip → Rename → Drag into Claude Code' },
+          },
+          {
+            title: 'Interrogate Your Idea',
+            description: 'Open Claude and paste the interrogation prompt. Answer every question Claude asks until there are absolutely no assumptions left about your app.',
+            whyItMatters: 'This is the most important step. Garbage planning = garbage code. The more thorough you are here, the smoother everything else goes.',
+            prompt: `Before writing any code, endlessly interrogate my idea in Planning mode only.
+Assume nothing. Ask questions until there are no assumptions left.
+
+My idea: [DESCRIBE YOUR APP IN 1-2 SENTENCES]`,
+            expectedOutput: 'Claude will ask you 10-20+ questions about your users, features, data, flows, and edge cases. Keep answering until Claude says it has enough information. This typically takes 15-30 minutes.',
+            troubleshooting: {
+              commonProblems: [
+                { issue: 'Claude stops asking too early', solution: 'Use the "Deep Dive" prompt from step 1.3' },
+                { issue: 'Questions feel repetitive', solution: 'This means you\'re getting thorough coverage - that\'s good!' },
+              ],
+            },
+          },
+          {
+            title: 'Deep Dive Questions',
+            description: 'If Claude stops asking questions before covering all areas, use this prompt to push deeper into users, features, data, flows, edge cases, auth, and platform requirements.',
+            whyItMatters: 'Claude might think it has enough info before it actually does. This prompt ensures you cover all the critical areas.',
+            prompt: `Keep asking questions. I want you to interrogate:
+
+USER & PURPOSE:
+- Who exactly is the target user?
+- What problem does this solve for them?
+- Why would they choose this over alternatives?
+
+CORE FUNCTIONALITY:
+- What is the single most important action a user takes?
+- What triggers that action?
+- What happens immediately after?
+- What data is created, modified, or deleted?
+
+DATA MODEL:
+- What information needs to be stored permanently?
+- What are the relationships between data types?
+- What needs to be displayed and where?
+
+USER FLOWS:
+- What does the user see first?
+- How do they navigate between screens?
+- What are all the possible paths through the app?
+
+EDGE CASES:
+- What happens if the user makes a mistake?
+- What happens if something fails?
+- What happens with empty states?
+
+ACCESS & AUTH:
+- Does this need user accounts?
+- What can anonymous users do vs logged-in users?
+- Are there different user roles?
+
+PLATFORM:
+- Does this need to work on mobile?
+- Does this need offline support?
+- Does this integrate with external services?`,
+            expectedOutput: 'Claude will continue asking detailed follow-up questions in each category. Answer them all thoroughly.',
+          },
+          {
+            title: 'Save Your Answers',
+            description: 'Copy your entire Q&A conversation with Claude and save it as a text file. You\'ll need this for the next phase when we populate all the documentation.',
+            whyItMatters: 'This conversation contains all your product decisions. Don\'t lose it! You\'ll paste it into Claude Code next.',
+            dragDrop: { from: 'Q&A Conversation', to: '00-planning/notes/', description: 'Save your interrogation answers as a text file in the notes folder' },
+          },
+        ],
+      },
+      {
+        number: 2, title: 'Documentation', icon: 'FileText',
+        steps: [
+          {
+            title: 'Confirm Claude Code is Ready',
+            description: 'Make sure Claude Code still has your template folder open from Phase 1. If you closed it, just drag the folder back in. Claude should be ready to write to your files.',
+            whyItMatters: 'Claude Code needs access to your project folder to read the templates and write the documentation. If you see your folder path in Claude Code, you\'re good to go.',
+            expectedOutput: 'You should see your project folder path displayed in Claude Code. If not, drag your template folder back in.',
+          },
+          {
+            title: 'Auto-Populate All Docs',
+            description: 'Paste this prompt into Claude Code along with your planning answers from Phase 1. Claude will write specific, detailed content to all six documentation files automatically.',
+            whyItMatters: 'Instead of writing docs manually (boring!), Claude creates them all in one go based on your answers. No placeholders - real, specific content.',
+            prompt: `Read the template files in 01-docs/ and CLAUDE.md first.
+
+Based on my planning answers below, populate ALL documentation files with real, specific content. No placeholders.
+
+## MY PROJECT NAME: [YOUR PROJECT NAME]
+
+## MY PLANNING ANSWERS:
+[PASTE YOUR ENTIRE INTERROGATION Q&A FROM PHASE 1]
+
+---
+
+INSTRUCTIONS:
+1. Write populated content to each file in 01-docs/:
+   - PRD.md (features, acceptance criteria)
+   - APP_FLOW.md (screens, user flows)
+   - TECH_STACK.md (packages, versions)
+   - FRONTEND_GUIDELINES.md (colors, fonts, spacing)
+   - BACKEND_STRUCTURE.md (database schema, API)
+   - IMPLEMENTATION_PLAN.md (numbered build steps)
+
+2. Update CLAUDE.md with project-specific info
+
+3. Update progress.txt to show starting state
+
+Write directly to each file. Use specific values, not examples.`,
+            expectedOutput: 'Claude will say it\'s reading files, then you\'ll see it write to each document one by one. This takes 2-5 minutes. You\'ll see "File updated" messages for each doc.',
+            troubleshooting: {
+              commonProblems: [
+                { issue: 'Claude says it can\'t find files', solution: 'Make sure you\'re in the right folder. Run "ls" to check.' },
+                { issue: 'Content has placeholders', solution: 'Add more detail from your Q&A or ask Claude to be more specific.' },
+              ],
+            },
+          },
+          {
+            title: 'Validate the Docs',
+            description: 'Ask Claude to review what it wrote and identify anything vague, missing, or assumed. Fix any issues before moving to the build phase.',
+            whyItMatters: 'Catching gaps now prevents confusion later. It\'s much easier to clarify requirements than to rewrite code.',
+            prompt: `Review all the docs you just wrote:
+
+1. Identify anything vague or ambiguous
+2. Identify missing information that would block coding
+3. Identify assumptions you made that I didn't confirm
+
+List issues so I can clarify.`,
+            expectedOutput: 'Claude will list any unclear areas. Answer its questions, then ask it to update the relevant docs.',
+          },
+        ],
+      },
+      {
+        number: 3, title: 'Design', icon: 'Package',
+        steps: [
+          {
+            title: 'Add Reference Screenshots',
+            description: 'Drop any inspiration images, screenshots of apps you like, or mockups into the design references folder. These help Claude understand your visual goals.',
+            whyItMatters: 'A picture is worth a thousand words. Reference images help Claude match your design vision much better than descriptions alone.',
+            dragDrop: { from: 'Screenshots & Mockups', to: '02-design/references/', description: 'Drag inspiration images into the references folder' },
+          },
+          {
+            title: 'Review Your Design System',
+            description: 'Open FRONTEND_GUIDELINES.md and verify the colors, fonts, and spacing feel right. This is your design system - every component will follow these rules.',
+            whyItMatters: 'The design system ensures consistency. Get it right now, and every screen Claude builds will look like it belongs.',
+            prompt: `Read 01-docs/FRONTEND_GUIDELINES.md.
+
+Show me a summary of:
+1. The color palette with hex codes
+2. The typography scale
+3. The spacing values
+4. The border radius values
+
+Does this match my vision? If not, I'll tell you what to change.`,
+            expectedOutput: 'Claude will show you the design tokens it\'s using. Review them and request changes if needed.',
+          },
+        ],
+      },
+      {
+        number: 4, title: 'Build', icon: 'Terminal',
+        steps: [
+          {
+            title: 'Start Coding',
+            description: 'Begin building from step 1.1 in your implementation plan. Claude will create files in the correct locations following your guidelines.',
+            whyItMatters: 'The implementation plan breaks your app into bite-sized pieces. Following it in order prevents you from getting overwhelmed.',
+            prompt: `Read CLAUDE.md and progress.txt first.
+
+We're building [PROJECT NAME].
+Start from step 1.1 in IMPLEMENTATION_PLAN.md.
+
+Before writing code, confirm you understand:
+1. What we're building
+2. Where it goes in the file structure
+3. What design tokens to use
+4. What the success state looks like`,
+            expectedOutput: 'Claude will summarize what it\'s about to build and ask for confirmation. Then it will create the code files and tell you how to test them.',
+            troubleshooting: {
+              commonProblems: [
+                { issue: 'Claude builds the wrong thing', solution: 'Check if the requirement is clear in PRD.md. Clarify and ask to rebuild.' },
+                { issue: 'Styling looks different', solution: 'Ask Claude to check FRONTEND_GUIDELINES.md and update the styles.' },
+              ],
+              debugPrompt: `Something's not right. Before making changes:
+1. Read the relevant doc (PRD.md, APP_FLOW.md, etc.)
+2. Tell me what SHOULD happen based on the docs
+3. Tell me what IS happening
+4. Identify the gap
+5. Propose a specific fix`,
+            },
+          },
+          {
+            title: 'Resume Sessions',
+            description: 'When you come back after a break, use this prompt to pick up where you left off. Claude reads progress.txt to remember context.',
+            whyItMatters: 'Claude has no memory between sessions. This prompt gives it the context it needs to continue smoothly.',
+            prompt: `Read CLAUDE.md and progress.txt.
+
+Continue from where we left off. Check IMPLEMENTATION_PLAN.md for next steps.
+Update progress.txt when tasks complete.`,
+            expectedOutput: 'Claude will read your progress file and tell you what was last completed and what\'s next. Then it will continue building.',
+          },
+          {
+            title: 'Debug Issues',
+            description: 'When something breaks, don\'t let Claude guess randomly. Use this prompt to force systematic debugging.',
+            whyItMatters: 'Random fixes waste time and can break other things. Systematic debugging finds the real problem.',
+            prompt: `Something's broken. Before guessing at fixes:
+
+1. Read the relevant section of [WHICH DOC - PRD, APP_FLOW, etc.]
+2. Check progress.txt for recent changes
+3. Explain what SHOULD happen based on the docs
+4. Explain what IS happening
+5. Identify the gap between expected and actual behavior
+6. Propose a specific fix with reasoning
+
+Don't shotgun solutions. Diagnose first.`,
+            expectedOutput: 'Claude will walk through the diagnostic steps and propose a targeted fix. It should explain WHY the fix will work.',
+          },
+          {
+            title: 'Feature Complete Check',
+            description: 'After finishing each feature, verify it matches your docs before moving on. This prevents small issues from snowballing.',
+            whyItMatters: 'Checking work as you go catches problems early. It\'s easier to fix one feature than debug a whole app later.',
+            prompt: `We just completed [FEATURE NAME].
+
+Before moving on:
+1. Does it match the requirements in PRD.md?
+2. Does the flow match APP_FLOW.md?
+3. Does the styling match FRONTEND_GUIDELINES.md?
+4. Does the data handling match BACKEND_STRUCTURE.md?
+5. Update progress.txt with what was built
+6. What's the next step in IMPLEMENTATION_PLAN.md?`,
+            expectedOutput: 'Claude will verify the feature against each doc and flag any mismatches. Then it will update progress and tell you what\'s next.',
+          },
+        ],
+      },
+      {
+        number: 5, title: 'Assets', icon: 'FolderOpen',
+        steps: [
+          {
+            title: 'Add Your Logo',
+            description: 'Drop your logo files into the assets folder. Include different sizes if you have them (favicon, app icon, full logo).',
+            whyItMatters: 'Having your logo ready means Claude can reference it when building components that need your branding.',
+            dragDrop: { from: 'Logo Files', to: '04-assets/images/logo/', description: 'Add your logo in various sizes' },
+          },
+          {
+            title: 'Add Icons & Photos',
+            description: 'Any custom icons, illustrations, or photos go in their respective folders in 04-assets.',
+            whyItMatters: 'Organizing assets now makes them easy to reference during the build. Claude can use them in your components.',
+            dragDrop: { from: 'Images & Icons', to: '04-assets/images/', description: 'Organize assets into icons/, photos/, and exports/ folders' },
+          },
+          {
+            title: 'Add Custom Fonts',
+            description: 'If using custom fonts (not Google Fonts), add the font files here and reference them in your FRONTEND_GUIDELINES.md.',
+            whyItMatters: 'Custom fonts need to be loaded locally. Having them in assets ensures they\'re available when building.',
+            dragDrop: { from: 'Font Files (.woff, .woff2)', to: '04-assets/fonts/', description: 'Add any custom font files' },
+          },
+        ],
+      },
+      {
+        number: 6, title: 'Ship', icon: 'Rocket',
+        steps: [
+          {
+            title: 'Test All User Flows',
+            description: 'Go through every flow in APP_FLOW.md and verify it works as documented. Check success states, error states, and edge cases.',
+            whyItMatters: 'Real users will try everything. Testing now prevents embarrassing bugs after launch.',
+            prompt: `Read 01-docs/APP_FLOW.md.
+
+For each user flow listed:
+1. Walk me through testing it
+2. What should I see at each step?
+3. What are the potential failure points?
+4. What edge cases should I test?`,
+            expectedOutput: 'Claude will give you a testing checklist based on your app flows. Follow it systematically.',
+          },
+          {
+            title: 'Verify Responsive Design',
+            description: 'Test your app at mobile (375px), tablet (768px), and desktop (1280px) widths. Everything should look intentional at every size.',
+            whyItMatters: 'Users access apps on all devices. Responsive design ensures a good experience everywhere.',
+          },
+          {
+            title: 'Review Against PRD',
+            description: 'Compare your finished app against the original requirements. Every feature in scope should be complete.',
+            whyItMatters: 'This is your final check before launch. Make sure you built what you planned to build.',
+            prompt: `Read 01-docs/PRD.md.
+
+Compare what we built against:
+1. All features listed - are they complete?
+2. Success criteria - do we meet them?
+3. Scope boundaries - did we stay in scope?
+
+List any gaps.`,
+            expectedOutput: 'Claude will compare your app to the PRD and list any gaps. Address them before deploying.',
+          },
+          {
+            title: 'Deploy!',
+            description: 'Push your code and deploy. Celebrate. You built an app with vibes!',
+            whyItMatters: 'You did it! Shipping is the goal. Celebrate this moment.',
+          },
+          {
+            title: 'Create Your Learning Story',
+            description: 'Ask Claude to create your Learning Story - a simple, story-like explanation of everything you built. This helps you remember how it works and learn from the experience.',
+            whyItMatters: 'Building is great, but understanding what you built makes you a better builder. The Learning Story captures your journey in plain English so you can reference it later and continue growing.',
+            prompt: `The project is complete! Please create my LEARNING_STORY.md file.
+
+Write it as a friendly story that explains:
+1. What problem we solved and why it matters
+2. Each major piece of the app (in plain English)
+3. How the pieces connect together
+4. What technical concepts I learned (explained simply)
+5. Where I'd look to make changes in the future
+
+Make it encouraging and beginner-friendly. Use analogies to explain technical concepts. I want to learn from this project, not just build it.`,
+            expectedOutput: 'Claude will create a LEARNING_STORY.md file in your project folder. It reads like a story, explaining your entire app in simple terms with friendly explanations of the technical concepts.',
+          },
+        ],
+      },
+    ];
+
+    // ============================================================================
+    // LLM TUTOR SECTION COMPONENT
+    // ============================================================================
+    const LLMTutorSection = ({ llmTutorData, setLlmTutorData }) => {
+      const [isDragging, setIsDragging] = useState(false);
+      const [isExpanded, setIsExpanded] = useState(false);
+      const fileInputRef = React.useRef(null);
+
+      const handleFileUpload = (file) => {
+        if (!file || !file.name.endsWith('.md')) {
+          alert('Please upload a .md file');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target.result;
+
+          // Parse project name (look for # heading or "Project:" line)
+          let projectName = '';
+          const headingMatch = content.match(/^#\s+(.+)$/m);
+          const projectMatch = content.match(/\*\*Project:\*\*\s+(.+)$/m);
+
+          if (headingMatch) {
+            projectName = headingMatch[1].trim();
+          } else if (projectMatch) {
+            projectName = projectMatch[1].trim();
+          }
+
+          // Parse description (look for "Description:" field or first paragraph)
+          let description = '';
+          const descMatch = content.match(/\*\*Description:\*\*\s+(.+)$/m);
+          const firstParaMatch = content.match(/^(?!#)(.+)$/m);
+
+          if (descMatch) {
+            description = descMatch[1].trim();
+          } else if (firstParaMatch) {
+            description = firstParaMatch[1].trim();
+          }
+
+          // Save to state and localStorage
+          const data = { projectName, description, uploadedAt: new Date().toLocaleString() };
+          setLlmTutorData(data);
+
+          // Save to localStorage
+          try {
+            localStorage.setItem('llmTutor_projectName', projectName);
+            localStorage.setItem('llmTutor_appDescription', description);
+          } catch {}
+        };
+        reader.readAsText(file);
+      };
+
+      const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        handleFileUpload(file);
+      };
+
+      const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+      };
+
+      const handleDragLeave = () => {
+        setIsDragging(false);
+      };
+
+      const handleClear = () => {
+        if (confirm('Clear LLM Tutor data? This will remove the auto-filled values.')) {
+          setLlmTutorData(null);
+          try {
+            localStorage.removeItem('llmTutor_projectName');
+            localStorage.removeItem('llmTutor_appDescription');
+          } catch {}
+        }
+      };
+
+      return (
+        <div style={{
+          marginBottom: '32px', padding: '24px', borderRadius: '20px',
+          background: colors.surface, border: `2px dashed ${colors.accent}`,
+        }}>
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '40px', height: '40px', borderRadius: '12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: colors.surfaceHover,
+              }}>
+                <Icons.Sparkles size={24} color={colors.accent} />
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: colors.text }}>
+                  Step 0: LLM Tutor (Optional)
+                </h3>
+                <p style={{ margin: '2px 0 0', fontSize: '13px', color: colors.textMuted }}>
+                  Refine your idea first, then auto-fill the workflow
+                </p>
+              </div>
+            </div>
+            <div style={{ flexShrink: 0 }}>
+              {isExpanded ? <Icons.ChevronDown size={20} color={colors.textMuted} /> : <Icons.ChevronRight size={20} color={colors.textMuted} />}
+            </div>
+          </button>
+
+          {isExpanded && (
+            <div style={{ marginTop: '20px' }}>
+              <p style={{ margin: '0 0 16px', fontSize: '14px', lineHeight: '1.6', color: colors.textMuted }}>
+                Before we start building in Claude Code, let's refine your idea with any LLM (ChatGPT, Claude.ai, Gemini, etc.)
+              </p>
+
+              <ol style={{ margin: '0 0 20px', paddingLeft: '20px', fontSize: '14px', lineHeight: '1.8', color: colors.textMuted }}>
+                <li>Go to your favorite LLM</li>
+                <li>Tell it your app idea</li>
+                <li>Have it interview you and create a simple PRD.md file</li>
+                <li>Download the PRD.md file</li>
+                <li>Drop it in the box below</li>
+              </ol>
+
+              {llmTutorData ? (
+                <div style={{
+                  padding: '16px', borderRadius: '12px',
+                  background: colors.successBg, border: `1px solid ${colors.success}30`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Icons.Check size={20} color={colors.success} />
+                      <span style={{ fontSize: '14px', fontWeight: '600', color: colors.success }}>PRD Uploaded</span>
+                    </div>
+                    <button
+                      onClick={handleClear}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        padding: '4px 10px', borderRadius: '6px', fontSize: '12px',
+                        background: 'white', color: colors.textMuted,
+                        border: `1px solid ${colors.border}`, cursor: 'pointer',
+                      }}
+                    >
+                      <Icons.X size={14} /> Clear
+                    </button>
+                  </div>
+                  <div style={{ fontSize: '13px', color: colors.textMuted, lineHeight: '1.6' }}>
+                    <strong style={{ color: colors.text }}>Project Name:</strong> {llmTutorData.projectName || 'Not found'}<br/>
+                    <strong style={{ color: colors.text }}>Description:</strong> {llmTutorData.description || 'Not found'}<br/>
+                    <span style={{ fontSize: '12px', color: colors.textLight }}>Uploaded: {llmTutorData.uploadedAt}</span>
+                  </div>
+                  <div style={{
+                    marginTop: '12px', padding: '10px', borderRadius: '8px',
+                    background: 'white', fontSize: '12px', color: colors.accent, fontWeight: '500',
+                  }}>
+                    ✨ Step 1.2 will be auto-filled with this data
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    padding: '32px', borderRadius: '12px', textAlign: 'center',
+                    background: isDragging ? colors.surfaceHover : colors.borderLight,
+                    border: `2px dashed ${isDragging ? colors.accent : colors.border}`,
+                    cursor: 'pointer', transition: 'all 0.2s',
+                  }}
+                >
+                  <Icons.Upload size={32} color={colors.textMuted} style={{ margin: '0 auto 12px' }} />
+                  <p style={{ margin: 0, fontSize: '14px', fontWeight: '500', color: colors.text }}>
+                    Drop your PRD.md here
+                  </p>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: colors.textMuted }}>
+                    or click to browse
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".md"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      if (e.target.files[0]) {
+                        handleFileUpload(e.target.files[0]);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // ============================================================================
+    // MAIN APP COMPONENT
+    // ============================================================================
+    function VibeCodingGuide() {
+      const [progress, setProgress] = useState(() => {
+        try {
+          const saved = localStorage.getItem('vibe-coding-progress');
+          return saved ? JSON.parse(saved) : {};
+        } catch { return {}; }
+      });
+
+      const [mode, setMode] = useState(() => {
+        try {
+          return localStorage.getItem('vibe-coding-mode') || 'beginner';
+        } catch { return 'beginner'; }
+      });
+
+      const [expandedStep, setExpandedStep] = useState(null);
+      const [searchQuery, setSearchQuery] = useState('');
+      const fileInputRef = React.useRef(null);
+
+      const [favorites, setFavorites] = useState(() => {
+        try {
+          const saved = localStorage.getItem('vibe-coding-favorites');
+          return saved ? JSON.parse(saved) : defaultFavorites;
+        } catch { return defaultFavorites; }
+      });
+
+      const [projects, setProjects] = useState(() => {
+        try {
+          const saved = localStorage.getItem('vibe-coding-projects');
+          return saved ? JSON.parse(saved) : defaultProjects;
+        } catch { return defaultProjects; }
+      });
+
+      const [stepNotes, setStepNotes] = useState(() => {
+        try {
+          const saved = localStorage.getItem('vibe-coding-step-notes');
+          return saved ? JSON.parse(saved) : defaultStepNotes;
+        } catch { return defaultStepNotes; }
+      });
+
+      const [learningStories, setLearningStories] = useState(() => {
+        try {
+          const saved = localStorage.getItem('vibe-coding-learning-stories');
+          return saved ? JSON.parse(saved) : defaultLearningStories;
+        } catch { return defaultLearningStories; }
+      });
+
+      const [llmTutorData, setLlmTutorData] = useState(() => {
+        try {
+          const projectName = localStorage.getItem('llmTutor_projectName');
+          const description = localStorage.getItem('llmTutor_appDescription');
+          if (projectName || description) {
+            return { projectName, description, uploadedAt: 'Previously uploaded' };
+          }
+          return null;
+        } catch { return null; }
+      });
+
+      const [quickCopyOpen, setQuickCopyOpen] = useState(false);
+
+      // Persist progress
+      useEffect(() => {
+        try { localStorage.setItem('vibe-coding-progress', JSON.stringify(progress)); }
+        catch {}
+      }, [progress]);
+
+      // Persist mode
+      useEffect(() => {
+        try { localStorage.setItem('vibe-coding-mode', mode); }
+        catch {}
+      }, [mode]);
+
+      // Persist favorites
+      useEffect(() => {
+        try { localStorage.setItem('vibe-coding-favorites', JSON.stringify(favorites)); }
+        catch {}
+      }, [favorites]);
+
+      // Persist projects
+      useEffect(() => {
+        try { localStorage.setItem('vibe-coding-projects', JSON.stringify(projects)); }
+        catch {}
+      }, [projects]);
+
+      // Persist step notes
+      useEffect(() => {
+        try { localStorage.setItem('vibe-coding-step-notes', JSON.stringify(stepNotes)); }
+        catch {}
+      }, [stepNotes]);
+
+      // Persist learning stories
+      useEffect(() => {
+        try { localStorage.setItem('vibe-coding-learning-stories', JSON.stringify(learningStories)); }
+        catch {}
+      }, [learningStories]);
+
+      // Keyboard shortcuts
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          // Ctrl/Cmd + K = Focus search
+          if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.querySelector('input[placeholder*="Search"]')?.focus();
+          }
+          // Escape = Clear search
+          if (e.key === 'Escape' && searchQuery) {
+            setSearchQuery('');
+          }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [searchQuery]);
+
+      const handleToggle = (key) => {
+        setProgress(prev => ({ ...prev, [key]: !prev[key] }));
+      };
+
+      const handleReset = () => {
+        if (confirm('Reset all progress? This cannot be undone.')) {
+          setProgress({});
+          localStorage.removeItem('vibe-coding-progress');
+        }
+      };
+
+      const totalSteps = phases.reduce((acc, p) => acc + p.steps.length, 0);
+      const completedSteps = Object.values(progress).filter(Boolean).length;
+      const overallProgress = Math.round((completedSteps / totalSteps) * 100);
+
+      return (
+        <div style={{ minHeight: '100vh', background: colors.bg }}>
+          {/* Header */}
+          <header style={{
+            position: 'sticky', top: 0, zIndex: 10,
+            backdropFilter: 'blur(12px)', background: `${colors.bg}ee`,
+            borderBottom: `1px solid ${colors.borderLight}`,
+          }}>
+            <div style={{ maxWidth: '720px', margin: '0 auto', padding: '20px 24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+                <div>
+                  <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '12px', color: colors.text }}>
+                    <Icons.Sparkles size={28} color={colors.accent} />
+                    Workflow Kitt
+                  </h1>
+                  <p style={{ margin: '4px 0 0', fontSize: '14px', color: colors.textMuted }}>Build apps with AI, step by step</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <ModeToggle mode={mode} onToggle={setMode} />
+                  <button
+                    onClick={handleReset}
+                    title="Reset Progress"
+                    style={{
+                      padding: '8px', borderRadius: '8px', background: 'transparent',
+                      border: `1px solid ${colors.border}`, cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <Icons.RefreshCw size={18} color={colors.textMuted} />
+                  </button>
+                </div>
+              </div>
+              <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ flex: 1, height: '8px', borderRadius: '4px', overflow: 'hidden', background: colors.borderLight }}>
+                  <div style={{
+                    height: '100%', borderRadius: '4px', transition: 'all 0.5s',
+                    width: `${overallProgress}%`,
+                    background: overallProgress === 100 ? colors.success : colors.accent,
+                  }} />
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: overallProgress === 100 ? colors.success : colors.text, minWidth: '80px', textAlign: 'right' }}>
+                  {overallProgress}% ({completedSteps}/{totalSteps})
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 24px' }}>
+            {/* Download Template Section */}
+            <div style={{
+              marginBottom: '32px', padding: '24px', borderRadius: '20px',
+              background: `linear-gradient(135deg, ${colors.surface} 0%, ${colors.surfaceHover} 100%)`,
+              border: `2px solid ${colors.accent}`,
+              textAlign: 'center',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginBottom: '12px' }}>
+                <Icons.FolderOpen size={32} color={colors.accent} />
+                <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '700', color: colors.text }}>Get the Template</h2>
+              </div>
+              <p style={{ margin: '0 0 20px', fontSize: '15px', color: colors.textMuted, maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }}>
+                Download the complete folder structure with all prompts, templates, and documentation files ready to use.
+              </p>
+              <button
+                onClick={downloadTemplate}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '10px',
+                  padding: '14px 28px', borderRadius: '12px',
+                  background: colors.accent, color: 'white',
+                  border: 'none', cursor: 'pointer',
+                  fontSize: '16px', fontWeight: '600',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = colors.accentHover}
+                onMouseOut={(e) => e.currentTarget.style.background = colors.accent}
+              >
+                <Icons.Download size={20} color="white" />
+                Download Template Folder
+              </button>
+              <p style={{ margin: '16px 0 0', fontSize: '13px', color: colors.textLight }}>
+                vibe-coding-template.zip • Contains all files shown in the guide
+              </p>
+            </div>
+
+            {/* LLM Tutor Section */}
+            <LLMTutorSection llmTutorData={llmTutorData} setLlmTutorData={setLlmTutorData} />
+
+            {/* My Favorites & Projects */}
+            <FavoritesSection favorites={favorites} setFavorites={setFavorites} />
+            <ProjectsSection projects={projects} setProjects={setProjects} />
+            <LearningStoriesSection stories={learningStories} setStories={setLearningStories} />
+
+            {/* Quick Copy Button */}
+            <button
+              onClick={() => setQuickCopyOpen(true)}
+              style={{
+                width: '100%', marginBottom: '24px', padding: '14px 20px', borderRadius: '12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                background: colors.accent, color: 'white', border: 'none',
+                fontSize: '15px', fontWeight: '600', cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              }}
+            >
+              <Icons.Copy size={18} color="white" />
+              Quick Copy All Prompts
+            </button>
+
+            {/* Export/Import Section */}
+            <div style={{
+              marginBottom: '24px', padding: '16px', borderRadius: '12px',
+              background: colors.surface, border: `1px solid ${colors.border}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
+            }}>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: colors.text }}>Backup & Restore</h4>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: colors.textMuted }}>Save your favorites, projects, and progress</p>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => exportData(favorites, projects, progress, stepNotes, learningStories)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 14px', borderRadius: '8px', fontSize: '13px',
+                    background: colors.surfaceHover, color: colors.textMuted,
+                    border: `1px solid ${colors.border}`, cursor: 'pointer', fontWeight: '500',
+                  }}
+                >
+                  <Icons.Download size={16} /> Export
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".json"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files[0]) {
+                      importData(e.target.files[0], setFavorites, setProjects, setProgress, setStepNotes, setLearningStories);
+                      e.target.value = '';
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '8px 14px', borderRadius: '8px', fontSize: '13px',
+                    background: colors.surfaceHover, color: colors.textMuted,
+                    border: `1px solid ${colors.border}`, cursor: 'pointer', fontWeight: '500',
+                  }}
+                >
+                  <Icons.Upload size={16} /> Import
+                </button>
+              </div>
+            </div>
+
+            {/* Workflow Guide Label */}
+            <div style={{ marginBottom: '16px', paddingBottom: '8px', borderBottom: `1px solid ${colors.borderLight}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                <h2 style={{ margin: 0, fontSize: '14px', fontWeight: '600', color: colors.textLight, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Workflow Guide
+                </h2>
+                <span style={{ fontSize: '11px', color: colors.textLight }}>
+                  ⌘K to search • Esc to clear
+                </span>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <SearchBar onSearch={setSearchQuery} searchQuery={searchQuery} />
+
+            {searchQuery && (
+              <div style={{ marginBottom: '16px', fontSize: '14px', color: colors.textMuted }}>
+                Showing results for "<strong>{searchQuery}</strong>"
+                <button
+                  onClick={() => setSearchQuery('')}
+                  style={{ marginLeft: '8px', background: 'none', border: 'none', color: colors.accent, cursor: 'pointer', textDecoration: 'underline' }}
+                >Clear</button>
+              </div>
+            )}
+
+            {phases.map((phase) => (
+              <Phase
+                key={phase.number}
+                {...phase}
+                progress={progress}
+                onStepToggle={handleToggle}
+                expandedStep={expandedStep}
+                onExpandStep={setExpandedStep}
+                mode={mode}
+                searchQuery={searchQuery}
+                stepNotes={stepNotes}
+                setStepNotes={setStepNotes}
+                llmTutorData={llmTutorData}
+              />
+            ))}
+
+            {/* Completion Celebration */}
+            {overallProgress === 100 && (
+              <div style={{
+                marginTop: '32px', padding: '32px', borderRadius: '20px', textAlign: 'center',
+                background: colors.successBg, border: `2px solid ${colors.success}`,
+              }}>
+                <Icons.Rocket size={48} color={colors.success} />
+                <h2 style={{ margin: '16px 0 8px', fontSize: '24px', fontWeight: '700', color: colors.success }}>You did it!</h2>
+                <p style={{ margin: 0, color: colors.textMuted }}>Your app is ready to ship. Go build something amazing!</p>
+              </div>
+            )}
+          </main>
+
+          {/* Footer */}
+          <footer style={{ maxWidth: '720px', margin: '0 auto', padding: '32px 24px', textAlign: 'center' }}>
+            <p style={{ margin: 0, fontSize: '14px', color: colors.textLight }}>
+              Workflow Kitt • Built for builders everywhere 💜
+            </p>
+          </footer>
+
+          {/* Quick Copy Drawer */}
+          <QuickCopyDrawer isOpen={quickCopyOpen} onClose={() => setQuickCopyOpen(false)} phases={phases} />
+        </div>
+      );
+    }
+
+    // Render
+    ReactDOM.render(<VibeCodingGuide />, document.getElementById('root'));
+  </script>
+</body>
+</html>
