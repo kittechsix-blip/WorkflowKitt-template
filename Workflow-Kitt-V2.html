@@ -1997,15 +1997,24 @@ const LearningStoriesSection = () => {
    BONUS: CLAUDE CODE TOOLKIT
    ═══════════════════════════════════════════ */
 const defaultToolkitItems = [
-  {id:'default-1',title:'Add GitHub MCP Server',command:'claude mcp add github -- npx -y @modelcontextprotocol/server-github',category:'mcp'},
-  {id:'default-2',title:'Add Filesystem MCP Server',command:'claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /path/to/your/project',category:'mcp'},
-  {id:'default-3',title:'Add Brave Search MCP Server',command:'claude mcp add brave-search -- npx -y @modelcontextprotocol/server-brave-search',category:'mcp'},
-  {id:'default-4',title:'Create Custom Slash Command',command:'mkdir -p .claude/commands && echo "Your prompt here" > .claude/commands/my-command.md',category:'skill'},
-  {id:'default-5',title:'Add Pre-Commit Hook (lint)',command:'echo \'{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"echo Checking..."}]}]}}\' > .claude/settings.json',category:'hook'},
+  {id:'default-1',title:'Spin Up a Team',command:'# In Claude Code, just type:\n"Create a team"\n\n# Claude reads planning/prd.md and planning/tasks.md,\n# then spins up architect, frontend, backend, and QA agents\n# that build your app in parallel.',category:'skill'},
+  {id:'default-2',title:'Add GitHub MCP Server',command:'claude mcp add github -- npx -y @modelcontextprotocol/server-github',category:'mcp'},
+  {id:'default-3',title:'Add Filesystem MCP Server',command:'claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /path/to/your/project',category:'mcp'},
+  {id:'default-4',title:'Add Brave Search MCP Server',command:'claude mcp add brave-search -- npx -y @modelcontextprotocol/server-brave-search',category:'mcp'},
+  {id:'default-5',title:'Add Firecrawl MCP (Web Scraping)',command:'claude mcp add firecrawl -e FIRECRAWL_API_KEY=your-api-key -- npx -y firecrawl-mcp',category:'mcp'},
+  {id:'default-6',title:'Add Playwright MCP (Browser Automation)',command:'claude mcp add playwright -- npx -y @playwright/mcp@latest',category:'mcp'},
+  {id:'default-7',title:'Create Custom Slash Command',command:'mkdir -p .claude/commands && echo "Your prompt here" > .claude/commands/my-command.md',category:'skill'},
+  {id:'default-8',title:'Add Pre-Commit Hook (lint)',command:'echo \'{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"echo Checking..."}]}]}}\' > .claude/settings.json',category:'hook'},
 ];
 const ToolkitSection = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [items, setItems] = useLocalStorage('wk-toolkit', defaultToolkitItems);
+  // Merge in any new defaults the user doesn't have yet
+  useEffect(() => {
+    const existingIds = new Set(items.map(i => i.id));
+    const newDefaults = defaultToolkitItems.filter(d => !existingIds.has(d.id));
+    if (newDefaults.length > 0) setItems(prev => [...newDefaults, ...prev]);
+  }, []);
   const [copiedId, setCopiedId] = useState(null);
   const [title, setTitle] = useState('');
   const [command, setCommand] = useState('');
