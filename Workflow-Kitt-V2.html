@@ -2347,15 +2347,66 @@ function WorkflowKitt() {
       transition: 'all 0.2s',
       transform: dlPulse ? 'scale(0.97)' : 'scale(1)'
     }
-  }, Icons.download(20, '#fff'), " Download Template Folder"), phases.map(phase => /*#__PURE__*/React.createElement(PhaseSection, {
-    key: phase.number,
-    phase: phase,
-    completedSteps: completedSteps,
-    expandedSteps: expandedSteps,
-    onToggleStep: toggleStep,
-    onCompleteStep: toggleComplete,
-    favorites: favorites,
-    onFavorite: toggleFavorite
+  }, Icons.download(20, '#fff'), " Download Template Folder"), phases.flatMap(phase => {
+    const section = /*#__PURE__*/React.createElement(PhaseSection, {
+      key: phase.number,
+      phase: phase,
+      completedSteps: completedSteps,
+      expandedSteps: expandedSteps,
+      onToggleStep: toggleStep,
+      onCompleteStep: toggleComplete,
+      favorites: favorites,
+      onFavorite: toggleFavorite
+    });
+    if (phase.number === 1) {
+      return [section, /*#__PURE__*/React.createElement("div", {
+        key: "team-banner",
+        style: {
+          margin: '8px 0 24px',
+          padding: '28px 24px',
+          background: 'linear-gradient(135deg, ' + colors.accent + ', ' + colors.accentDark + ')',
+          borderRadius: 16,
+          textAlign: 'center',
+          boxShadow: '0 4px 24px ' + colors.accent + '33'
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 28,
+          fontWeight: 800,
+          color: '#fff',
+          letterSpacing: '-0.01em',
+          lineHeight: 1.3,
+          marginBottom: 8
+        }
+      }, "Before you build \u2014 spin up your team!"), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 15,
+          color: 'rgba(255,255,255,0.85)',
+          lineHeight: 1.6,
+          maxWidth: 520,
+          margin: '0 auto 16px'
+        }
+      }, "Planning is done. Now open Claude Code and run:"), /*#__PURE__*/React.createElement("code", {
+        style: {
+          display: 'inline-block',
+          fontSize: 18,
+          fontWeight: 700,
+          color: '#fff',
+          background: 'rgba(255,255,255,0.15)',
+          padding: '10px 24px',
+          borderRadius: 10,
+          letterSpacing: '0.02em',
+          border: '1px solid rgba(255,255,255,0.25)'
+        }
+      }, "\"Create a team\""), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 13,
+          color: 'rgba(255,255,255,0.65)',
+          marginTop: 14
+        }
+      }, "This spins up architect, frontend, backend, and QA agents to build in parallel."))];
+    }
+    return [section];
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'center',
