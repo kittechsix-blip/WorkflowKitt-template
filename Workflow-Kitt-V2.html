@@ -295,7 +295,10 @@ const Icons = {
     d: "M22 2l-7.5 7.5"
   }), /*#__PURE__*/React.createElement("path", {
     d: "M15 12l3.17-3.17a4 4 0 000-5.66L15 2M12 9l-3.17 3.17a4 4 0 000 5.66L12 22"
-  }))
+  })),
+  code: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    s: s, c: c, d: "M16 18l6-6-6-6M8 6l-6 6 6 6"
+  })
 };
 const phaseIcons = {
   1: Icons.map,
@@ -1991,6 +1994,86 @@ const LearningStoriesSection = () => {
 };
 
 /* ═══════════════════════════════════════════
+   BONUS: CLAUDE CODE TOOLKIT
+   ═══════════════════════════════════════════ */
+const defaultToolkitItems = [
+  {id:'default-1',title:'Add GitHub MCP Server',command:'claude mcp add github -- npx -y @modelcontextprotocol/server-github',category:'mcp'},
+  {id:'default-2',title:'Add Filesystem MCP Server',command:'claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem /path/to/your/project',category:'mcp'},
+  {id:'default-3',title:'Add Brave Search MCP Server',command:'claude mcp add brave-search -- npx -y @modelcontextprotocol/server-brave-search',category:'mcp'},
+  {id:'default-4',title:'Create Custom Slash Command',command:'mkdir -p .claude/commands && echo "Your prompt here" > .claude/commands/my-command.md',category:'skill'},
+  {id:'default-5',title:'Add Pre-Commit Hook (lint)',command:'echo \'{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"echo Checking..."}]}]}}\' > .claude/settings.json',category:'hook'},
+];
+const ToolkitSection = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [items, setItems] = useLocalStorage('wk-toolkit', defaultToolkitItems);
+  const [copiedId, setCopiedId] = useState(null);
+  const [title, setTitle] = useState('');
+  const [command, setCommand] = useState('');
+  const [category, setCategory] = useState('mcp');
+  const categories = {mcp:{label:'MCP Server',color:colors.accent},skill:{label:'Skill',color:colors.success},hook:{label:'Hook',color:colors.warning}};
+  const add = () => {
+    if (!title.trim() || !command.trim()) return;
+    setItems(p => [...p, {id: Date.now(), title: title.trim(), command: command.trim(), category}]);
+    setTitle('');setCommand('');setCategory('mcp');
+  };
+  const del = id => setItems(p => p.filter(x => x.id !== id));
+  const handleCopy = async (id, text) => {
+    const ok = await copyText(text);
+    if (ok) {setCopiedId(id);setTimeout(() => setCopiedId(null), 2000);}
+  };
+  return /*#__PURE__*/React.createElement("div", {style:{marginBottom:16}},
+    /*#__PURE__*/React.createElement("div", {
+      role:"button", tabIndex:0, "aria-expanded":isOpen,
+      onClick:() => setIsOpen(!isOpen),
+      onKeyDown:e => {if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}},
+      style:{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}
+    },
+      Icons.code(18, colors.accent),
+      /*#__PURE__*/React.createElement("span", {style:{flex:1,fontSize:15,fontWeight:600,color:colors.text}}, "Claude Code Toolkit (", items.length, ")"),
+      /*#__PURE__*/React.createElement("div", {style:{transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}, Icons.chevronDown(18, colors.textLight))
+    ),
+    isOpen && /*#__PURE__*/React.createElement("div", {style:{padding:'12px 0'}},
+      items.map(item => /*#__PURE__*/React.createElement("div", {
+        key: item.id,
+        style:{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,padding:14,marginBottom:8}
+      },
+        /*#__PURE__*/React.createElement("div", {style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}},
+          /*#__PURE__*/React.createElement("div", {style:{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}},
+            /*#__PURE__*/React.createElement("span", {style:{fontSize:14,fontWeight:600,color:colors.text}}, item.title),
+            /*#__PURE__*/React.createElement("span", {style:{fontSize:10,fontWeight:700,padding:'2px 8px',borderRadius:10,background:(categories[item.category]||categories.mcp).color+'18',color:(categories[item.category]||categories.mcp).color,textTransform:'uppercase',letterSpacing:'0.05em'}}, (categories[item.category]||categories.mcp).label)
+          ),
+          /*#__PURE__*/React.createElement("div", {style:{display:'flex',gap:4}},
+            /*#__PURE__*/React.createElement("button", {
+              onClick:() => handleCopy(item.id, item.command),
+              style:{background:'none',border:'none',cursor:'pointer',padding:4}
+            }, copiedId===item.id ? Icons.check(14, colors.success) : Icons.clipboard(14, colors.textMuted)),
+            /*#__PURE__*/React.createElement("button", {
+              onClick:() => del(item.id),
+              style:{background:'none',border:'none',cursor:'pointer',padding:4}
+            }, Icons.trash(14, colors.error))
+          )
+        ),
+        /*#__PURE__*/React.createElement("code", {style:{display:'block',background:colors.codeBg,borderRadius:8,padding:'10px 14px',fontSize:12,lineHeight:1.5,color:colors.text,wordBreak:'break-all',fontFamily:"'SF Mono','Fira Code',Consolas,monospace"}}, item.command),
+        copiedId===item.id && /*#__PURE__*/React.createElement("div", {style:{fontSize:11,color:colors.success,marginTop:6,fontWeight:600}}, "Copied! Paste into your terminal.")
+      )),
+      /*#__PURE__*/React.createElement("div", {style:{background:colors.codeBg,borderRadius:10,padding:16,border:'1px solid '+colors.border,marginTop:4}},
+        /*#__PURE__*/React.createElement("div", {style:{fontSize:13,fontWeight:600,color:colors.text,marginBottom:12}}, "Add Command"),
+        /*#__PURE__*/React.createElement("input", {placeholder:"Name (e.g., Add Supabase MCP)", value:title, onChange:e => setTitle(e.target.value), style:inputStyle}),
+        /*#__PURE__*/React.createElement("textarea", {placeholder:"Bash command (e.g., claude mcp add ...)", value:command, onChange:e => setCommand(e.target.value), rows:3, style:{...inputStyle,resize:'vertical',fontFamily:"'SF Mono','Fira Code',Consolas,monospace",fontSize:12}}),
+        /*#__PURE__*/React.createElement("div", {style:{display:'flex',gap:8,alignItems:'center'}},
+          /*#__PURE__*/React.createElement("select", {value:category, onChange:e => setCategory(e.target.value), style:{...inputStyle,width:'auto',marginBottom:0}},
+            /*#__PURE__*/React.createElement("option", {value:"mcp"}, "MCP Server"),
+            /*#__PURE__*/React.createElement("option", {value:"skill"}, "Skill"),
+            /*#__PURE__*/React.createElement("option", {value:"hook"}, "Hook")
+          ),
+          /*#__PURE__*/React.createElement("button", {onClick:add, style:{padding:'8px 16px',fontSize:13,fontWeight:600,background:colors.accent,color:'#fff',border:'none',borderRadius:8,cursor:'pointer'}}, "Add")
+        )
+      )
+    )
+  );
+};
+
+/* ═══════════════════════════════════════════
    BONUS: QUICK COPY DRAWER
    ═══════════════════════════════════════════ */
 const QuickCopyDrawer = () => {
@@ -2436,7 +2519,7 @@ function WorkflowKitt() {
   })), /*#__PURE__*/React.createElement(FavoritesSection, {
     favorites: favorites,
     onRemove: toggleFavorite
-  }), /*#__PURE__*/React.createElement(ProjectsSection, null), /*#__PURE__*/React.createElement(LearningStoriesSection, null)), /*#__PURE__*/React.createElement(QuickCopyDrawer, null), /*#__PURE__*/React.createElement("footer", {
+  }), /*#__PURE__*/React.createElement(ToolkitSection, null), /*#__PURE__*/React.createElement(ProjectsSection, null), /*#__PURE__*/React.createElement(LearningStoriesSection, null)), /*#__PURE__*/React.createElement(QuickCopyDrawer, null), /*#__PURE__*/React.createElement("footer", {
     style: {
       textAlign: 'center',
       padding: '32px 20px',
