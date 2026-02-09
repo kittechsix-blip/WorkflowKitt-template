@@ -7,7 +7,6 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,3 29,28 3,28' fill='%237B5FCC'/%3E%3C/svg%3E">
     <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
       :root {
@@ -49,21 +48,35 @@
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel">
-const { useState, useEffect, useMemo } = React;
+<script>const {
+  useState,
+  useEffect,
+  useMemo
+} = React;
 
 /* ═══════════════════════════════════════════
    COLOR SYSTEM
    ═══════════════════════════════════════════ */
 const colors = {
-  bg:'#FEFDFB', surface:'#FFFFFF', surfaceHover:'#F8F7FF',
-  border:'#E0D9F0', borderLight:'#F0EDF7',
-  text:'#1A0F2E', textMuted:'#5B4A75', textLight:'#8B7BA8',
-  accent:'#7B5FCC', accentHover:'#9D7FEA', accentDark:'#5B3FA8',
-  success:'#059669', successBg:'#D1FAE5',
-  warning:'#D97706', warningBg:'#FEF3C7',
-  error:'#DC2626', errorBg:'#FEE2E2',
-  codeBg:'#F5F3F7', divider:'#E9E4F0',
+  bg: '#FEFDFB',
+  surface: '#FFFFFF',
+  surfaceHover: '#F8F7FF',
+  border: '#E0D9F0',
+  borderLight: '#F0EDF7',
+  text: '#1A0F2E',
+  textMuted: '#5B4A75',
+  textLight: '#8B7BA8',
+  accent: '#7B5FCC',
+  accentHover: '#9D7FEA',
+  accentDark: '#5B3FA8',
+  success: '#059669',
+  successBg: '#D1FAE5',
+  warning: '#D97706',
+  warningBg: '#FEF3C7',
+  error: '#DC2626',
+  errorBg: '#FEE2E2',
+  codeBg: '#F5F3F7',
+  divider: '#E9E4F0'
 };
 
 /* ═══════════════════════════════════════════
@@ -74,76 +87,236 @@ const LOGO_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAJsAAACCCAYAAABRuLrfAAAKqWlDQ1BJQ0M
 /* ═══════════════════════════════════════════
    SVG ICONS
    ═══════════════════════════════════════════ */
-const Ic = ({d,size=20,color='currentColor',fill='none',sw=2}) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color}
-    strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
-    <path d={d}/>
-  </svg>
-);
-
+const Ic = ({
+  d,
+  size = 20,
+  color = 'currentColor',
+  fill = 'none',
+  sw = 2
+}) => /*#__PURE__*/React.createElement("svg", {
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: fill,
+  stroke: color,
+  strokeWidth: sw,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  style: {
+    display: 'inline-block',
+    verticalAlign: 'middle',
+    flexShrink: 0
+  }
+}, /*#__PURE__*/React.createElement("path", {
+  d: d
+}));
 const Icons = {
-  clipboard:(s=18,c)=>(
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
-      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
-    </svg>
-  ),
-  check:(s=18,c)=><Ic size={s} color={c||colors.success} d="M20 6L9 17l-5-5"/>,
-  chevronDown:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M6 9l6 6 6-6"/>,
-  chevronRight:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M9 18l6-6-6-6"/>,
-  star:(s=18,c)=><Ic size={s} color={c||colors.textLight} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>,
-  starFilled:(s=18,c)=><Ic size={s} color={c||colors.accent} fill={c||colors.accent} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>,
-  trash:(s=18,c)=>(
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
-      <path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-    </svg>
-  ),
-  edit:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>,
-  x:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M18 6L6 18M6 6l12 12"/>,
-  download:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>,
-  book:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5V5a2 2 0 012-2h14v14H6.5A2.5 2.5 0 004 19.5z"/>,
-  folder:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>,
-  arrowRight:(s=18,c)=><Ic size={s} color={c||'currentColor'} d="M5 12h14M12 5l7 7-7 7"/>,
-  map:(s=18,c)=>(
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
-      <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/>
-    </svg>
-  ),
-  hammer:(s=18,c)=>(
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
-      <path d="M15 12l-8.5 8.5c-.83.83-2.17.83-3 0a2.12 2.12 0 010-3L12 9"/><path d="M17.64 15L22 10.64"/><path d="M20.91 11.7l-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V6.5a.5.5 0 01.5-.5H21a3 3 0 003-3"/>
-    </svg>
-  ),
-  paintbrush:(s=18,c)=>(
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
-      <path d="M18.37 2.63a2.12 2.12 0 013 3L14 13l-4 1 1-4 7.37-7.37z"/><path d="M8 21a4 4 0 01-4-4c0-2 4-6 4-6s4 4 4 6a4 4 0 01-4 4z"/>
-    </svg>
-  ),
-  rocket:(s=18,c)=>(
-    <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke={c||'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{display:'inline-block',verticalAlign:'middle',flexShrink:0}}>
-      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3"/><path d="M22 2l-7.5 7.5"/>
-      <path d="M15 12l3.17-3.17a4 4 0 000-5.66L15 2M12 9l-3.17 3.17a4 4 0 000 5.66L12 22"/>
-    </svg>
-  ),
+  clipboard: (s = 18, c) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c || 'currentColor',
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      display: 'inline-block',
+      verticalAlign: 'middle',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "8",
+    y: "2",
+    width: "8",
+    height: "4",
+    rx: "1",
+    ry: "1"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"
+  })),
+  check: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || colors.success,
+    d: "M20 6L9 17l-5-5"
+  }),
+  chevronDown: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || 'currentColor',
+    d: "M6 9l6 6 6-6"
+  }),
+  chevronRight: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || 'currentColor',
+    d: "M9 18l6-6-6-6"
+  }),
+  star: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || colors.textLight,
+    d: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+  }),
+  starFilled: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || colors.accent,
+    fill: c || colors.accent,
+    d: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+  }),
+  trash: (s = 18, c) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c || 'currentColor',
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      display: 'inline-block',
+      verticalAlign: 'middle',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M3 6h18"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"
+  })),
+  edit: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || 'currentColor',
+    d: "M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+  }),
+  x: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || 'currentColor',
+    d: "M18 6L6 18M6 6l12 12"
+  }),
+  download: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || 'currentColor',
+    d: "M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+  }),
+  book: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || 'currentColor',
+    d: "M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5V5a2 2 0 012-2h14v14H6.5A2.5 2.5 0 004 19.5z"
+  }),
+  folder: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || 'currentColor',
+    d: "M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"
+  }),
+  arrowRight: (s = 18, c) => /*#__PURE__*/React.createElement(Ic, {
+    size: s,
+    color: c || 'currentColor',
+    d: "M5 12h14M12 5l7 7-7 7"
+  }),
+  map: (s = 18, c) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c || 'currentColor',
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      display: 'inline-block',
+      verticalAlign: 'middle',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M8 2v16"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M16 6v16"
+  })),
+  hammer: (s = 18, c) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c || 'currentColor',
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      display: 'inline-block',
+      verticalAlign: 'middle',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M15 12l-8.5 8.5c-.83.83-2.17.83-3 0a2.12 2.12 0 010-3L12 9"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M17.64 15L22 10.64"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M20.91 11.7l-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V6.5a.5.5 0 01.5-.5H21a3 3 0 003-3"
+  })),
+  paintbrush: (s = 18, c) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c || 'currentColor',
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      display: 'inline-block',
+      verticalAlign: 'middle',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M18.37 2.63a2.12 2.12 0 013 3L14 13l-4 1 1-4 7.37-7.37z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M8 21a4 4 0 01-4-4c0-2 4-6 4-6s4 4 4 6a4 4 0 01-4 4z"
+  })),
+  rocket: (s = 18, c) => /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c || 'currentColor',
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      display: 'inline-block',
+      verticalAlign: 'middle',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M12 15l-3-3"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M22 2l-7.5 7.5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M15 12l3.17-3.17a4 4 0 000-5.66L15 2M12 9l-3.17 3.17a4 4 0 000 5.66L12 22"
+  }))
 };
-
-const phaseIcons = { 1:Icons.map, 2:Icons.hammer, 3:Icons.paintbrush, 4:Icons.rocket };
+const phaseIcons = {
+  1: Icons.map,
+  2: Icons.hammer,
+  3: Icons.paintbrush,
+  4: Icons.rocket
+};
 
 /* ═══════════════════════════════════════════
    CLAUDE.MD TEMPLATE (for ZIP download)
    ═══════════════════════════════════════════ */
 const CLAUDE_TEMPLATE = "# CLAUDE.md - AI Operating Manual\n# [PROJECT NAME]\n\nThis file is read automatically by Claude Code at the start of every session.\n\n---\n\n## Project Overview\n\n**Project Name:** [YOUR PROJECT NAME]\n**One-Line Description:** [WHAT DOES IT DO IN ONE SENTENCE]\n**Target User:** [WHO IS THIS FOR]\n**Core Value Proposition:** [WHY WOULD THEY USE THIS]\n\n---\n\n## WORKFLOW: Plan Mode PRD Approach\n\n### Initial Setup\n```\nMake a PRD.md (to-do list) file in Claude Code Plan Mode:\nI want to build \"[PROJECT NAME]\" for \"[SOLUTION/PURPOSE]\"\nHelp me create a comprehensive plan and write this in PRD.md as a to-do list.\n```\n\n### After PRD is Created\n```\nRead this plan file and interview me in detail using the AskUserQuestion tool about:\n- Technical implementation details\n- UI and UX design decisions\n- Potential concerns and tradeoffs\n- Tech stack choices\n- Design system preferences\n- Assets and visual identity\n\nFor each question, research thoroughly to help me make informed decisions.\nI can share pictures of UI examples to show what I expect.\n```\n\n---\n\n## IMPLEMENTATION WORKFLOW\n\n**Implement this plan ONE TASK AT A TIME:**\n\nFor each task:\n1. **Implement** the task following best coding practices\n2. **Test** that it works correctly\n3. **Security check** - ensure no vulnerabilities introduced\n4. **Update CLAUDE.md** - Document what was completed and what's next\n5. **Clear context window** - Start a new conversation before the next task\n6. **Move to next task**\n\n**DO NOT skip to the next task until the current one is:**\n- Fully implemented\n- Tested and working\n- Secure\n- Documented in CLAUDE.md\n\n---\n\n## CRITICAL: Read Before You Edit\n\n**Before editing ANY files, you MUST read at least 3 relevant files to ensure coherent and consistent code.**\n\n### Files You Must Read\n\n1. **Similar files** - Files with similar functionality to understand existing patterns\n2. **Imported dependencies** - The definition/implementation of any imports you're not 100% sure about\n3. **Related files** - Files that interact with what you're building\n\n### Steps to Follow\n\n1. **Read** at least 3 relevant existing files\n2. **Understand** the patterns, conventions, and API usage\n3. **Edit** - Only then proceed with creating/editing files\n\n**Never edit files blindly. Always understand the existing codebase first.**\n\n---\n\n## Tech Stack\n\n**Framework:** [e.g., React, Next.js, Vue]\n**Language:** [e.g., TypeScript, JavaScript]\n**Styling:** [e.g., Tailwind CSS, CSS Modules]\n**UI Library:** [e.g., Shadcn/UI, none]\n**Backend:** [e.g., Supabase, Firebase, none]\n**Database:** [e.g., PostgreSQL, localStorage]\n**Authentication:** [e.g., Supabase Auth, none]\n**Deployment:** [e.g., Vercel, Netlify]\n\n---\n\n## Styling Guidelines\n\n### Approach\n- **Mobile-first** approach with TailwindCSS\n- Use **Shadcn/UI** components from `src/components/ui/`\n- Custom components in `src/components/nowts/`\n\n### Typography\n- Use shared typography components for paragraphs and headings\n- Don't create custom `<p>`, `<h1>`, etc. tags directly\n\n### Spacing\n- Prefer utility layouts like `flex flex-col gap-4` for vertical spacing\n- Use `flex gap-4` for horizontal spacing\n- Avoid `space-y-4` and similar spacing utilities\n\n---\n\n## Coding Rules\n\n### ALWAYS\n- Follow the patterns in existing code\n- Read 3+ relevant files before editing\n- Use the design system and styling guidelines above\n- Update progress.txt after completing features\n- Update CLAUDE.md after completing each task\n- Handle errors gracefully\n- Test before moving to the next task\n- Use best coding practices\n- Emphasize security in all implementations\n\n### NEVER\n- Skip reading the docs before coding\n- Edit files without understanding existing patterns\n- Hardcode values that should be configurable\n- Ignore edge cases defined in PRD.md\n- Move to the next task without testing the current one\n- Skip security considerations\n- Leave CLAUDE.md outdated\n\n---\n\n## Development Tools\n\n### Ralph Loop\nRun the Ralph loop for automated testing and validation:\nGitHub: https://github.com/michaelshimeles/ralphy\n\n---\n\n## Documentation References\n\nBefore making decisions, check these files:\n\n1. `PRD.md` - To-do list and requirements\n2. `01-docs/APP_FLOW.md` - User flows and navigation\n3. `01-docs/TECH_STACK.md` - Approved packages and versions\n4. `01-docs/FRONTEND_GUIDELINES.md` - Design system details\n5. `01-docs/BACKEND_STRUCTURE.md` - Data and API structure\n6. `01-docs/IMPLEMENTATION_PLAN.md` - Build sequence\n7. `progress.txt` - Current state and session history\n8. `CLAUDE.md` (this file) - Always current project status\n\n---\n\n## Current Session Context\n\n**Current Phase:** [Planning / Build / Polish / Ship]\n**Last Updated:** [DATE]\n**Current Focus:** [What you're working on right now]\n**Last Completed Task:** [Most recent completed task]\n**Next Task:** [What to work on next from PRD.md]\n**Blockers:** [Any issues blocking progress, or \"None\"]\n\n---\n\n## END OF PROJECT: Create Learning Document\n\n**IMPORTANT: When the project is complete, Claude MUST create a personalized learning document.**\n\n### Prompt to Use\n\n```\nThe project is complete! Please create my FOR[YourName].md learning document.\n\nThis should explain the entire project in plain language, including:\n- Technical architecture and how it's structured\n- How the various parts are connected\n- Technologies used and why we chose them\n- Lessons I can learn from this project\n\nMake it engaging and memorable.\n```\n\n---\n\n## Project Checklist\n\n### Phase 1: Planning\n- [ ] Created PRD.md in Plan Mode\n- [ ] Completed detailed interview with AskUserQuestion\n- [ ] All design decisions documented\n- [ ] Assets gathered\n- [ ] CLAUDE.md initialized\n\n### Phase 2: Build\n- [ ] Implementing tasks one at a time\n- [ ] Testing each task before moving on\n- [ ] Following best practices and security guidelines\n- [ ] Updating CLAUDE.md after each task\n\n### Phase 3: Polish\n- [ ] All features tested\n- [ ] Mobile responsive\n- [ ] Edge cases handled\n- [ ] Security reviewed\n\n### Phase 4: Ship\n- [ ] Final testing complete\n- [ ] Deployed\n- [ ] Learning document created\n- [ ] Project documented\n\n---\n\n**Keep this file updated throughout the project.**\n";
-
 const PROGRESS_TEMPLATE = "# Progress Tracker\n\n## Session Log\n\n### Session 1 - [DATE]\n- Started: [TIME]\n- Completed: [TASKS]\n- Next: [NEXT TASK]\n- Issues: None\n\n---\n\n## Completed Tasks\n- (none yet)\n\n## Current Task\n- Starting Phase 1: Planning\n\n## Upcoming Tasks\n- See IMPLEMENTATION_PLAN.md\n\n## Blockers\n- None\n";
-
 const CHECKLIST_TEMPLATE = "# Project Checklist\n\n## Phase 1: Planning\n- [ ] Download and set up template folder\n- [ ] Create PRD.md in Plan Mode\n- [ ] Complete detailed interview\n- [ ] Review and approve plan\n\n## Phase 2: Build\n- [ ] Start building from implementation plan\n- [ ] Follow one-task-at-a-time workflow\n- [ ] Add assets as needed\n\n## Phase 3: Polish\n- [ ] Test all features\n- [ ] Test on mobile\n- [ ] Fix bugs\n- [ ] Run automated tests (optional)\n\n## Phase 4: Ship\n- [ ] Deploy app\n- [ ] Create learning story\n";
-
 const DOC_TEMPLATES = {
   'PRD.md': '# Product Requirements Document\n\n## Project Name\n[Your project name]\n\n## Problem Statement\n[What problem are you solving?]\n\n## Target User\n[Who is this for?]\n\n## Features (To-Do List)\n- [ ] Feature 1\n- [ ] Feature 2\n- [ ] Feature 3\n\n## Success Criteria\n- [ ] Criteria 1\n- [ ] Criteria 2',
   'APP_FLOW.md': '# App Flow\n\n## Screens\n\n### Screen 1: [Name]\n- Description: [What the user sees]\n- Actions: [What the user can do]\n- Navigation: [Where they can go next]',
   'TECH_STACK.md': '# Tech Stack\n\n## Frontend\n- Framework: [React / Next.js / Vue]\n- Styling: [Tailwind CSS / CSS Modules]\n- UI Library: [Shadcn/UI / none]\n\n## Backend\n- Runtime: [Node.js / none]\n- Database: [Supabase / Firebase / localStorage]\n- Auth: [Supabase Auth / none]\n\n## Deployment\n- Platform: [Vercel / Netlify / Railway]',
   'FRONTEND_GUIDELINES.md': '# Frontend Guidelines\n\n## Design System\n\n### Colors\n- Primary: [hex]\n- Secondary: [hex]\n- Background: [hex]\n- Text: [hex]\n\n### Typography\n- Headings: [font]\n- Body: [font]\n\n### Spacing\n- Use consistent spacing scale\n\n### Components\n- Follow existing patterns\n- Mobile-first approach',
   'BACKEND_STRUCTURE.md': '# Backend Structure\n\n## Database Schema\n\n### Table: [name]\n- id (uuid, primary key)\n- created_at (timestamp)\n- [field] ([type])\n\n## API Endpoints\n\n### GET /api/[resource]\n- Description: [what it does]\n- Response: [shape]',
-  'IMPLEMENTATION_PLAN.md': '# Implementation Plan\n\n## Build Order\n\n### Task 1: Project Setup\n- Initialize project\n- Install dependencies\n- Set up folder structure\n\n### Task 2: [Feature]\n- Implement [feature]\n- Test [feature]\n- Update CLAUDE.md',
+  'IMPLEMENTATION_PLAN.md': '# Implementation Plan\n\n## Build Order\n\n### Task 1: Project Setup\n- Initialize project\n- Install dependencies\n- Set up folder structure\n\n### Task 2: [Feature]\n- Implement [feature]\n- Test [feature]\n- Update CLAUDE.md'
 };
 
 /* ═══════════════════════════════════════════
@@ -151,729 +324,1850 @@ const DOC_TEMPLATES = {
    ═══════════════════════════════════════════ */
 function useLocalStorage(key, init) {
   const [val, setVal] = useState(() => {
-    try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : init; }
-    catch { return init; }
+    try {
+      const s = localStorage.getItem(key);
+      return s ? JSON.parse(s) : init;
+    } catch {
+      return init;
+    }
   });
   useEffect(() => {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch {}
   }, [key, val]);
   return [val, setVal];
 }
-
 async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); return true; }
-  catch {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
     const ta = document.createElement('textarea');
-    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
-    document.body.appendChild(ta); ta.select();
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
     const ok = document.execCommand('copy');
-    document.body.removeChild(ta); return ok;
+    document.body.removeChild(ta);
+    return ok;
   }
 }
+const inputStyle = {
+  width: '100%',
+  padding: '8px 12px',
+  fontSize: 13,
+  border: '1px solid ' + colors.border,
+  borderRadius: 6,
+  marginBottom: 8,
+  background: colors.surface,
+  color: colors.text
+};
 
 /* ═══════════════════════════════════════════
    PHASES DATA (4 phases, 15 steps)
    ═══════════════════════════════════════════ */
-const phases = [
-  {
-    number:1, title:'PLANNING', color:'#7B5FCC',
-    steps: [
-      {
-        id:'1.1', title:'Download the Template Folder',
-        description:'Click "Download Template Folder" at the top of this guide. Unzip it and rename the folder to your project name. Then in Claude Code, type cd and drag your renamed folder into the Claude Code window \u2014 it auto-fills the path. Hit enter.',
-        whyItMatters:'The template contains all the prompts, documentation templates, and folder structure Claude needs. This gives Claude Code access to read and write your project files.',
-        expectedOutput:'Claude Code is now working inside your project folder. It can see all the folders: 00-planning, 01-docs, 02-design, 03-code, 04-assets.',
-        prompt:null,
-        dragDrop:{from:'Your renamed folder', to:'Claude Code (after typing cd)', description:'Unzip \u2192 Rename folder \u2192 Type cd \u2192 Drag folder into Claude Code \u2192 Enter'},
-      },
-      {
-        id:'1.2', title:'Create Your PRD in Plan Mode',
-        description:'Follow these steps in order:\n\n1. Enter Plan Mode: press Shift+Tab, then Tab \u2014 you\u2019ll see "Plan Mode" at the bottom of Claude Code\n2. Fill in your project details below and click Copy Filled Prompt\n3. Paste it into Claude Code (Cmd+V) and hit Enter\n4. Claude will write a plan and ask "Would you like to proceed?"\n   \u2022 If the plan ONLY mentions writing PRD.md \u2014 select option 1 or 2 to proceed\n   \u2022 If the plan mentions writing OTHER docs too \u2014 select option 4 and type: "Only write PRD.md, nothing else"\n5. Once PRD.md is created, move to Step 1.3',
-        whyItMatters:'Plan Mode tells Claude to think and plan before writing any code. It creates a structured to-do list of everything that needs to be built. This becomes your roadmap.',
-        expectedOutput:'You should see a PRD.md file in your 01-docs folder with a numbered to-do list of features broken into small tasks. If Claude tries to write other docs too, tell it to stop \u2014 the interview in Step 1.3 needs to happen first.',
-        prompt:{
-          template:'Make a PRD.md (to-do list) file in Claude Code Plan Mode:\n\nI want to build "{{projectName}}" for "{{problemSolved}}"\n\nHelp me create a comprehensive plan and write this in PRD.md as a to-do list.\n\nIMPORTANT: ONLY create the PRD.md file. Do NOT populate the other docs, do NOT start the interview, and do NOT start building. Just write PRD.md and STOP. Wait for my next prompt.',
-          fields:[
-            {name:'projectName',label:'Your Project Name',type:'text',placeholder:'e.g., Recipe Finder App'},
-            {name:'problemSolved',label:'Problem You\'re Solving',type:'textarea',placeholder:'e.g., Home cooks want to find recipes based on ingredients they have',rows:3},
-          ]
-        },
-        troubleshooting:[
-          {issue:'Claude doesn\u2019t enter Plan Mode',solution:'Say "Please use Plan Mode to create this PRD"'},
-          {issue:'Plan is too vague',solution:'Ask "Can you break each item down into smaller, more specific tasks?"'},
-        ],
-      },
-      {
-        id:'1.3', title:'Complete the Detailed Interview',
-        description:'Let Claude interview you about every aspect of your project using the AskUserQuestion tool.',
-        whyItMatters:'This is the MOST IMPORTANT step. Claude asks you structured questions (with multiple choice options) about Product, Tech Stack, Design/UX, and Assets. The better you answer, the better Claude understands what to build.',
-        expectedOutput:'After 20\u201330 questions, Claude will say \u201cI have all the information I need\u201d and will auto-populate all 6 documentation files: PRD.md, APP_FLOW.md, TECH_STACK.md, FRONTEND_GUIDELINES.md, BACKEND_STRUCTURE.md, IMPLEMENTATION_PLAN.md. When done, move to Step 1.4: paste the review prompt to check everything looks right.',
-        prompt:{
-          template:'Read the PRD.md plan file and interview me in detail using the AskUserQuestion tool.\n\nAsk me about:\n- Product details (who it\u2019s for, what it does, how it works)\n- Technical implementation (frameworks, databases, hosting)\n- UI and UX design (style, colors, layout, inspiration)\n- Assets I have (logos, icons, photos, fonts)\n- Potential concerns and tradeoffs\n\nFor each question, research thoroughly to help me make informed decisions.\nI can share pictures of UI examples to show what I expect.\n\nWhen you\u2019re done interviewing, populate the documentation files and STOP. Do NOT start building or writing code. Wait for my next prompt.',
-          fields:[]
-        },
-        tips:['Take your time with each answer','Share screenshots of apps you like (drag them into chat)','If you have logo/icon files, drag them into the chat when asked','Don\u2019t rush \u2014 this phase determines everything'],
-        troubleshooting:[
-          {issue:'Claude stops asking too early',solution:'Say "Keep asking more questions about [tech stack/design/features]"'},
-          {issue:'Questions are confusing',solution:'Say "Can you explain this question differently? I\u2019m not sure what you\u2019re asking"'},
-          {issue:'You\u2019re not sure how to answer',solution:'Say "What do you recommend for my use case?"'},
-        ],
-      },
-      {
-        id:'1.4', title:'Review & Approve Your Plan',
-        description:'Quickly skim the docs Claude created to make sure they match your vision.',
-        whyItMatters:'This is your last chance to course-correct before Claude starts writing code. If something doesn\u2019t match your vision, fix it now.',
-        expectedOutput:'Claude shows you a concise summary of the key decisions. Review them and either approve or request changes.\n\n⛔ STOP HERE — DO NOT LET CLAUDE START BUILDING.\nWhen Claude asks "ready to build?" or "shall I proceed?", say: "No. Stop here."\n\nThen close this conversation: type /clear or press Cmd+N.\nOpen Step 2.1 in the guide, copy the Build prompt, and paste it into the fresh conversation.\nThis gives Claude a clean context window focused entirely on building.',
-        prompt:{
-          template:'Show me a summary of what you\u2019ve planned:\n1. The main features from PRD.md\n2. The tech stack from TECH_STACK.md\n3. The color palette from FRONTEND_GUIDELINES.md\n\nDoes this match my vision? If not, I\u2019ll tell you what to change.\n\nIMPORTANT: After showing the summary, STOP COMPLETELY. Do NOT offer to start building. Do NOT ask "shall I proceed?" Do NOT write any code. Just show the summary and wait. I will start a new conversation for the build phase.',
-          fields:[]
-        },
-        checkList:['Are the features what you wanted?','Is the tech stack reasonable?','Do the colors and style match your vision?'],
-      },
-    ],
-  },
-  {
-    number:2, title:'BUILD', color:'#5B3FA8',
-    steps: [
-      {
-        id:'2.1', title:'Start Building',
-        description:'FIRST: Start a fresh conversation (/clear or Cmd+N) \u2014 do NOT paste this into the planning conversation. Then paste this mega-prompt. It tells Claude the full workflow: build one task at a time, test it, check security, update docs, then tell you when to start a new conversation for the next task.',
-        whyItMatters:'This single prompt gives Claude everything it needs to build correctly. It follows the one-task-at-a-time pattern, which prevents overwhelm and ensures each piece works before moving on.',
-        expectedOutput:'Claude will: 1) Read your docs, 2) Tell you what it\u2019s about to implement, 3) Create the code files, 4) Show you how to test it, 5) Update CLAUDE.md with progress, 6) Tell you "Task complete. Start a new conversation for the next task." When it does, start a fresh conversation and paste this same prompt again for the next task.',
-        prompt:{
-          template:'Read CLAUDE.md and progress.txt.\n\nStart building from the next incomplete task in IMPLEMENTATION_PLAN.md.\n\nFollow this workflow for EACH task:\n1. Tell me what you\u2019re about to implement\n2. Implement it using best coding practices\n3. Test that it works\n4. Check for security issues\n5. Update CLAUDE.md and progress.txt with what was completed\n6. STOP and tell me to start a new conversation for the next task\n\nDo ONE task only, then stop. Do NOT move to the next task in the same conversation.\n\nEmphasize security and follow the patterns in FRONTEND_GUIDELINES.md.',
-          fields:[]
-        },
-        pattern:['Paste this prompt in a new conversation','Claude implements one task','Claude tests it and checks security','Claude updates CLAUDE.md and progress.txt','Claude tells you to start a new conversation','Repeat until all tasks are done'],
-        troubleshooting:[
-          {issue:'Claude builds the wrong thing',solution:'Point it to the specific requirement in PRD.md or APP_FLOW.md'},
-          {issue:'Code doesn\u2019t match design',solution:'Say "Check FRONTEND_GUIDELINES.md and update the styling to match"'},
-          {issue:'Claude tries to do multiple tasks',solution:'Say "Stop. Only do one task per conversation."'},
-        ],
-      },
-      {
-        id:'2.2', title:'Resume After a Break', toolkit:true,
-        description:'Use this prompt when you come back after a break and need to pick up where you left off.',
-        whyItMatters:'Claude has no memory between sessions. This prompt tells it to read your progress files and continue from the right spot.',
-        expectedOutput:'Claude summarizes what\u2019s been done, what\u2019s next, and any blockers \u2014 then continues building.',
-        prompt:{
-          template:'Read CLAUDE.md and progress.txt.\n\nShow me:\n1. What we completed last session\n2. What we\u2019re working on next\n3. Any blockers or issues\n\nThen continue building the next task. Follow the one-task-at-a-time workflow: implement, test, security check, update docs, then STOP.',
-          fields:[]
-        },
-      },
-      {
-        id:'2.3', title:'Debug Issues', toolkit:true,
-        description:'Use this prompt when something breaks during the build.',
-        whyItMatters:'Systematic debugging finds the real problem. Random fixes waste time and break other things.',
-        expectedOutput:'Claude walks through the diagnostic steps and proposes a targeted fix with clear reasoning.',
-        prompt:{
-          template:'Something\u2019s broken with {{issueDescription}}.\n\nBefore guessing at fixes:\n1. Read the relevant documentation (PRD.md, APP_FLOW.md, etc.)\n2. Check progress.txt for recent changes\n3. Explain what SHOULD happen based on the docs\n4. Explain what IS happening\n5. Identify the gap between expected and actual behavior\n6. Propose a specific fix with reasoning\n\nDon\u2019t make random changes. Diagnose first.',
-          fields:[{name:'issueDescription',label:'Describe the Issue',type:'textarea',placeholder:'e.g., The login button doesn\u2019t respond when clicked',rows:3}]
-        },
-      },
-      {
-        id:'2.4', title:'Add Assets', toolkit:true,
-        description:'Use this when Claude asks for logos, icons, images, or fonts during the build. Drop them into the right folders.',
-        whyItMatters:'Having assets in the right place lets Claude reference them in your code.',
-        expectedOutput:'Claude sees the files and uses them in your components.',
-        prompt:null,
-        dragDrop:{from:'Your logo files', to:'04-assets/images/logo/', description:'Organize assets so Claude can use them'},
-        assetFolders:[
-          {type:'Logos',path:'04-assets/images/logo/'},
-          {type:'Icons',path:'04-assets/images/icons/'},
-          {type:'Photos',path:'04-assets/images/photos/'},
-          {type:'Fonts',path:'04-assets/fonts/'},
-        ],
-      },
-    ],
-  },
-  {
-    number:3, title:'POLISH', color:'#7B5FCC',
-    steps: [
-      {
-        id:'3.1', title:'Test All Features',
-        description:'Go through every feature and verify it works as designed.',
-        whyItMatters:'Real users will try everything. Testing now prevents embarrassing bugs after launch.',
-        expectedOutput:'Claude gives you a testing checklist based on your app\u2019s flows. Follow it systematically.',
-        prompt:{
-          template:'Read APP_FLOW.md.\n\nFor each user flow listed:\n1. Walk me through testing it step by step\n2. What should I see at each step?\n3. What are the potential failure points?\n4. What edge cases should I test?',
-          fields:[]
-        },
-      },
-      {
-        id:'3.2', title:'Test on Mobile',
-        description:'Verify your app works on phones and tablets.',
-        whyItMatters:'Many users will access your app on mobile. It needs to work everywhere.',
-        expectedOutput:'Your app looks good and works smoothly on mobile devices.',
-        prompt:null,
-        mobileChecklist:['Does text fit without horizontal scrolling?','Are buttons easy to tap?','Do all features work on touch screens?','Is the layout readable?'],
-      },
-      {
-        id:'3.3', title:'Fix Bugs',
-        description:'Address any issues you found during testing.',
-        whyItMatters:'This is your polish phase \u2014 make everything work perfectly.',
-        expectedOutput:'All bugs fixed, app works smoothly.',
-        prompt:{
-          template:'I found these issues during testing:\n\n{{bugList}}\n\nFor each one:\n1. Diagnose the root cause\n2. Propose a fix\n3. Test the fix\n4. Update CLAUDE.md',
-          fields:[{name:'bugList',label:'List the Bugs Found',type:'textarea',placeholder:'1. Login button not responding\n2. Mobile menu doesn\u2019t close\n3. Form validation shows wrong error',rows:5}]
-        },
-      },
-      {
-        id:'3.4', title:'Run Ralph Loop (Optional)',
-        description:'Use automated testing if applicable.',
-        whyItMatters:'Automated testing can catch issues you might miss.',
-        expectedOutput:'Ralph loop runs tests and reports results.',
-        prompt:{
-          template:'Run the Ralph loop for automated validation:\nhttps://github.com/michaelshimeles/ralphy\n\nTest the app thoroughly and report any issues.',
-          fields:[]
-        },
-      },
-    ],
-  },
-  {
-    number:4, title:'SHIP', color:'#5B3FA8',
-    steps: [
-      {
-        id:'4.1', title:'Deploy Your App',
-        description:'Push your code and make it live.',
-        whyItMatters:'You\u2019re making your app available to the world!',
-        expectedOutput:'Your app is live at a public URL. Share it!',
-        prompt:{
-          template:'Read TECH_STACK.md for deployment instructions.\n\nDeploy the app to {{hostingPlatform}}.\n\nWalk me through the deployment steps.',
-          fields:[{name:'hostingPlatform',label:'Hosting Platform',type:'text',placeholder:'e.g., Vercel, Netlify, Railway'}]
-        },
-      },
-      {
-        id:'4.2', title:'Create Your Learning Story',
-        description:'Ask Claude to document everything you learned.',
-        whyItMatters:'Building is great, but understanding what you built makes you a better builder. This document captures your journey so you can learn from it and reference it later.',
-        expectedOutput:'Claude creates your personal learning document \u2014 a friendly, engaging explanation of your entire project with lessons learned, mental models, and growth opportunities.',
-        prompt:{
-          template:'The project is complete! Please create my FOR[{{yourName}}].md learning document.\n\nThis should explain the entire project in plain language, including:\n- Technical architecture and how it\u2019s structured\n- How the various parts are connected\n- Technologies used and why we chose them\n- Lessons I can learn from this project:\n  * Bugs we ran into and how we fixed them\n  * Potential pitfalls and how to avoid them in the future\n  * New technologies/concepts introduced\n  * How good engineers think and work\n  * Best practices demonstrated in this project\n\nMake it engaging and memorable \u2014 use technical terms appropriately, but also use analogies and anecdotes to make concepts stick. Don\u2019t make it sound like boring technical documentation.\n\nThis is a learning tool to help me grow as a builder.',
-          fields:[{name:'yourName',label:'Your Name',type:'text',placeholder:'e.g., Andy'}]
-        },
-        whatToDo:'Read it! This is your personal knowledge base. Refer back to it when building your next project.',
-      },
-    ],
-  },
-];
+const phases = [{
+  number: 1,
+  title: 'PLANNING',
+  color: '#7B5FCC',
+  steps: [{
+    id: '1.1',
+    title: 'Download the Template Folder',
+    description: 'Click "Download Template Folder" at the top of this guide. Unzip it and rename the folder to your project name. Then in Claude Code, type cd and drag your renamed folder into the Claude Code window \u2014 it auto-fills the path. Hit enter.',
+    whyItMatters: 'The template contains all the prompts, documentation templates, and folder structure Claude needs. This gives Claude Code access to read and write your project files.',
+    expectedOutput: 'Claude Code is now working inside your project folder. It can see all the folders: 00-planning, 01-docs, 02-design, 03-code, 04-assets.',
+    prompt: null,
+    dragDrop: {
+      from: 'Your renamed folder',
+      to: 'Claude Code (after typing cd)',
+      description: 'Unzip \u2192 Rename folder \u2192 Type cd \u2192 Drag folder into Claude Code \u2192 Enter'
+    }
+  }, {
+    id: '1.2',
+    title: 'Create Your PRD in Plan Mode',
+    description: 'Follow these steps in order:\n\n1. Enter Plan Mode: press Shift+Tab, then Tab \u2014 you\u2019ll see "Plan Mode" at the bottom of Claude Code\n2. Fill in your project details below and click Copy Filled Prompt\n3. Paste it into Claude Code (Cmd+V) and hit Enter\n4. Claude will write a plan and ask "Would you like to proceed?"\n   \u2022 If the plan ONLY mentions writing PRD.md \u2014 select option 1 or 2 to proceed\n   \u2022 If the plan mentions writing OTHER docs too \u2014 select option 4 and type: "Only write PRD.md, nothing else"\n5. Once PRD.md is created, move to Step 1.3',
+    whyItMatters: 'Plan Mode tells Claude to think and plan before writing any code. It creates a structured to-do list of everything that needs to be built. This becomes your roadmap.',
+    expectedOutput: 'You should see a PRD.md file in your 01-docs folder with a numbered to-do list of features broken into small tasks. If Claude tries to write other docs too, tell it to stop \u2014 the interview in Step 1.3 needs to happen first.',
+    prompt: {
+      template: 'Make a PRD.md (to-do list) file in Claude Code Plan Mode:\n\nI want to build "{{projectName}}" for "{{problemSolved}}"\n\nHelp me create a comprehensive plan and write this in PRD.md as a to-do list.\n\nIMPORTANT: ONLY create the PRD.md file. Do NOT populate the other docs, do NOT start the interview, and do NOT start building. Just write PRD.md and STOP. Wait for my next prompt.',
+      fields: [{
+        name: 'projectName',
+        label: 'Your Project Name',
+        type: 'text',
+        placeholder: 'e.g., Recipe Finder App'
+      }, {
+        name: 'problemSolved',
+        label: 'Problem You\'re Solving',
+        type: 'textarea',
+        placeholder: 'e.g., Home cooks want to find recipes based on ingredients they have',
+        rows: 3
+      }]
+    },
+    troubleshooting: [{
+      issue: 'Claude doesn\u2019t enter Plan Mode',
+      solution: 'Say "Please use Plan Mode to create this PRD"'
+    }, {
+      issue: 'Plan is too vague',
+      solution: 'Ask "Can you break each item down into smaller, more specific tasks?"'
+    }]
+  }, {
+    id: '1.3',
+    title: 'Complete the Detailed Interview',
+    description: 'Let Claude interview you about every aspect of your project using the AskUserQuestion tool.',
+    whyItMatters: 'This is the MOST IMPORTANT step. Claude asks you structured questions (with multiple choice options) about Product, Tech Stack, Design/UX, and Assets. The better you answer, the better Claude understands what to build.',
+    expectedOutput: 'After 20\u201330 questions, Claude will say \u201cI have all the information I need\u201d and will auto-populate all 6 documentation files: PRD.md, APP_FLOW.md, TECH_STACK.md, FRONTEND_GUIDELINES.md, BACKEND_STRUCTURE.md, IMPLEMENTATION_PLAN.md. When done, move to Step 1.4: paste the review prompt to check everything looks right.',
+    prompt: {
+      template: 'Read the PRD.md plan file and interview me in detail using the AskUserQuestion tool.\n\nAsk me about:\n- Product details (who it\u2019s for, what it does, how it works)\n- Technical implementation (frameworks, databases, hosting)\n- UI and UX design (style, colors, layout, inspiration)\n- Assets I have (logos, icons, photos, fonts)\n- Potential concerns and tradeoffs\n\nFor each question, research thoroughly to help me make informed decisions.\nI can share pictures of UI examples to show what I expect.\n\nWhen you\u2019re done interviewing, populate the documentation files and STOP. Do NOT start building or writing code. Wait for my next prompt.',
+      fields: []
+    },
+    tips: ['Take your time with each answer', 'Share screenshots of apps you like (drag them into chat)', 'If you have logo/icon files, drag them into the chat when asked', 'Don\u2019t rush \u2014 this phase determines everything'],
+    troubleshooting: [{
+      issue: 'Claude stops asking too early',
+      solution: 'Say "Keep asking more questions about [tech stack/design/features]"'
+    }, {
+      issue: 'Questions are confusing',
+      solution: 'Say "Can you explain this question differently? I\u2019m not sure what you\u2019re asking"'
+    }, {
+      issue: 'You\u2019re not sure how to answer',
+      solution: 'Say "What do you recommend for my use case?"'
+    }]
+  }, {
+    id: '1.4',
+    title: 'Review & Approve Your Plan',
+    description: 'Quickly skim the docs Claude created to make sure they match your vision.',
+    whyItMatters: 'This is your last chance to course-correct before Claude starts writing code. If something doesn\u2019t match your vision, fix it now.',
+    expectedOutput: 'Claude shows you a concise summary of the key decisions. Review them and either approve or request changes.\n\n⛔ STOP HERE — DO NOT LET CLAUDE START BUILDING.\nWhen Claude asks "ready to build?" or "shall I proceed?", say: "No. Stop here."\n\nThen close this conversation: type /clear or press Cmd+N.\nOpen Step 2.1 in the guide, copy the Build prompt, and paste it into the fresh conversation.\nThis gives Claude a clean context window focused entirely on building.',
+    prompt: {
+      template: 'Show me a summary of what you\u2019ve planned:\n1. The main features from PRD.md\n2. The tech stack from TECH_STACK.md\n3. The color palette from FRONTEND_GUIDELINES.md\n\nDoes this match my vision? If not, I\u2019ll tell you what to change.\n\nIMPORTANT: After showing the summary, STOP COMPLETELY. Do NOT offer to start building. Do NOT ask "shall I proceed?" Do NOT write any code. Just show the summary and wait. I will start a new conversation for the build phase.',
+      fields: []
+    },
+    checkList: ['Are the features what you wanted?', 'Is the tech stack reasonable?', 'Do the colors and style match your vision?']
+  }]
+}, {
+  number: 2,
+  title: 'BUILD',
+  color: '#5B3FA8',
+  steps: [{
+    id: '2.1',
+    title: 'Start Building',
+    description: 'FIRST: Start a fresh conversation (/clear or Cmd+N) \u2014 do NOT paste this into the planning conversation. Then paste this mega-prompt. It tells Claude the full workflow: build one task at a time, test it, check security, update docs, then tell you when to start a new conversation for the next task.',
+    whyItMatters: 'This single prompt gives Claude everything it needs to build correctly. It follows the one-task-at-a-time pattern, which prevents overwhelm and ensures each piece works before moving on.',
+    expectedOutput: 'Claude will: 1) Read your docs, 2) Tell you what it\u2019s about to implement, 3) Create the code files, 4) Show you how to test it, 5) Update CLAUDE.md with progress, 6) Tell you "Task complete. Start a new conversation for the next task." When it does, start a fresh conversation and paste this same prompt again for the next task.',
+    prompt: {
+      template: 'Read CLAUDE.md and progress.txt.\n\nStart building from the next incomplete task in IMPLEMENTATION_PLAN.md.\n\nFollow this workflow for EACH task:\n1. Tell me what you\u2019re about to implement\n2. Implement it using best coding practices\n3. Test that it works\n4. Check for security issues\n5. Update CLAUDE.md and progress.txt with what was completed\n6. STOP and tell me to start a new conversation for the next task\n\nDo ONE task only, then stop. Do NOT move to the next task in the same conversation.\n\nEmphasize security and follow the patterns in FRONTEND_GUIDELINES.md.',
+      fields: []
+    },
+    pattern: ['Paste this prompt in a new conversation', 'Claude implements one task', 'Claude tests it and checks security', 'Claude updates CLAUDE.md and progress.txt', 'Claude tells you to start a new conversation', 'Repeat until all tasks are done'],
+    troubleshooting: [{
+      issue: 'Claude builds the wrong thing',
+      solution: 'Point it to the specific requirement in PRD.md or APP_FLOW.md'
+    }, {
+      issue: 'Code doesn\u2019t match design',
+      solution: 'Say "Check FRONTEND_GUIDELINES.md and update the styling to match"'
+    }, {
+      issue: 'Claude tries to do multiple tasks',
+      solution: 'Say "Stop. Only do one task per conversation."'
+    }]
+  }, {
+    id: '2.2',
+    title: 'Resume After a Break',
+    toolkit: true,
+    description: 'Use this prompt when you come back after a break and need to pick up where you left off.',
+    whyItMatters: 'Claude has no memory between sessions. This prompt tells it to read your progress files and continue from the right spot.',
+    expectedOutput: 'Claude summarizes what\u2019s been done, what\u2019s next, and any blockers \u2014 then continues building.',
+    prompt: {
+      template: 'Read CLAUDE.md and progress.txt.\n\nShow me:\n1. What we completed last session\n2. What we\u2019re working on next\n3. Any blockers or issues\n\nThen continue building the next task. Follow the one-task-at-a-time workflow: implement, test, security check, update docs, then STOP.',
+      fields: []
+    }
+  }, {
+    id: '2.3',
+    title: 'Debug Issues',
+    toolkit: true,
+    description: 'Use this prompt when something breaks during the build.',
+    whyItMatters: 'Systematic debugging finds the real problem. Random fixes waste time and break other things.',
+    expectedOutput: 'Claude walks through the diagnostic steps and proposes a targeted fix with clear reasoning.',
+    prompt: {
+      template: 'Something\u2019s broken with {{issueDescription}}.\n\nBefore guessing at fixes:\n1. Read the relevant documentation (PRD.md, APP_FLOW.md, etc.)\n2. Check progress.txt for recent changes\n3. Explain what SHOULD happen based on the docs\n4. Explain what IS happening\n5. Identify the gap between expected and actual behavior\n6. Propose a specific fix with reasoning\n\nDon\u2019t make random changes. Diagnose first.',
+      fields: [{
+        name: 'issueDescription',
+        label: 'Describe the Issue',
+        type: 'textarea',
+        placeholder: 'e.g., The login button doesn\u2019t respond when clicked',
+        rows: 3
+      }]
+    }
+  }, {
+    id: '2.4',
+    title: 'Add Assets',
+    toolkit: true,
+    description: 'Use this when Claude asks for logos, icons, images, or fonts during the build. Drop them into the right folders.',
+    whyItMatters: 'Having assets in the right place lets Claude reference them in your code.',
+    expectedOutput: 'Claude sees the files and uses them in your components.',
+    prompt: null,
+    dragDrop: {
+      from: 'Your logo files',
+      to: '04-assets/images/logo/',
+      description: 'Organize assets so Claude can use them'
+    },
+    assetFolders: [{
+      type: 'Logos',
+      path: '04-assets/images/logo/'
+    }, {
+      type: 'Icons',
+      path: '04-assets/images/icons/'
+    }, {
+      type: 'Photos',
+      path: '04-assets/images/photos/'
+    }, {
+      type: 'Fonts',
+      path: '04-assets/fonts/'
+    }]
+  }]
+}, {
+  number: 3,
+  title: 'POLISH',
+  color: '#7B5FCC',
+  steps: [{
+    id: '3.1',
+    title: 'Test All Features',
+    description: 'Go through every feature and verify it works as designed.',
+    whyItMatters: 'Real users will try everything. Testing now prevents embarrassing bugs after launch.',
+    expectedOutput: 'Claude gives you a testing checklist based on your app\u2019s flows. Follow it systematically.',
+    prompt: {
+      template: 'Read APP_FLOW.md.\n\nFor each user flow listed:\n1. Walk me through testing it step by step\n2. What should I see at each step?\n3. What are the potential failure points?\n4. What edge cases should I test?',
+      fields: []
+    }
+  }, {
+    id: '3.2',
+    title: 'Test on Mobile',
+    description: 'Verify your app works on phones and tablets.',
+    whyItMatters: 'Many users will access your app on mobile. It needs to work everywhere.',
+    expectedOutput: 'Your app looks good and works smoothly on mobile devices.',
+    prompt: null,
+    mobileChecklist: ['Does text fit without horizontal scrolling?', 'Are buttons easy to tap?', 'Do all features work on touch screens?', 'Is the layout readable?']
+  }, {
+    id: '3.3',
+    title: 'Fix Bugs',
+    description: 'Address any issues you found during testing.',
+    whyItMatters: 'This is your polish phase \u2014 make everything work perfectly.',
+    expectedOutput: 'All bugs fixed, app works smoothly.',
+    prompt: {
+      template: 'I found these issues during testing:\n\n{{bugList}}\n\nFor each one:\n1. Diagnose the root cause\n2. Propose a fix\n3. Test the fix\n4. Update CLAUDE.md',
+      fields: [{
+        name: 'bugList',
+        label: 'List the Bugs Found',
+        type: 'textarea',
+        placeholder: '1. Login button not responding\n2. Mobile menu doesn\u2019t close\n3. Form validation shows wrong error',
+        rows: 5
+      }]
+    }
+  }, {
+    id: '3.4',
+    title: 'Run Ralph Loop (Optional)',
+    description: 'Use automated testing if applicable.',
+    whyItMatters: 'Automated testing can catch issues you might miss.',
+    expectedOutput: 'Ralph loop runs tests and reports results.',
+    prompt: {
+      template: 'Run the Ralph loop for automated validation:\nhttps://github.com/michaelshimeles/ralphy\n\nTest the app thoroughly and report any issues.',
+      fields: []
+    }
+  }]
+}, {
+  number: 4,
+  title: 'SHIP',
+  color: '#5B3FA8',
+  steps: [{
+    id: '4.1',
+    title: 'Deploy Your App',
+    description: 'Push your code and make it live.',
+    whyItMatters: 'You\u2019re making your app available to the world!',
+    expectedOutput: 'Your app is live at a public URL. Share it!',
+    prompt: {
+      template: 'Read TECH_STACK.md for deployment instructions.\n\nDeploy the app to {{hostingPlatform}}.\n\nWalk me through the deployment steps.',
+      fields: [{
+        name: 'hostingPlatform',
+        label: 'Hosting Platform',
+        type: 'text',
+        placeholder: 'e.g., Vercel, Netlify, Railway'
+      }]
+    }
+  }, {
+    id: '4.2',
+    title: 'Create Your Learning Story',
+    description: 'Ask Claude to document everything you learned.',
+    whyItMatters: 'Building is great, but understanding what you built makes you a better builder. This document captures your journey so you can learn from it and reference it later.',
+    expectedOutput: 'Claude creates your personal learning document \u2014 a friendly, engaging explanation of your entire project with lessons learned, mental models, and growth opportunities.',
+    prompt: {
+      template: 'The project is complete! Please create my FOR[{{yourName}}].md learning document.\n\nThis should explain the entire project in plain language, including:\n- Technical architecture and how it\u2019s structured\n- How the various parts are connected\n- Technologies used and why we chose them\n- Lessons I can learn from this project:\n  * Bugs we ran into and how we fixed them\n  * Potential pitfalls and how to avoid them in the future\n  * New technologies/concepts introduced\n  * How good engineers think and work\n  * Best practices demonstrated in this project\n\nMake it engaging and memorable \u2014 use technical terms appropriately, but also use analogies and anecdotes to make concepts stick. Don\u2019t make it sound like boring technical documentation.\n\nThis is a learning tool to help me grow as a builder.',
+      fields: [{
+        name: 'yourName',
+        label: 'Your Name',
+        type: 'text',
+        placeholder: 'e.g., Andy'
+      }]
+    },
+    whatToDo: 'Read it! This is your personal knowledge base. Refer back to it when building your next project.'
+  }]
+}];
 
 /* ═══════════════════════════════════════════
    EDITABLE PROMPT COMPONENT
    ═══════════════════════════════════════════ */
-const EditablePrompt = ({template, fields, stepId, onFavorite, isFavorited}) => {
+const EditablePrompt = ({
+  template,
+  fields,
+  stepId,
+  onFavorite,
+  isFavorited
+}) => {
   const [vals, setVals] = useState({});
   const [copied, setCopied] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-
   const filled = useMemo(() => {
     let t = template;
     if (fields && fields.length > 0) {
       fields.forEach(f => {
-        t = t.replace(new RegExp('\\{\\{'+f.name+'\\}\\}','g'), vals[f.name] || '['+f.label+']');
+        t = t.replace(new RegExp('\\{\\{' + f.name + '\\}\\}', 'g'), vals[f.name] || '[' + f.label + ']');
       });
     }
     return t;
   }, [template, fields, vals]);
-
   const handleCopy = async () => {
     const ok = await copyText(filled);
-    if(ok){setCopied(true);setTimeout(()=>setCopied(false),2000);}
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
-
   const hasFields = fields && fields.length > 0;
-
-  return (
-    <div style={{background:colors.codeBg,border:'1px solid '+colors.border,borderRadius:12,padding:20,marginTop:12}}>
-      {hasFields && (
-        <div style={{marginBottom:16}}>
-          <div style={{fontSize:12,fontWeight:600,color:colors.textMuted,textTransform:'uppercase',letterSpacing:'0.05em',marginBottom:10}}>
-            Fill in your details
-          </div>
-          {fields.map(f=>(
-            <div key={f.name} style={{marginBottom:12}}>
-              <label style={{display:'block',fontSize:13,fontWeight:500,color:colors.text,marginBottom:4}}>{f.label}</label>
-              {f.type==='textarea'?(
-                <textarea rows={f.rows||3} placeholder={f.placeholder} value={vals[f.name]||''}
-                  onChange={e=>setVals(p=>({...p,[f.name]:e.target.value}))}
-                  style={{width:'100%',padding:'8px 12px',fontSize:14,border:'1px solid '+colors.border,borderRadius:8,background:colors.surface,color:colors.text,resize:'vertical',lineHeight:1.5,transition:'border-color 0.2s'}}
-                  onFocus={e=>e.target.style.borderColor=colors.accent}
-                  onBlur={e=>e.target.style.borderColor=colors.border}
-                />
-              ):(
-                <input type="text" placeholder={f.placeholder} value={vals[f.name]||''}
-                  onChange={e=>setVals(p=>({...p,[f.name]:e.target.value}))}
-                  style={{width:'100%',padding:'8px 12px',fontSize:14,border:'1px solid '+colors.border,borderRadius:8,background:colors.surface,color:colors.text,transition:'border-color 0.2s'}}
-                  onFocus={e=>e.target.style.borderColor=colors.accent}
-                  onBlur={e=>e.target.style.borderColor=colors.border}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-      <div onClick={()=>setShowPreview(!showPreview)}
-        style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontSize:13,color:colors.textMuted,marginBottom:showPreview?8:0,userSelect:'none'}}>
-        {showPreview?Icons.chevronDown(14,colors.textMuted):Icons.chevronRight(14,colors.textMuted)}
-        <span>{showPreview?'Hide':'Preview'} prompt</span>
-      </div>
-      {showPreview && (
-        <pre style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:8,padding:14,fontSize:13,lineHeight:1.6,whiteSpace:'pre-wrap',wordBreak:'break-word',color:colors.text,maxHeight:300,overflow:'auto',marginBottom:12}}>
-          {filled}
-        </pre>
-      )}
-      <div style={{display:'flex',gap:8,marginTop:12,flexWrap:'wrap'}}>
-        <button onClick={handleCopy} className={'btn-copy'+(copied?' copied':'')}
-          style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 16px',fontSize:13,fontWeight:600,background:copied?colors.success:colors.accent,color:'#fff',border:'none',borderRadius:8,cursor:'pointer',transition:'all 0.2s'}}>
-          {copied?Icons.check(14,'#fff'):Icons.clipboard(14,'#fff')}
-          {copied?'Copied!':(hasFields?'Copy Filled Prompt':'Copy Prompt')}
-        </button>
-        {copied&&(
-          <span style={{display:'inline-flex',alignItems:'center',fontSize:13,fontWeight:600,color:colors.success,animation:'fadeIn 0.3s ease-out'}}>
-            Now paste this into Claude Code (Cmd+V)
-          </span>
-        )}
-        {onFavorite && (
-          <button onClick={()=>onFavorite(stepId)} title={isFavorited?'Remove from favorites':'Add to favorites'}
-            style={{display:'inline-flex',alignItems:'center',gap:4,padding:'8px 12px',fontSize:13,background:'transparent',border:'1px solid '+colors.border,borderRadius:8,cursor:'pointer',color:colors.textMuted,transition:'all 0.2s'}}>
-            {isFavorited?Icons.starFilled(14):Icons.star(14)}
-          </button>
-        )}
-      </div>
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: colors.codeBg,
+      border: '1px solid ' + colors.border,
+      borderRadius: 12,
+      padding: 20,
+      marginTop: 12
+    }
+  }, hasFields && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      marginBottom: 10
+    }
+  }, "Fill in your details"), fields.map(f => /*#__PURE__*/React.createElement("div", {
+    key: f.name,
+    style: {
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: 'block',
+      fontSize: 13,
+      fontWeight: 500,
+      color: colors.text,
+      marginBottom: 4
+    }
+  }, f.label), f.type === 'textarea' ? /*#__PURE__*/React.createElement("textarea", {
+    rows: f.rows || 3,
+    placeholder: f.placeholder,
+    value: vals[f.name] || '',
+    onChange: e => setVals(p => ({
+      ...p,
+      [f.name]: e.target.value
+    })),
+    style: {
+      width: '100%',
+      padding: '8px 12px',
+      fontSize: 14,
+      border: '1px solid ' + colors.border,
+      borderRadius: 8,
+      background: colors.surface,
+      color: colors.text,
+      resize: 'vertical',
+      lineHeight: 1.5,
+      transition: 'border-color 0.2s'
+    },
+    onFocus: e => e.target.style.borderColor = colors.accent,
+    onBlur: e => e.target.style.borderColor = colors.border
+  }) : /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    placeholder: f.placeholder,
+    value: vals[f.name] || '',
+    onChange: e => setVals(p => ({
+      ...p,
+      [f.name]: e.target.value
+    })),
+    style: {
+      width: '100%',
+      padding: '8px 12px',
+      fontSize: 14,
+      border: '1px solid ' + colors.border,
+      borderRadius: 8,
+      background: colors.surface,
+      color: colors.text,
+      transition: 'border-color 0.2s'
+    },
+    onFocus: e => e.target.style.borderColor = colors.accent,
+    onBlur: e => e.target.style.borderColor = colors.border
+  })))), /*#__PURE__*/React.createElement("div", {
+    onClick: () => setShowPreview(!showPreview),
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6,
+      cursor: 'pointer',
+      fontSize: 13,
+      color: colors.textMuted,
+      marginBottom: showPreview ? 8 : 0,
+      userSelect: 'none'
+    }
+  }, showPreview ? Icons.chevronDown(14, colors.textMuted) : Icons.chevronRight(14, colors.textMuted), /*#__PURE__*/React.createElement("span", null, showPreview ? 'Hide' : 'Preview', " prompt")), showPreview && /*#__PURE__*/React.createElement("pre", {
+    style: {
+      background: colors.surface,
+      border: '1px solid ' + colors.borderLight,
+      borderRadius: 8,
+      padding: 14,
+      fontSize: 13,
+      lineHeight: 1.6,
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-word',
+      color: colors.text,
+      maxHeight: 300,
+      overflow: 'auto',
+      marginBottom: 12
+    }
+  }, filled), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginTop: 12,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: handleCopy,
+    className: 'btn-copy' + (copied ? ' copied' : ''),
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 6,
+      padding: '8px 16px',
+      fontSize: 13,
+      fontWeight: 600,
+      background: copied ? colors.success : colors.accent,
+      color: '#fff',
+      border: 'none',
+      borderRadius: 8,
+      cursor: 'pointer',
+      transition: 'all 0.2s'
+    }
+  }, copied ? Icons.check(14, '#fff') : Icons.clipboard(14, '#fff'), copied ? 'Copied!' : hasFields ? 'Copy Filled Prompt' : 'Copy Prompt'), copied && /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      fontSize: 13,
+      fontWeight: 600,
+      color: colors.success,
+      animation: 'fadeIn 0.3s ease-out'
+    }
+  }, "Now paste this into Claude Code (Cmd+V)"), onFavorite && /*#__PURE__*/React.createElement("button", {
+    onClick: () => onFavorite(stepId),
+    title: isFavorited ? 'Remove from favorites' : 'Add to favorites',
+    style: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 4,
+      padding: '8px 12px',
+      fontSize: 13,
+      background: 'transparent',
+      border: '1px solid ' + colors.border,
+      borderRadius: 8,
+      cursor: 'pointer',
+      color: colors.textMuted,
+      transition: 'all 0.2s'
+    }
+  }, isFavorited ? Icons.starFilled(14) : Icons.star(14))));
 };
 
 /* ═══════════════════════════════════════════
    DRAG-DROP VISUAL
    ═══════════════════════════════════════════ */
-const DragDropVisual = ({from,to,description}) => (
-  <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:16,padding:20,margin:'12px 0',
-    background:'linear-gradient(135deg,'+colors.codeBg+','+colors.surfaceHover+')',borderRadius:12,border:'1px dashed '+colors.border,flexWrap:'wrap'}}>
-    <div style={{padding:'10px 16px',background:colors.surface,borderRadius:8,border:'1px solid '+colors.border,fontSize:13,fontWeight:500,color:colors.text,animation:'bounceFile 2s ease-in-out infinite',display:'flex',alignItems:'center',gap:6}}>
-      {Icons.folder(16,colors.accent)}{from}
-    </div>
-    <div>{Icons.arrowRight(24,colors.accent)}</div>
-    <div style={{padding:'10px 16px',background:colors.surface,borderRadius:8,border:'2px solid '+colors.accent,fontSize:13,fontWeight:500,color:colors.text,display:'flex',alignItems:'center',gap:6}}>
-      {Icons.folder(16,colors.accent)}{to}
-    </div>
-    {description&&<div style={{width:'100%',textAlign:'center',fontSize:12,color:colors.textMuted,marginTop:4}}>{description}</div>}
-  </div>
-);
+const DragDropVisual = ({
+  from,
+  to,
+  description
+}) => /*#__PURE__*/React.createElement("div", {
+  style: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    padding: 20,
+    margin: '12px 0',
+    background: 'linear-gradient(135deg,' + colors.codeBg + ',' + colors.surfaceHover + ')',
+    borderRadius: 12,
+    border: '1px dashed ' + colors.border,
+    flexWrap: 'wrap'
+  }
+}, /*#__PURE__*/React.createElement("div", {
+  style: {
+    padding: '10px 16px',
+    background: colors.surface,
+    borderRadius: 8,
+    border: '1px solid ' + colors.border,
+    fontSize: 13,
+    fontWeight: 500,
+    color: colors.text,
+    animation: 'bounceFile 2s ease-in-out infinite',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6
+  }
+}, Icons.folder(16, colors.accent), from), /*#__PURE__*/React.createElement("div", null, Icons.arrowRight(24, colors.accent)), /*#__PURE__*/React.createElement("div", {
+  style: {
+    padding: '10px 16px',
+    background: colors.surface,
+    borderRadius: 8,
+    border: '2px solid ' + colors.accent,
+    fontSize: 13,
+    fontWeight: 500,
+    color: colors.text,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6
+  }
+}, Icons.folder(16, colors.accent), to), description && /*#__PURE__*/React.createElement("div", {
+  style: {
+    width: '100%',
+    textAlign: 'center',
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 4
+  }
+}, description));
 
 /* ═══════════════════════════════════════════
    STEP CARD
    ═══════════════════════════════════════════ */
-const StepCard = ({step,isExpanded,onToggle,isCompleted,onComplete,isFavorited,onFavorite}) => {
+const StepCard = ({
+  step,
+  isExpanded,
+  onToggle,
+  isCompleted,
+  onComplete,
+  isFavorited,
+  onFavorite
+}) => {
   const isToolkit = step.toolkit;
-  return (
-  <div className="fade-in" style={{background:colors.surface,border:(isToolkit?'1px dashed ':'1px solid ')+(isCompleted?colors.success+'44':isToolkit?colors.textLight+'66':colors.border),borderRadius:12,marginBottom:10,overflow:'hidden',transition:'border-color 0.2s, box-shadow 0.2s',boxShadow:isExpanded?'0 4px 20px '+colors.accent+'11':'none'}}>
-    <div role="button" tabIndex={0} aria-expanded={isExpanded} onClick={onToggle} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onToggle();}}} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 18px',cursor:'pointer',userSelect:'none',background:isExpanded?colors.surfaceHover:'transparent',transition:'background 0.2s'}}>
-      {!isToolkit&&<div role="checkbox" tabIndex={0} aria-checked={isCompleted} aria-label={'Mark '+step.title+(isCompleted?' incomplete':' complete')} onClick={e=>{e.stopPropagation();onComplete();}} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();onComplete();}}}
-        style={{width:22,height:22,borderRadius:6,flexShrink:0,border:'2px solid '+(isCompleted?colors.success:colors.border),background:isCompleted?colors.successBg:'transparent',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',transition:'all 0.2s'}}>
-        {isCompleted&&Icons.check(14,colors.success)}
-      </div>}
-      <div style={{flex:1,minWidth:0}}>
-        <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-          {isToolkit?(
-            <span style={{fontSize:10,fontWeight:700,color:colors.textLight,background:colors.borderLight,padding:'2px 8px',borderRadius:4,textTransform:'uppercase',letterSpacing:'0.05em'}}>When needed</span>
-          ):(
-            <span style={{fontSize:11,fontWeight:700,color:colors.accent,background:colors.codeBg,padding:'2px 8px',borderRadius:4}}>{step.id}</span>
-          )}
-          <span style={{fontSize:15,fontWeight:600,color:isCompleted?colors.textLight:colors.text,textDecoration:isCompleted?'line-through':'none',transition:'color 0.2s'}}>{step.title}</span>
-        </div>
-      </div>
-      <div style={{flexShrink:0,transition:'transform 0.2s',transform:isExpanded?'rotate(180deg)':'rotate(0)'}}>
-        {Icons.chevronDown(18,colors.textLight)}
-      </div>
-    </div>
-    {isExpanded&&(
-      <div style={{padding:'0 18px 18px',animation:'fadeIn 0.25s ease-out'}}>
-        <p style={{fontSize:14,color:colors.textMuted,lineHeight:1.7,marginBottom:16}}>{step.description}</p>
-        {step.whyItMatters&&(
-          <div style={{background:colors.surfaceHover,borderRadius:8,padding:14,marginBottom:16,borderLeft:'3px solid '+colors.accent}}>
-            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:4,textTransform:'uppercase',letterSpacing:'0.04em'}}>Why it matters</div>
-            <p style={{fontSize:13,color:colors.text,lineHeight:1.6,margin:0}}>{step.whyItMatters}</p>
-          </div>
-        )}
-        {step.dragDrop&&<DragDropVisual {...step.dragDrop}/>}
-        {step.assetFolders&&(
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(170px, 1fr))',gap:8,margin:'12px 0'}}>
-            {step.assetFolders.map(af=>(
-              <div key={af.type} style={{padding:'10px 14px',background:colors.codeBg,borderRadius:8,border:'1px solid '+colors.borderLight,fontSize:13}}>
-                <div style={{fontWeight:600,color:colors.text,marginBottom:2}}>{af.type}</div>
-                <code style={{fontSize:11,color:colors.textMuted}}>{af.path}</code>
-              </div>
-            ))}
-          </div>
-        )}
-        {step.prompt&&<EditablePrompt template={step.prompt.template} fields={step.prompt.fields} stepId={step.id} onFavorite={onFavorite} isFavorited={isFavorited}/>}
-        {step.pattern&&(
-          <div style={{margin:'16px 0'}}>
-            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>The Pattern</div>
-            <ol style={{paddingLeft:20,fontSize:13,color:colors.text,lineHeight:2}}>
-              {step.pattern.map((p,i)=><li key={i}>{p}</li>)}
-            </ol>
-          </div>
-        )}
-        {step.tips&&(
-          <div style={{margin:'16px 0'}}>
-            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>Tips</div>
-            <ul style={{paddingLeft:20,fontSize:13,color:colors.text,lineHeight:2}}>
-              {step.tips.map((t,i)=><li key={i}>{t}</li>)}
-            </ul>
-          </div>
-        )}
-        {step.mobileChecklist&&(
-          <div style={{margin:'16px 0'}}>
-            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>What to Test</div>
-            <ul style={{paddingLeft:4,fontSize:13,color:colors.text,lineHeight:2,listStyle:'none'}}>
-              {step.mobileChecklist.map((m,i)=><li key={i}>{'\u2610'} {m}</li>)}
-            </ul>
-          </div>
-        )}
-        {step.checkList&&(
-          <div style={{margin:'16px 0'}}>
-            <div style={{fontSize:12,fontWeight:700,color:colors.accent,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>What to Check</div>
-            <ul style={{paddingLeft:20,fontSize:13,color:colors.text,lineHeight:2}}>
-              {step.checkList.map((c,i)=><li key={i}>{c}</li>)}
-            </ul>
-          </div>
-        )}
-        {step.expectedOutput&&(
-          <div style={{background:colors.successBg,borderRadius:8,padding:14,marginTop:16,borderLeft:'3px solid '+colors.success}}>
-            <div style={{fontSize:12,fontWeight:700,color:colors.success,marginBottom:4,textTransform:'uppercase',letterSpacing:'0.04em'}}>Expected Output</div>
-            <p style={{fontSize:13,color:colors.text,lineHeight:1.6,margin:0}}>{step.expectedOutput}</p>
-          </div>
-        )}
-        {step.whatToDo&&(
-          <div style={{background:colors.warningBg,borderRadius:8,padding:14,marginTop:12,borderLeft:'3px solid '+colors.warning}}>
-            <div style={{fontSize:12,fontWeight:700,color:colors.warning,marginBottom:4,textTransform:'uppercase',letterSpacing:'0.04em'}}>What to Do With It</div>
-            <p style={{fontSize:13,color:colors.text,lineHeight:1.6,margin:0}}>{step.whatToDo}</p>
-          </div>
-        )}
-        {step.troubleshooting&&step.troubleshooting.length>0&&(
-          <div style={{marginTop:16}}>
-            <div style={{fontSize:12,fontWeight:700,color:colors.warning,marginBottom:8,textTransform:'uppercase',letterSpacing:'0.04em'}}>Troubleshooting</div>
-            {step.troubleshooting.map((t,i)=>(
-              <div key={i} style={{background:colors.warningBg,borderRadius:8,padding:12,marginBottom:8,fontSize:13,lineHeight:1.5}}>
-                <strong style={{color:colors.text}}>Issue:</strong> <span style={{color:colors.textMuted}}>{t.issue}</span><br/>
-                <strong style={{color:colors.text}}>Fix:</strong> <span style={{color:colors.text}}>{t.solution}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fade-in",
+    style: {
+      background: colors.surface,
+      border: (isToolkit ? '1px dashed ' : '1px solid ') + (isCompleted ? colors.success + '44' : isToolkit ? colors.textLight + '66' : colors.border),
+      borderRadius: 12,
+      marginBottom: 10,
+      overflow: 'hidden',
+      transition: 'border-color 0.2s, box-shadow 0.2s',
+      boxShadow: isExpanded ? '0 4px 20px ' + colors.accent + '11' : 'none'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    role: "button",
+    tabIndex: 0,
+    "aria-expanded": isExpanded,
+    onClick: onToggle,
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onToggle();
+      }
+    },
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      padding: '14px 18px',
+      cursor: 'pointer',
+      userSelect: 'none',
+      background: isExpanded ? colors.surfaceHover : 'transparent',
+      transition: 'background 0.2s'
+    }
+  }, !isToolkit && /*#__PURE__*/React.createElement("div", {
+    role: "checkbox",
+    tabIndex: 0,
+    "aria-checked": isCompleted,
+    "aria-label": 'Mark ' + step.title + (isCompleted ? ' incomplete' : ' complete'),
+    onClick: e => {
+      e.stopPropagation();
+      onComplete();
+    },
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        onComplete();
+      }
+    },
+    style: {
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      flexShrink: 0,
+      border: '2px solid ' + (isCompleted ? colors.success : colors.border),
+      background: isCompleted ? colors.successBg : 'transparent',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      transition: 'all 0.2s'
+    }
+  }, isCompleted && Icons.check(14, colors.success)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap'
+    }
+  }, isToolkit ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      fontWeight: 700,
+      color: colors.textLight,
+      background: colors.borderLight,
+      padding: '2px 8px',
+      borderRadius: 4,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em'
+    }
+  }, "When needed") : /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: colors.accent,
+      background: colors.codeBg,
+      padding: '2px 8px',
+      borderRadius: 4
+    }
+  }, step.id), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 15,
+      fontWeight: 600,
+      color: isCompleted ? colors.textLight : colors.text,
+      textDecoration: isCompleted ? 'line-through' : 'none',
+      transition: 'color 0.2s'
+    }
+  }, step.title))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flexShrink: 0,
+      transition: 'transform 0.2s',
+      transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)'
+    }
+  }, Icons.chevronDown(18, colors.textLight))), isExpanded && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 18px 18px',
+      animation: 'fadeIn 0.25s ease-out'
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 14,
+      color: colors.textMuted,
+      lineHeight: 1.7,
+      marginBottom: 16
+    }
+  }, step.description), step.whyItMatters && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: colors.surfaceHover,
+      borderRadius: 8,
+      padding: 14,
+      marginBottom: 16,
+      borderLeft: '3px solid ' + colors.accent
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: colors.accent,
+      marginBottom: 4,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }
+  }, "Why it matters"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 1.6,
+      margin: 0
+    }
+  }, step.whyItMatters)), step.dragDrop && /*#__PURE__*/React.createElement(DragDropVisual, step.dragDrop), step.assetFolders && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+      gap: 8,
+      margin: '12px 0'
+    }
+  }, step.assetFolders.map(af => /*#__PURE__*/React.createElement("div", {
+    key: af.type,
+    style: {
+      padding: '10px 14px',
+      background: colors.codeBg,
+      borderRadius: 8,
+      border: '1px solid ' + colors.borderLight,
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 600,
+      color: colors.text,
+      marginBottom: 2
+    }
+  }, af.type), /*#__PURE__*/React.createElement("code", {
+    style: {
+      fontSize: 11,
+      color: colors.textMuted
+    }
+  }, af.path)))), step.prompt && /*#__PURE__*/React.createElement(EditablePrompt, {
+    template: step.prompt.template,
+    fields: step.prompt.fields,
+    stepId: step.id,
+    onFavorite: onFavorite,
+    isFavorited: isFavorited
+  }), step.pattern && /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: '16px 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: colors.accent,
+      marginBottom: 8,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }
+  }, "The Pattern"), /*#__PURE__*/React.createElement("ol", {
+    style: {
+      paddingLeft: 20,
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 2
+    }
+  }, step.pattern.map((p, i) => /*#__PURE__*/React.createElement("li", {
+    key: i
+  }, p)))), step.tips && /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: '16px 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: colors.accent,
+      marginBottom: 8,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }
+  }, "Tips"), /*#__PURE__*/React.createElement("ul", {
+    style: {
+      paddingLeft: 20,
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 2
+    }
+  }, step.tips.map((t, i) => /*#__PURE__*/React.createElement("li", {
+    key: i
+  }, t)))), step.mobileChecklist && /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: '16px 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: colors.accent,
+      marginBottom: 8,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }
+  }, "What to Test"), /*#__PURE__*/React.createElement("ul", {
+    style: {
+      paddingLeft: 4,
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 2,
+      listStyle: 'none'
+    }
+  }, step.mobileChecklist.map((m, i) => /*#__PURE__*/React.createElement("li", {
+    key: i
+  }, '\u2610', " ", m)))), step.checkList && /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: '16px 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: colors.accent,
+      marginBottom: 8,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }
+  }, "What to Check"), /*#__PURE__*/React.createElement("ul", {
+    style: {
+      paddingLeft: 20,
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 2
+    }
+  }, step.checkList.map((c, i) => /*#__PURE__*/React.createElement("li", {
+    key: i
+  }, c)))), step.expectedOutput && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: colors.successBg,
+      borderRadius: 8,
+      padding: 14,
+      marginTop: 16,
+      borderLeft: '3px solid ' + colors.success
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: colors.success,
+      marginBottom: 4,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }
+  }, "Expected Output"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 1.6,
+      margin: 0
+    }
+  }, step.expectedOutput)), step.whatToDo && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: colors.warningBg,
+      borderRadius: 8,
+      padding: 14,
+      marginTop: 12,
+      borderLeft: '3px solid ' + colors.warning
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: colors.warning,
+      marginBottom: 4,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }
+  }, "What to Do With It"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: colors.text,
+      lineHeight: 1.6,
+      margin: 0
+    }
+  }, step.whatToDo)), step.troubleshooting && step.troubleshooting.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: colors.warning,
+      marginBottom: 8,
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    }
+  }, "Troubleshooting"), step.troubleshooting.map((t, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      background: colors.warningBg,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 8,
+      fontSize: 13,
+      lineHeight: 1.5
+    }
+  }, /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: colors.text
+    }
+  }, "Issue:"), " ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: colors.textMuted
+    }
+  }, t.issue), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("strong", {
+    style: {
+      color: colors.text
+    }
+  }, "Fix:"), " ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: colors.text
+    }
+  }, t.solution))))));
 };
 
 /* ═══════════════════════════════════════════
    PHASE SECTION
    ═══════════════════════════════════════════ */
-const PhaseSection = ({phase,completedSteps,expandedSteps,onToggleStep,onCompleteStep,favorites,onFavorite}) => {
-  const [isOpen,setIsOpen] = useState(true);
-  const coreSteps = phase.steps.filter(s=>!s.toolkit);
-  const done = coreSteps.filter(s=>completedSteps.includes(s.id)).length;
-  const pct = coreSteps.length>0?(done/coreSteps.length)*100:0;
-
-  return (
-    <div style={{marginBottom:24}}>
-      <div role="button" tabIndex={0} aria-expanded={isOpen} onClick={()=>setIsOpen(!isOpen)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}}}
-        style={{display:'flex',alignItems:'center',gap:14,padding:'16px 20px',background:colors.surface,borderRadius:16,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none',transition:'box-shadow 0.2s',boxShadow:isOpen?'0 2px 12px '+colors.accent+'11':'none'}}>
-        <div style={{width:42,height:42,borderRadius:12,flexShrink:0,background:'linear-gradient(135deg,'+phase.color+','+phase.color+'cc)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-          {phaseIcons[phase.number](20,'#fff')}
-        </div>
-        <div style={{flex:1}}>
-          <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-            <span style={{fontSize:11,fontWeight:700,color:colors.textLight,textTransform:'uppercase',letterSpacing:'0.08em'}}>Phase {phase.number}</span>
-            <span style={{fontSize:18,fontWeight:700,color:colors.text}}>{phase.title}</span>
-            <span style={{fontSize:11,fontWeight:600,color:done===coreSteps.length?colors.success:colors.textMuted,background:done===coreSteps.length?colors.successBg:colors.codeBg,padding:'2px 8px',borderRadius:10}}>{done}/{coreSteps.length}</span>
-          </div>
-          <div style={{height:4,background:colors.borderLight,borderRadius:2,marginTop:8,overflow:'hidden'}}>
-            <div style={{height:'100%',borderRadius:2,transition:'width 0.4s ease',width:pct+'%',background:done===coreSteps.length?'linear-gradient(90deg,'+colors.success+',#34d399)':'linear-gradient(90deg,'+phase.color+','+colors.accentHover+')'}}/>
-          </div>
-        </div>
-        <div style={{flexShrink:0,transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>
-          {Icons.chevronDown(20,colors.textLight)}
-        </div>
-      </div>
-      {isOpen&&(
-        <div style={{padding:'12px 0 0'}}>
-          {(()=>{
-            const regular = phase.steps.filter(s=>!s.toolkit);
-            const toolkit = phase.steps.filter(s=>s.toolkit);
-            return (<>
-              {regular.map(step=>(
-                <StepCard key={step.id} step={step}
-                  isExpanded={expandedSteps.includes(step.id)}
-                  onToggle={()=>onToggleStep(step.id)}
-                  isCompleted={completedSteps.includes(step.id)}
-                  onComplete={()=>onCompleteStep(step.id)}
-                  isFavorited={favorites.includes(step.id)}
-                  onFavorite={onFavorite}
-                />
-              ))}
-              {toolkit.length>0&&(
-                <div style={{textAlign:'center',padding:'16px 0 12px',margin:'8px 0'}}>
-                  <div style={{height:1,background:'linear-gradient(90deg,transparent,'+colors.divider+',transparent)',marginBottom:10}}/>
-                  <span style={{fontSize:12,fontWeight:600,color:colors.textLight,letterSpacing:'0.06em',textTransform:'uppercase'}}>Build Toolkit \u2014 use when needed</span>
-                  <p style={{fontSize:12,color:colors.textLight,margin:'4px 0 0',fontWeight:400}}>These aren\u2019t sequential steps. Reach for them during the build as the situation calls for it.</p>
-                  <div style={{height:1,background:'linear-gradient(90deg,transparent,'+colors.divider+',transparent)',marginTop:10}}/>
-                </div>
-              )}
-              {toolkit.map(step=>(
-                <StepCard key={step.id} step={step}
-                  isExpanded={expandedSteps.includes(step.id)}
-                  onToggle={()=>onToggleStep(step.id)}
-                  isCompleted={completedSteps.includes(step.id)}
-                  onComplete={()=>onCompleteStep(step.id)}
-                  isFavorited={favorites.includes(step.id)}
-                  onFavorite={onFavorite}
-                />
-              ))}
-            </>);
-          })()}
-        </div>
-      )}
-    </div>
-  );
+const PhaseSection = ({
+  phase,
+  completedSteps,
+  expandedSteps,
+  onToggleStep,
+  onCompleteStep,
+  favorites,
+  onFavorite
+}) => {
+  const [isOpen, setIsOpen] = useState(true);
+  const coreSteps = phase.steps.filter(s => !s.toolkit);
+  const done = coreSteps.filter(s => completedSteps.includes(s.id)).length;
+  const pct = coreSteps.length > 0 ? done / coreSteps.length * 100 : 0;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    role: "button",
+    tabIndex: 0,
+    "aria-expanded": isOpen,
+    onClick: () => setIsOpen(!isOpen),
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setIsOpen(!isOpen);
+      }
+    },
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      padding: '16px 20px',
+      background: colors.surface,
+      borderRadius: 16,
+      border: '1px solid ' + colors.border,
+      cursor: 'pointer',
+      userSelect: 'none',
+      transition: 'box-shadow 0.2s',
+      boxShadow: isOpen ? '0 2px 12px ' + colors.accent + '11' : 'none'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      flexShrink: 0,
+      background: 'linear-gradient(135deg,' + phase.color + ',' + phase.color + 'cc)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }
+  }, phaseIcons[phase.number](20, '#fff')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: colors.textLight,
+      textTransform: 'uppercase',
+      letterSpacing: '0.08em'
+    }
+  }, "Phase ", phase.number), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 18,
+      fontWeight: 700,
+      color: colors.text
+    }
+  }, phase.title), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      color: done === coreSteps.length ? colors.success : colors.textMuted,
+      background: done === coreSteps.length ? colors.successBg : colors.codeBg,
+      padding: '2px 8px',
+      borderRadius: 10
+    }
+  }, done, "/", coreSteps.length)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 4,
+      background: colors.borderLight,
+      borderRadius: 2,
+      marginTop: 8,
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '100%',
+      borderRadius: 2,
+      transition: 'width 0.4s ease',
+      width: pct + '%',
+      background: done === coreSteps.length ? 'linear-gradient(90deg,' + colors.success + ',#34d399)' : 'linear-gradient(90deg,' + phase.color + ',' + colors.accentHover + ')'
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flexShrink: 0,
+      transition: 'transform 0.2s',
+      transform: isOpen ? 'rotate(180deg)' : 'rotate(0)'
+    }
+  }, Icons.chevronDown(20, colors.textLight))), isOpen && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '12px 0 0'
+    }
+  }, (() => {
+    const regular = phase.steps.filter(s => !s.toolkit);
+    const toolkit = phase.steps.filter(s => s.toolkit);
+    return /*#__PURE__*/React.createElement(React.Fragment, null, regular.map(step => /*#__PURE__*/React.createElement(StepCard, {
+      key: step.id,
+      step: step,
+      isExpanded: expandedSteps.includes(step.id),
+      onToggle: () => onToggleStep(step.id),
+      isCompleted: completedSteps.includes(step.id),
+      onComplete: () => onCompleteStep(step.id),
+      isFavorited: favorites.includes(step.id),
+      onFavorite: onFavorite
+    })), toolkit.length > 0 && /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: 'center',
+        padding: '16px 0 12px',
+        margin: '8px 0'
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: 1,
+        background: 'linear-gradient(90deg,transparent,' + colors.divider + ',transparent)',
+        marginBottom: 10
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        fontWeight: 600,
+        color: colors.textLight,
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase'
+      }
+    }, "Build Toolkit \\u2014 use when needed"), /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 12,
+        color: colors.textLight,
+        margin: '4px 0 0',
+        fontWeight: 400
+      }
+    }, "These aren\\u2019t sequential steps. Reach for them during the build as the situation calls for it."), /*#__PURE__*/React.createElement("div", {
+      style: {
+        height: 1,
+        background: 'linear-gradient(90deg,transparent,' + colors.divider + ',transparent)',
+        marginTop: 10
+      }
+    })), toolkit.map(step => /*#__PURE__*/React.createElement(StepCard, {
+      key: step.id,
+      step: step,
+      isExpanded: expandedSteps.includes(step.id),
+      onToggle: () => onToggleStep(step.id),
+      isCompleted: completedSteps.includes(step.id),
+      onComplete: () => onCompleteStep(step.id),
+      isFavorited: favorites.includes(step.id),
+      onFavorite: onFavorite
+    })));
+  })()));
 };
 
 /* ═══════════════════════════════════════════
    BONUS: MY FAVORITES
    ═══════════════════════════════════════════ */
-const FavoritesSection = ({favorites,onRemove}) => {
-  const [isOpen,setIsOpen] = useState(false);
-  const favSteps = useMemo(()=>{
-    const out=[];
-    phases.forEach(p=>p.steps.forEach(s=>{if(s.prompt&&favorites.includes(s.id))out.push(s);}));
+const FavoritesSection = ({
+  favorites,
+  onRemove
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const favSteps = useMemo(() => {
+    const out = [];
+    phases.forEach(p => p.steps.forEach(s => {
+      if (s.prompt && favorites.includes(s.id)) out.push(s);
+    }));
     return out;
-  },[favorites]);
-  if(favSteps.length===0&&!isOpen) return null;
-  return (
-    <div style={{marginBottom:16}}>
-      <div role="button" tabIndex={0} aria-expanded={isOpen} onClick={()=>setIsOpen(!isOpen)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}}}
-        style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
-        {Icons.starFilled(18,colors.accent)}
-        <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>My Favorites ({favSteps.length})</span>
-        <div style={{transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(18,colors.textLight)}</div>
-      </div>
-      {isOpen&&(
-        <div style={{padding:'12px 0'}}>
-          {favSteps.length===0?(
-            <p style={{textAlign:'center',color:colors.textLight,fontSize:13,padding:20}}>No favorites yet. Click the star on any prompt to save it here.</p>
-          ):favSteps.map(s=>(
-            <div key={s.id} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,padding:14,marginBottom:8}}>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
-                <span style={{fontSize:13,fontWeight:600,color:colors.text}}>
-                  <span style={{color:colors.accent,marginRight:6}}>{s.id}</span>{s.title}
-                </span>
-                <button onClick={()=>onRemove(s.id)} style={{background:'none',border:'none',cursor:'pointer',padding:4}} title="Remove">
-                  {Icons.starFilled(16,colors.accent)}
-                </button>
-              </div>
-              <EditablePrompt template={s.prompt.template} fields={s.prompt.fields} stepId={s.id}/>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  }, [favorites]);
+  if (favSteps.length === 0 && !isOpen) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    role: "button",
+    tabIndex: 0,
+    "aria-expanded": isOpen,
+    onClick: () => setIsOpen(!isOpen),
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setIsOpen(!isOpen);
+      }
+    },
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '14px 18px',
+      background: colors.surface,
+      borderRadius: 12,
+      border: '1px solid ' + colors.border,
+      cursor: 'pointer',
+      userSelect: 'none'
+    }
+  }, Icons.starFilled(18, colors.accent), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: 600,
+      color: colors.text
+    }
+  }, "My Favorites (", favSteps.length, ")"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      transition: 'transform 0.2s',
+      transform: isOpen ? 'rotate(180deg)' : 'rotate(0)'
+    }
+  }, Icons.chevronDown(18, colors.textLight))), isOpen && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '12px 0'
+    }
+  }, favSteps.length === 0 ? /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: 'center',
+      color: colors.textLight,
+      fontSize: 13,
+      padding: 20
+    }
+  }, "No favorites yet. Click the star on any prompt to save it here.") : favSteps.map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.id,
+    style: {
+      background: colors.surface,
+      border: '1px solid ' + colors.borderLight,
+      borderRadius: 10,
+      padding: 14,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: colors.text
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: colors.accent,
+      marginRight: 6
+    }
+  }, s.id), s.title), /*#__PURE__*/React.createElement("button", {
+    onClick: () => onRemove(s.id),
+    style: {
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 4
+    },
+    title: "Remove"
+  }, Icons.starFilled(16, colors.accent))), /*#__PURE__*/React.createElement(EditablePrompt, {
+    template: s.prompt.template,
+    fields: s.prompt.fields,
+    stepId: s.id
+  })))));
 };
 
 /* ═══════════════════════════════════════════
    BONUS: MY PROJECTS
    ═══════════════════════════════════════════ */
 const ProjectsSection = () => {
-  const [isOpen,setIsOpen] = useState(false);
-  const [projects,setProjects] = useLocalStorage('wk-projects',[]);
-  const [editing,setEditing] = useState(null);
-  const [form,setForm] = useState({name:'',description:'',status:'planning',notes:'',whatILearned:''});
+  const [isOpen, setIsOpen] = useState(false);
+  const [projects, setProjects] = useLocalStorage('wk-projects', []);
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    status: 'planning',
+    notes: '',
+    whatILearned: ''
+  });
   const statusMap = {
-    planning:{bg:colors.codeBg,fg:colors.accent,label:'Planning'},
-    building:{bg:colors.warningBg,fg:colors.warning,label:'Building'},
-    polishing:{bg:'#E0F2FE',fg:'#0284C7',label:'Polishing'},
-    shipped:{bg:colors.successBg,fg:colors.success,label:'Shipped'},
+    planning: {
+      bg: colors.codeBg,
+      fg: colors.accent,
+      label: 'Planning'
+    },
+    building: {
+      bg: colors.warningBg,
+      fg: colors.warning,
+      label: 'Building'
+    },
+    polishing: {
+      bg: '#E0F2FE',
+      fg: '#0284C7',
+      label: 'Polishing'
+    },
+    shipped: {
+      bg: colors.successBg,
+      fg: colors.success,
+      label: 'Shipped'
+    }
   };
-  const save=()=>{if(!form.name.trim())return;if(editing!==null){setProjects(p=>p.map(x=>x.id===editing?{...form,id:editing}:x));setEditing(null);}else{setProjects(p=>[...p,{...form,id:Date.now()}]);}setForm({name:'',description:'',status:'planning',notes:'',whatILearned:''});};
-  const del=(id)=>setProjects(p=>p.filter(x=>x.id!==id));
-  const startEdit=(proj)=>{setForm({name:proj.name,description:proj.description,status:proj.status,notes:proj.notes,whatILearned:proj.whatILearned});setEditing(proj.id);};
-  const inputStyle = {width:'100%',padding:'8px 12px',fontSize:13,border:'1px solid '+colors.border,borderRadius:6,marginBottom:8,background:colors.surface,color:colors.text};
-
-  return (
-    <div style={{marginBottom:16}}>
-      <div role="button" tabIndex={0} aria-expanded={isOpen} onClick={()=>setIsOpen(!isOpen)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}}}
-        style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
-        {Icons.folder(18,colors.accent)}
-        <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>My Projects ({projects.length})</span>
-        <div style={{transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(18,colors.textLight)}</div>
-      </div>
-      {isOpen&&(
-        <div style={{padding:'12px 0'}}>
-          {projects.map(proj=>(
-            <div key={proj.id||proj.name} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,padding:16,marginBottom:10}}>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
-                <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
-                  <span style={{fontSize:15,fontWeight:600,color:colors.text}}>{proj.name}</span>
-                  <span style={{fontSize:11,fontWeight:600,padding:'2px 8px',borderRadius:10,background:(statusMap[proj.status]||statusMap.planning).bg,color:(statusMap[proj.status]||statusMap.planning).fg}}>
-                    {(statusMap[proj.status]||statusMap.planning).label}
-                  </span>
-                </div>
-                <div style={{display:'flex',gap:4}}>
-                  <button onClick={()=>startEdit(proj)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.edit(14,colors.textMuted)}</button>
-                  <button onClick={()=>del(proj.id)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.trash(14,colors.error)}</button>
-                </div>
-              </div>
-              {proj.description&&<p style={{fontSize:13,color:colors.textMuted,marginBottom:8}}>{proj.description}</p>}
-              {proj.notes&&<div style={{fontSize:12,color:colors.textMuted,background:colors.codeBg,borderRadius:6,padding:10,marginBottom:8}}><strong>Notes:</strong> {proj.notes}</div>}
-              {proj.whatILearned&&<div style={{fontSize:12,color:colors.accent,background:colors.surfaceHover,borderRadius:6,padding:10,borderLeft:'3px solid '+colors.accent}}><strong>What I Learned:</strong> {proj.whatILearned}</div>}
-            </div>
-          ))}
-          <div style={{background:colors.codeBg,borderRadius:10,padding:16,border:'1px solid '+colors.border}}>
-            <div style={{fontSize:13,fontWeight:600,color:colors.text,marginBottom:12}}>{editing!==null?'Edit Project':'Add New Project'}</div>
-            <input placeholder="Project name" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} style={inputStyle}/>
-            <input placeholder="Short description" value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} style={inputStyle}/>
-            <select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))} style={inputStyle}>
-              <option value="planning">Planning</option><option value="building">Building</option>
-              <option value="polishing">Polishing</option><option value="shipped">Shipped</option>
-            </select>
-            <textarea placeholder="Notes" value={form.notes} rows={2} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} style={{...inputStyle,resize:'vertical'}}/>
-            <textarea placeholder="What I learned..." value={form.whatILearned} rows={2} onChange={e=>setForm(f=>({...f,whatILearned:e.target.value}))} style={{...inputStyle,resize:'vertical'}}/>
-            <div style={{display:'flex',gap:8}}>
-              <button onClick={save} style={{padding:'8px 16px',fontSize:13,fontWeight:600,background:colors.accent,color:'#fff',border:'none',borderRadius:8,cursor:'pointer'}}>
-                {editing!==null?'Save Changes':'Add Project'}
-              </button>
-              {editing!==null&&(
-                <button onClick={()=>{setEditing(null);setForm({name:'',description:'',status:'planning',notes:'',whatILearned:''});}}
-                  style={{padding:'8px 16px',fontSize:13,background:'transparent',border:'1px solid '+colors.border,borderRadius:8,cursor:'pointer',color:colors.textMuted}}>
-                  Cancel
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const save = () => {
+    if (!form.name.trim()) return;
+    if (editing !== null) {
+      setProjects(p => p.map(x => x.id === editing ? {
+        ...form,
+        id: editing
+      } : x));
+      setEditing(null);
+    } else {
+      setProjects(p => [...p, {
+        ...form,
+        id: Date.now()
+      }]);
+    }
+    setForm({
+      name: '',
+      description: '',
+      status: 'planning',
+      notes: '',
+      whatILearned: ''
+    });
+  };
+  const del = id => setProjects(p => p.filter(x => x.id !== id));
+  const startEdit = proj => {
+    setForm({
+      name: proj.name,
+      description: proj.description,
+      status: proj.status,
+      notes: proj.notes,
+      whatILearned: proj.whatILearned
+    });
+    setEditing(proj.id);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    role: "button",
+    tabIndex: 0,
+    "aria-expanded": isOpen,
+    onClick: () => setIsOpen(!isOpen),
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setIsOpen(!isOpen);
+      }
+    },
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '14px 18px',
+      background: colors.surface,
+      borderRadius: 12,
+      border: '1px solid ' + colors.border,
+      cursor: 'pointer',
+      userSelect: 'none'
+    }
+  }, Icons.folder(18, colors.accent), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: 600,
+      color: colors.text
+    }
+  }, "My Projects (", projects.length, ")"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      transition: 'transform 0.2s',
+      transform: isOpen ? 'rotate(180deg)' : 'rotate(0)'
+    }
+  }, Icons.chevronDown(18, colors.textLight))), isOpen && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '12px 0'
+    }
+  }, projects.map(proj => /*#__PURE__*/React.createElement("div", {
+    key: proj.id || proj.name,
+    style: {
+      background: colors.surface,
+      border: '1px solid ' + colors.borderLight,
+      borderRadius: 10,
+      padding: 16,
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 15,
+      fontWeight: 600,
+      color: colors.text
+    }
+  }, proj.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 600,
+      padding: '2px 8px',
+      borderRadius: 10,
+      background: (statusMap[proj.status] || statusMap.planning).bg,
+      color: (statusMap[proj.status] || statusMap.planning).fg
+    }
+  }, (statusMap[proj.status] || statusMap.planning).label)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 4
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => startEdit(proj),
+    style: {
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 4
+    }
+  }, Icons.edit(14, colors.textMuted)), /*#__PURE__*/React.createElement("button", {
+    onClick: () => del(proj.id),
+    style: {
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 4
+    }
+  }, Icons.trash(14, colors.error)))), proj.description && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: colors.textMuted,
+      marginBottom: 8
+    }
+  }, proj.description), proj.notes && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: colors.textMuted,
+      background: colors.codeBg,
+      borderRadius: 6,
+      padding: 10,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("strong", null, "Notes:"), " ", proj.notes), proj.whatILearned && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: colors.accent,
+      background: colors.surfaceHover,
+      borderRadius: 6,
+      padding: 10,
+      borderLeft: '3px solid ' + colors.accent
+    }
+  }, /*#__PURE__*/React.createElement("strong", null, "What I Learned:"), " ", proj.whatILearned))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: colors.codeBg,
+      borderRadius: 10,
+      padding: 16,
+      border: '1px solid ' + colors.border
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: colors.text,
+      marginBottom: 12
+    }
+  }, editing !== null ? 'Edit Project' : 'Add New Project'), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Project name",
+    value: form.name,
+    onChange: e => setForm(f => ({
+      ...f,
+      name: e.target.value
+    })),
+    style: inputStyle
+  }), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Short description",
+    value: form.description,
+    onChange: e => setForm(f => ({
+      ...f,
+      description: e.target.value
+    })),
+    style: inputStyle
+  }), /*#__PURE__*/React.createElement("select", {
+    value: form.status,
+    onChange: e => setForm(f => ({
+      ...f,
+      status: e.target.value
+    })),
+    style: inputStyle
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "planning"
+  }, "Planning"), /*#__PURE__*/React.createElement("option", {
+    value: "building"
+  }, "Building"), /*#__PURE__*/React.createElement("option", {
+    value: "polishing"
+  }, "Polishing"), /*#__PURE__*/React.createElement("option", {
+    value: "shipped"
+  }, "Shipped")), /*#__PURE__*/React.createElement("textarea", {
+    placeholder: "Notes",
+    value: form.notes,
+    rows: 2,
+    onChange: e => setForm(f => ({
+      ...f,
+      notes: e.target.value
+    })),
+    style: {
+      ...inputStyle,
+      resize: 'vertical'
+    }
+  }), /*#__PURE__*/React.createElement("textarea", {
+    placeholder: "What I learned...",
+    value: form.whatILearned,
+    rows: 2,
+    onChange: e => setForm(f => ({
+      ...f,
+      whatILearned: e.target.value
+    })),
+    style: {
+      ...inputStyle,
+      resize: 'vertical'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: save,
+    style: {
+      padding: '8px 16px',
+      fontSize: 13,
+      fontWeight: 600,
+      background: colors.accent,
+      color: '#fff',
+      border: 'none',
+      borderRadius: 8,
+      cursor: 'pointer'
+    }
+  }, editing !== null ? 'Save Changes' : 'Add Project'), editing !== null && /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setEditing(null);
+      setForm({
+        name: '',
+        description: '',
+        status: 'planning',
+        notes: '',
+        whatILearned: ''
+      });
+    },
+    style: {
+      padding: '8px 16px',
+      fontSize: 13,
+      background: 'transparent',
+      border: '1px solid ' + colors.border,
+      borderRadius: 8,
+      cursor: 'pointer',
+      color: colors.textMuted
+    }
+  }, "Cancel")))));
 };
 
 /* ═══════════════════════════════════════════
    BONUS: LEARNING STORIES
    ═══════════════════════════════════════════ */
 const LearningStoriesSection = () => {
-  const [isOpen,setIsOpen] = useState(false);
-  const [stories,setStories] = useLocalStorage('wk-stories',[]);
-  const [title,setTitle] = useState('');
-  const [content,setContent] = useState('');
-  const [expanded,setExpanded] = useState(null);
-  const add=()=>{if(!title.trim()||!content.trim())return;setStories(s=>[...s,{id:Date.now(),title:title.trim(),content:content.trim(),date:new Date().toLocaleDateString()}]);setTitle('');setContent('');};
-  const del=(id)=>setStories(s=>s.filter(x=>x.id!==id));
-  const inputStyle={width:'100%',padding:'8px 12px',fontSize:13,border:'1px solid '+colors.border,borderRadius:6,marginBottom:8,background:colors.surface,color:colors.text};
-
-  return (
-    <div style={{marginBottom:16}}>
-      <div role="button" tabIndex={0} aria-expanded={isOpen} onClick={()=>setIsOpen(!isOpen)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}}}
-        style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
-        {Icons.book(18,colors.success)}
-        <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>Learning Stories ({stories.length})</span>
-        <div style={{transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(18,colors.textLight)}</div>
-      </div>
-      {isOpen&&(
-        <div style={{padding:'12px 0'}}>
-          {stories.map(s=>(
-            <div key={s.id||s.title} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,marginBottom:8,overflow:'hidden'}}>
-              <div role="button" tabIndex={0} aria-expanded={expanded===s.id} onClick={()=>setExpanded(expanded===s.id?null:s.id)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setExpanded(expanded===s.id?null:s.id);}}}
-                style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px',cursor:'pointer',userSelect:'none'}}>
-                <div>
-                  <span style={{fontSize:14,fontWeight:600,color:colors.text}}>{s.title}</span>
-                  <span style={{fontSize:11,color:colors.textLight,marginLeft:8}}>{s.date}</span>
-                </div>
-                <div style={{display:'flex',gap:4,alignItems:'center'}}>
-                  <button onClick={e=>{e.stopPropagation();del(s.id);}} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.trash(14,colors.error)}</button>
-                  <div style={{transition:'transform 0.2s',transform:expanded===s.id?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(16,colors.textLight)}</div>
-                </div>
-              </div>
-              {expanded===s.id&&(
-                <div style={{padding:'0 14px 14px'}}>
-                  <pre style={{background:colors.codeBg,borderRadius:8,padding:14,fontSize:13,lineHeight:1.6,whiteSpace:'pre-wrap',wordBreak:'break-word',color:colors.text,maxHeight:400,overflow:'auto'}}>{s.content}</pre>
-                </div>
-              )}
-            </div>
-          ))}
-          <div style={{background:colors.codeBg,borderRadius:10,padding:16,border:'1px solid '+colors.border}}>
-            <div style={{fontSize:13,fontWeight:600,color:colors.text,marginBottom:12}}>Add Learning Story</div>
-            <input placeholder="Story title (e.g., My Recipe App)" value={title} onChange={e=>setTitle(e.target.value)} style={inputStyle}/>
-            <textarea placeholder="Paste your LEARNING_STORY.md or learning document content here..." value={content} onChange={e=>setContent(e.target.value)} rows={6} style={{...inputStyle,resize:'vertical'}}/>
-            <button onClick={add} style={{padding:'8px 16px',fontSize:13,fontWeight:600,background:colors.success,color:'#fff',border:'none',borderRadius:8,cursor:'pointer'}}>Save Story</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const [isOpen, setIsOpen] = useState(false);
+  const [stories, setStories] = useLocalStorage('wk-stories', []);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [expanded, setExpanded] = useState(null);
+  const add = () => {
+    if (!title.trim() || !content.trim()) return;
+    setStories(s => [...s, {
+      id: Date.now(),
+      title: title.trim(),
+      content: content.trim(),
+      date: new Date().toLocaleDateString()
+    }]);
+    setTitle('');
+    setContent('');
+  };
+  const del = id => setStories(s => s.filter(x => x.id !== id));
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    role: "button",
+    tabIndex: 0,
+    "aria-expanded": isOpen,
+    onClick: () => setIsOpen(!isOpen),
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setIsOpen(!isOpen);
+      }
+    },
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '14px 18px',
+      background: colors.surface,
+      borderRadius: 12,
+      border: '1px solid ' + colors.border,
+      cursor: 'pointer',
+      userSelect: 'none'
+    }
+  }, Icons.book(18, colors.success), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: 600,
+      color: colors.text
+    }
+  }, "Learning Stories (", stories.length, ")"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      transition: 'transform 0.2s',
+      transform: isOpen ? 'rotate(180deg)' : 'rotate(0)'
+    }
+  }, Icons.chevronDown(18, colors.textLight))), isOpen && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '12px 0'
+    }
+  }, stories.map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.id || s.title,
+    style: {
+      background: colors.surface,
+      border: '1px solid ' + colors.borderLight,
+      borderRadius: 10,
+      marginBottom: 8,
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    role: "button",
+    tabIndex: 0,
+    "aria-expanded": expanded === s.id,
+    onClick: () => setExpanded(expanded === s.id ? null : s.id),
+    onKeyDown: e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setExpanded(expanded === s.id ? null : s.id);
+      }
+    },
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '12px 14px',
+      cursor: 'pointer',
+      userSelect: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: colors.text
+    }
+  }, s.title), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: colors.textLight,
+      marginLeft: 8
+    }
+  }, s.date)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 4,
+      alignItems: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      del(s.id);
+    },
+    style: {
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 4
+    }
+  }, Icons.trash(14, colors.error)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      transition: 'transform 0.2s',
+      transform: expanded === s.id ? 'rotate(180deg)' : 'rotate(0)'
+    }
+  }, Icons.chevronDown(16, colors.textLight)))), expanded === s.id && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '0 14px 14px'
+    }
+  }, /*#__PURE__*/React.createElement("pre", {
+    style: {
+      background: colors.codeBg,
+      borderRadius: 8,
+      padding: 14,
+      fontSize: 13,
+      lineHeight: 1.6,
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-word',
+      color: colors.text,
+      maxHeight: 400,
+      overflow: 'auto'
+    }
+  }, s.content)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: colors.codeBg,
+      borderRadius: 10,
+      padding: 16,
+      border: '1px solid ' + colors.border
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: colors.text,
+      marginBottom: 12
+    }
+  }, "Add Learning Story"), /*#__PURE__*/React.createElement("input", {
+    placeholder: "Story title (e.g., My Recipe App)",
+    value: title,
+    onChange: e => setTitle(e.target.value),
+    style: inputStyle
+  }), /*#__PURE__*/React.createElement("textarea", {
+    placeholder: "Paste your LEARNING_STORY.md or learning document content here...",
+    value: content,
+    onChange: e => setContent(e.target.value),
+    rows: 6,
+    style: {
+      ...inputStyle,
+      resize: 'vertical'
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: add,
+    style: {
+      padding: '8px 16px',
+      fontSize: 13,
+      fontWeight: 600,
+      background: colors.success,
+      color: '#fff',
+      border: 'none',
+      borderRadius: 8,
+      cursor: 'pointer'
+    }
+  }, "Save Story"))));
 };
 
 /* ═══════════════════════════════════════════
    BONUS: QUICK COPY DRAWER
    ═══════════════════════════════════════════ */
 const QuickCopyDrawer = () => {
-  const [isOpen,setIsOpen] = useState(false);
-  const [copiedId,setCopiedId] = useState(null);
-  const allPrompts = useMemo(()=>{
-    const out=[];
-    phases.forEach(p=>p.steps.forEach(s=>{if(s.prompt)out.push({id:s.id,title:s.title,template:s.prompt.template,fields:s.prompt.fields||[],phase:p.title});}));
+  const [isOpen, setIsOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+  const allPrompts = useMemo(() => {
+    const out = [];
+    phases.forEach(p => p.steps.forEach(s => {
+      if (s.prompt) out.push({
+        id: s.id,
+        title: s.title,
+        template: s.prompt.template,
+        fields: s.prompt.fields || [],
+        phase: p.title
+      });
+    }));
     return out;
-  },[]);
-  const fillPlaceholders=(template,fields)=>{
-    let text=template;
-    fields.forEach(f=>{text=text.replace(new RegExp('\\{\\{'+f.name+'\\}\\}','g'),'[FILL IN: '+f.label+']');});
+  }, []);
+  const fillPlaceholders = (template, fields) => {
+    let text = template;
+    fields.forEach(f => {
+      text = text.replace(new RegExp('\\{\\{' + f.name + '\\}\\}', 'g'), '[FILL IN: ' + f.label + ']');
+    });
     return text;
   };
-  const handleCopy=async(id,text,fields)=>{const filled=fields.length?fillPlaceholders(text,fields):text;const ok=await copyText(filled);if(ok){setCopiedId(id);setTimeout(()=>setCopiedId(null),2000);}};
-
-  return (
-    <>
-      <button onClick={()=>setIsOpen(true)} title="Quick Copy All Prompts" className="btn-fab"
-        style={{position:'fixed',bottom:24,right:24,zIndex:998,width:52,height:52,borderRadius:14,
-          background:'linear-gradient(135deg,'+colors.accent+','+colors.accentDark+')',border:'none',cursor:'pointer',color:'#fff',
-          display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 20px '+colors.accent+'44',transition:'transform 0.2s, box-shadow 0.2s'}}>
-        {Icons.clipboard(22,'#fff')}
-      </button>
-      {isOpen&&<div onClick={()=>setIsOpen(false)} style={{position:'fixed',inset:0,zIndex:999,background:'rgba(26,15,46,0.4)',backdropFilter:'blur(2px)'}}/>}
-      <div style={{position:'fixed',top:0,right:0,bottom:0,zIndex:1000,width:'calc(100vw - 20px)',maxWidth:420,
-        background:colors.surface,boxShadow:'-8px 0 32px rgba(0,0,0,0.12)',
-        transform:isOpen?'translateX(0)':'translateX(100%)',transition:'transform 0.3s cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column'}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'18px 20px',borderBottom:'1px solid '+colors.border}}>
-          <div style={{fontSize:16,fontWeight:700,color:colors.text}}>Quick Copy</div>
-          <button onClick={()=>setIsOpen(false)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.x(20,colors.textMuted)}</button>
-        </div>
-        <div style={{flex:1,overflow:'auto',padding:16}}>
-          <div style={{fontSize:11,color:colors.textLight,marginBottom:12,fontStyle:'italic'}}>* = has fill-in fields. Use the full step card to customize before copying.</div>
-          {['PLANNING','BUILD','POLISH','SHIP'].map(pn=>{
-            const pp=allPrompts.filter(p=>p.phase===pn);
-            if(!pp.length)return null;
-            return (
-              <div key={pn} style={{marginBottom:20}}>
-                <div style={{fontSize:11,fontWeight:700,color:colors.accent,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}}>{pn}</div>
-                {pp.map(p=>(
-                  <button key={p.id} onClick={()=>handleCopy(p.id,p.template,p.fields)} className={'btn-drawer-item'+(copiedId===p.id?' copied':'')}
-                    style={{display:'flex',alignItems:'center',gap:10,width:'100%',textAlign:'left',padding:'10px 14px',
-                      background:copiedId===p.id?colors.successBg:colors.codeBg,
-                      border:'1px solid '+(copiedId===p.id?colors.success+'44':colors.borderLight),
-                      borderRadius:8,marginBottom:6,cursor:'pointer',transition:'all 0.2s',fontSize:13,color:colors.text}}>
-                    <span style={{flexShrink:0,fontSize:11,fontWeight:700,color:colors.accent}}>{p.id}</span>
-                    <span style={{flex:1,fontWeight:500}}>{p.title}{p.fields.length>0&&<span style={{fontSize:10,color:colors.textLight,marginLeft:6}} title="Has fields to fill in — use the full step card for best results">*</span>}</span>
-                    <span style={{flexShrink:0}}>{copiedId===p.id?Icons.check(14,colors.success):Icons.clipboard(14,colors.textLight)}</span>
-                  </button>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </>
-  );
+  const handleCopy = async (id, text, fields) => {
+    const filled = fields.length ? fillPlaceholders(text, fields) : text;
+    const ok = await copyText(filled);
+    if (ok) {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setIsOpen(true),
+    title: "Quick Copy All Prompts",
+    className: "btn-fab",
+    style: {
+      position: 'fixed',
+      bottom: 24,
+      right: 24,
+      zIndex: 998,
+      width: 52,
+      height: 52,
+      borderRadius: 14,
+      background: 'linear-gradient(135deg,' + colors.accent + ',' + colors.accentDark + ')',
+      border: 'none',
+      cursor: 'pointer',
+      color: '#fff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 4px 20px ' + colors.accent + '44',
+      transition: 'transform 0.2s, box-shadow 0.2s'
+    }
+  }, Icons.clipboard(22, '#fff')), isOpen && /*#__PURE__*/React.createElement("div", {
+    onClick: () => setIsOpen(false),
+    style: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: 999,
+      background: 'rgba(26,15,46,0.4)',
+      backdropFilter: 'blur(2px)'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 1000,
+      width: 'calc(100vw - 20px)',
+      maxWidth: 420,
+      background: colors.surface,
+      boxShadow: '-8px 0 32px rgba(0,0,0,0.12)',
+      transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+      transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1)',
+      display: 'flex',
+      flexDirection: 'column'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '18px 20px',
+      borderBottom: '1px solid ' + colors.border
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 700,
+      color: colors.text
+    }
+  }, "Quick Copy"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setIsOpen(false),
+    style: {
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 4
+    }
+  }, Icons.x(20, colors.textMuted))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflow: 'auto',
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: colors.textLight,
+      marginBottom: 12,
+      fontStyle: 'italic'
+    }
+  }, "* = has fill-in fields. Use the full step card to customize before copying."), ['PLANNING', 'BUILD', 'POLISH', 'SHIP'].map(pn => {
+    const pp = allPrompts.filter(p => p.phase === pn);
+    if (!pp.length) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: pn,
+      style: {
+        marginBottom: 20
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        fontWeight: 700,
+        color: colors.accent,
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        marginBottom: 8
+      }
+    }, pn), pp.map(p => /*#__PURE__*/React.createElement("button", {
+      key: p.id,
+      onClick: () => handleCopy(p.id, p.template, p.fields),
+      className: 'btn-drawer-item' + (copiedId === p.id ? ' copied' : ''),
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        width: '100%',
+        textAlign: 'left',
+        padding: '10px 14px',
+        background: copiedId === p.id ? colors.successBg : colors.codeBg,
+        border: '1px solid ' + (copiedId === p.id ? colors.success + '44' : colors.borderLight),
+        borderRadius: 8,
+        marginBottom: 6,
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+        fontSize: 13,
+        color: colors.text
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        flexShrink: 0,
+        fontSize: 11,
+        fontWeight: 700,
+        color: colors.accent
+      }
+    }, p.id), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flex: 1,
+        fontWeight: 500
+      }
+    }, p.title, p.fields.length > 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 10,
+        color: colors.textLight,
+        marginLeft: 6
+      },
+      title: "Has fields to fill in \u2014 use the full step card for best results"
+    }, "*")), /*#__PURE__*/React.createElement("span", {
+      style: {
+        flexShrink: 0
+      }
+    }, copiedId === p.id ? Icons.check(14, colors.success) : Icons.clipboard(14, colors.textLight)))));
+  }))));
 };
 
 /* ═══════════════════════════════════════════
@@ -885,19 +2179,24 @@ async function downloadTemplate() {
   zip.file('progress.txt', PROGRESS_TEMPLATE);
   zip.file('PROJECT_CHECKLIST.md', CHECKLIST_TEMPLATE);
   zip.folder('00-planning/notes');
-  zip.file('00-planning/notes/interrogation-answers.md','# Interview Answers\n\n(Claude will populate this during the interview step)\n');
-  Object.entries(DOC_TEMPLATES).forEach(([name,content])=>zip.file('01-docs/'+name,content));
+  zip.file('00-planning/notes/interrogation-answers.md', '# Interview Answers\n\n(Claude will populate this during the interview step)\n');
+  Object.entries(DOC_TEMPLATES).forEach(([name, content]) => zip.file('01-docs/' + name, content));
   zip.folder('02-design/references');
-  zip.file('02-design/references/.gitkeep','');
+  zip.file('02-design/references/.gitkeep', '');
   zip.folder('03-code');
-  zip.file('03-code/.gitkeep','');
-  ['04-assets/images/logo','04-assets/images/icons','04-assets/images/photos','04-assets/fonts'].forEach(d=>zip.folder(d));
-  zip.file('04-assets/.gitkeep','');
-  const blob = await zip.generateAsync({type:'blob'});
+  zip.file('03-code/.gitkeep', '');
+  ['04-assets/images/logo', '04-assets/images/icons', '04-assets/images/photos', '04-assets/fonts'].forEach(d => zip.folder(d));
+  zip.file('04-assets/.gitkeep', '');
+  const blob = await zip.generateAsync({
+    type: 'blob'
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href=url; a.download='workflow-kitt-template.zip';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  a.href = url;
+  a.download = 'workflow-kitt-template.zip';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
@@ -905,97 +2204,217 @@ async function downloadTemplate() {
    MAIN APP
    ═══════════════════════════════════════════ */
 function WorkflowKitt() {
-  const [completedSteps,setCompletedSteps] = useLocalStorage('wk-v2-completed',[]);
-  const [favorites,setFavorites] = useLocalStorage('wk-v2-favorites',[]);
-  const [expandedSteps,setExpandedSteps] = useState([]);
-  const [dlPulse,setDlPulse] = useState(false);
-
-  const totalSteps = phases.reduce((a,p)=>a+p.steps.filter(s=>!s.toolkit).length,0);
-  const totalDone = phases.reduce((a,p)=>a+p.steps.filter(s=>!s.toolkit&&completedSteps.includes(s.id)).length,0);
-  const pct = Math.round((totalDone/totalSteps)*100);
-
-  const toggleStep = id => setExpandedSteps(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
-  const toggleComplete = id => setCompletedSteps(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
-  const toggleFavorite = id => setFavorites(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
-  const handleDownload = ()=>{setDlPulse(true);setTimeout(()=>setDlPulse(false),600);downloadTemplate();};
-  const handleClearData = ()=>{
-    if(window.confirm('Clear all saved progress? This cannot be undone.')){
-      ['wk-projects','wk-stories','wk-v2-completed','wk-v2-favorites'].forEach(k=>localStorage.removeItem(k));
-      setCompletedSteps([]);setFavorites([]);setExpandedSteps([]);
+  const [completedSteps, setCompletedSteps] = useLocalStorage('wk-v2-completed', []);
+  const [favorites, setFavorites] = useLocalStorage('wk-v2-favorites', []);
+  const [expandedSteps, setExpandedSteps] = useState([]);
+  const [dlPulse, setDlPulse] = useState(false);
+  const totalSteps = phases.reduce((a, p) => a + p.steps.filter(s => !s.toolkit).length, 0);
+  const totalDone = phases.reduce((a, p) => a + p.steps.filter(s => !s.toolkit && completedSteps.includes(s.id)).length, 0);
+  const pct = Math.round(totalDone / totalSteps * 100);
+  const toggleStep = id => setExpandedSteps(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const toggleComplete = id => setCompletedSteps(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const toggleFavorite = id => setFavorites(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const handleDownload = () => {
+    setDlPulse(true);
+    setTimeout(() => setDlPulse(false), 600);
+    downloadTemplate();
+  };
+  const handleClearData = () => {
+    if (window.confirm('Clear all saved progress? This cannot be undone.')) {
+      ['wk-projects', 'wk-stories', 'wk-v2-completed', 'wk-v2-favorites'].forEach(k => localStorage.removeItem(k));
+      setCompletedSteps([]);
+      setFavorites([]);
+      setExpandedSteps([]);
     }
   };
-
-  return (
-    <div style={{minHeight:'100vh',background:colors.bg}}>
-      {/* ─── HEADER ─── */}
-      <header style={{textAlign:'center',padding:'36px 20px 28px',background:'rgba(255,255,255,0.92)',borderBottom:'1px solid '+colors.borderLight,position:'sticky',top:0,zIndex:100,backdropFilter:'blur(12px)',WebkitBackdropFilter:'blur(12px)'}}>
-        <div style={{fontSize:16,fontWeight:500,color:colors.textMuted,letterSpacing:'0.12em',textTransform:'uppercase',marginBottom:10}}>Kittech</div>
-        <img src={'data:image/png;base64,'+LOGO_BASE64} alt="Kittech Logo"
-          style={{width:80,height:80,display:'block',margin:'0 auto',filter:'drop-shadow(0 2px 8px rgba(123,95,204,0.3))'}}/>
-        <h1 style={{fontSize:32,fontWeight:700,color:colors.text,margin:'12px 0 6px',letterSpacing:'-0.01em'}}>WorkFlow</h1>
-        <p style={{fontSize:14,color:colors.textMuted,margin:0}}>Build apps with AI, step by step</p>
-        {totalDone>0&&(
-          <div style={{maxWidth:300,margin:'16px auto 0'}}>
-            <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:colors.textLight,marginBottom:4}}>
-              <span>Overall Progress</span><span>{pct}%</span>
-            </div>
-            <div style={{height:4,background:colors.borderLight,borderRadius:2,overflow:'hidden'}}>
-              <div style={{height:'100%',borderRadius:2,transition:'width 0.5s ease',width:pct+'%',
-                background:pct===100?'linear-gradient(90deg,'+colors.success+',#34d399)':'linear-gradient(90deg,'+colors.accent+','+colors.accentHover+')'}}/>
-            </div>
-          </div>
-        )}
-        <button onClick={handleClearData} className="btn-clear"
-          style={{marginTop:12,background:'none',border:'1px solid '+colors.borderLight,borderRadius:8,padding:'6px 14px',
-            fontSize:12,color:colors.textLight,cursor:'pointer',transition:'all 0.2s'}}>
-          Clear All Data
-        </button>
-      </header>
-
-      {/* ─── MAIN ─── */}
-      <main style={{maxWidth:720,margin:'0 auto',padding:'24px 16px 80px'}}>
-        <button onClick={handleDownload} className="btn-download"
-          style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,width:'100%',padding:'16px 24px',marginBottom:32,
-            background:'linear-gradient(135deg,'+colors.accent+','+colors.accentDark+')',color:'#fff',border:'none',borderRadius:14,
-            fontSize:16,fontWeight:700,cursor:'pointer',boxShadow:'0 4px 20px '+colors.accent+'33',transition:'all 0.2s',
-            transform:dlPulse?'scale(0.97)':'scale(1)'}}>
-          {Icons.download(20,'#fff')} Download Template Folder
-        </button>
-
-        {phases.map(phase=>(
-          <PhaseSection key={phase.number} phase={phase}
-            completedSteps={completedSteps} expandedSteps={expandedSteps}
-            onToggleStep={toggleStep} onCompleteStep={toggleComplete}
-            favorites={favorites} onFavorite={toggleFavorite}/>
-        ))}
-
-        {/* ─── DIVIDER ─── */}
-        <div style={{textAlign:'center',padding:'40px 0',margin:'16px 0 24px'}}>
-          <div style={{height:1,background:'linear-gradient(90deg,transparent,'+colors.divider+',transparent)',marginBottom:16}}/>
-          <span style={{fontSize:14,fontWeight:600,color:colors.textMuted,letterSpacing:'0.06em',textTransform:'uppercase'}}>Additional Tools &amp; Libraries</span>
-          <div style={{height:1,background:'linear-gradient(90deg,transparent,'+colors.divider+',transparent)',marginTop:16}}/>
-        </div>
-
-        <FavoritesSection favorites={favorites} onRemove={toggleFavorite}/>
-        <ProjectsSection/>
-        <LearningStoriesSection/>
-      </main>
-
-      <QuickCopyDrawer/>
-
-      <footer style={{textAlign:'center',padding:'32px 20px',borderTop:'1px solid '+colors.borderLight,background:colors.surface}}>
-        <div style={{fontSize:13,color:colors.textLight}}>Workflow Kitt V2 — Built with care by <span style={{color:colors.accent,fontWeight:600}}>Kittech</span></div>
-        <div style={{fontSize:11,color:colors.textLight,marginTop:4}}>Your guide to building apps with AI, one step at a time</div>
-      </footer>
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      background: colors.bg
+    }
+  }, /*#__PURE__*/React.createElement("header", {
+    style: {
+      textAlign: 'center',
+      padding: '36px 20px 28px',
+      background: 'rgba(255,255,255,0.92)',
+      borderBottom: '1px solid ' + colors.borderLight,
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 16,
+      fontWeight: 500,
+      color: colors.textMuted,
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      marginBottom: 10
+    }
+  }, "Kittech"), /*#__PURE__*/React.createElement("img", {
+    src: 'data:image/png;base64,' + LOGO_BASE64,
+    alt: "Kittech Logo",
+    style: {
+      width: 80,
+      height: 80,
+      display: 'block',
+      margin: '0 auto',
+      filter: 'drop-shadow(0 2px 8px rgba(123,95,204,0.3))'
+    }
+  }), /*#__PURE__*/React.createElement("h1", {
+    style: {
+      fontSize: 32,
+      fontWeight: 700,
+      color: colors.text,
+      margin: '12px 0 6px',
+      letterSpacing: '-0.01em'
+    }
+  }, "WorkFlow"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 14,
+      color: colors.textMuted,
+      margin: 0
+    }
+  }, "Build apps with AI, step by step"), totalDone > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      maxWidth: 300,
+      margin: '16px auto 0'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: 11,
+      color: colors.textLight,
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Overall Progress"), /*#__PURE__*/React.createElement("span", null, pct, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 4,
+      background: colors.borderLight,
+      borderRadius: 2,
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '100%',
+      borderRadius: 2,
+      transition: 'width 0.5s ease',
+      width: pct + '%',
+      background: pct === 100 ? 'linear-gradient(90deg,' + colors.success + ',#34d399)' : 'linear-gradient(90deg,' + colors.accent + ',' + colors.accentHover + ')'
+    }
+  }))), /*#__PURE__*/React.createElement("button", {
+    onClick: handleClearData,
+    className: "btn-clear",
+    style: {
+      marginTop: 12,
+      background: 'none',
+      border: '1px solid ' + colors.borderLight,
+      borderRadius: 8,
+      padding: '6px 14px',
+      fontSize: 12,
+      color: colors.textLight,
+      cursor: 'pointer',
+      transition: 'all 0.2s'
+    }
+  }, "Clear All Data")), /*#__PURE__*/React.createElement("main", {
+    style: {
+      maxWidth: 720,
+      margin: '0 auto',
+      padding: '24px 16px 80px'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: handleDownload,
+    className: "btn-download",
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+      width: '100%',
+      padding: '16px 24px',
+      marginBottom: 32,
+      background: 'linear-gradient(135deg,' + colors.accent + ',' + colors.accentDark + ')',
+      color: '#fff',
+      border: 'none',
+      borderRadius: 14,
+      fontSize: 16,
+      fontWeight: 700,
+      cursor: 'pointer',
+      boxShadow: '0 4px 20px ' + colors.accent + '33',
+      transition: 'all 0.2s',
+      transform: dlPulse ? 'scale(0.97)' : 'scale(1)'
+    }
+  }, Icons.download(20, '#fff'), " Download Template Folder"), phases.map(phase => /*#__PURE__*/React.createElement(PhaseSection, {
+    key: phase.number,
+    phase: phase,
+    completedSteps: completedSteps,
+    expandedSteps: expandedSteps,
+    onToggleStep: toggleStep,
+    onCompleteStep: toggleComplete,
+    favorites: favorites,
+    onFavorite: toggleFavorite
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      padding: '40px 0',
+      margin: '16px 0 24px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 1,
+      background: 'linear-gradient(90deg,transparent,' + colors.divider + ',transparent)',
+      marginBottom: 16
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 14,
+      fontWeight: 600,
+      color: colors.textMuted,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase'
+    }
+  }, "Additional Tools & Libraries"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 1,
+      background: 'linear-gradient(90deg,transparent,' + colors.divider + ',transparent)',
+      marginTop: 16
+    }
+  })), /*#__PURE__*/React.createElement(FavoritesSection, {
+    favorites: favorites,
+    onRemove: toggleFavorite
+  }), /*#__PURE__*/React.createElement(ProjectsSection, null), /*#__PURE__*/React.createElement(LearningStoriesSection, null)), /*#__PURE__*/React.createElement(QuickCopyDrawer, null), /*#__PURE__*/React.createElement("footer", {
+    style: {
+      textAlign: 'center',
+      padding: '32px 20px',
+      borderTop: '1px solid ' + colors.borderLight,
+      background: colors.surface
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: colors.textLight
+    }
+  }, "Workflow Kitt V2 \u2014 Built with care by ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: colors.accent,
+      fontWeight: 600
+    }
+  }, "Kittech")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: colors.textLight,
+      marginTop: 4
+    }
+  }, "Your guide to building apps with AI, one step at a time")));
 }
 
 /* ═══════════════════════════════════════════
    RENDER
    ═══════════════════════════════════════════ */
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<WorkflowKitt />);
-</script>
+root.render(/*#__PURE__*/React.createElement(WorkflowKitt, null));</script>
 </body>
 </html>

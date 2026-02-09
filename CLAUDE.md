@@ -1,5 +1,5 @@
 # CLAUDE.md - AI Operating Manual
-# Vibe Coding Guide Project
+# Workflow Kitt V2
 
 This file is read automatically by Claude Code at the start of every session. It defines the rules, constraints, and context for this specific project.
 
@@ -7,9 +7,9 @@ This file is read automatically by Claude Code at the start of every session. It
 
 ## Project Overview
 
-**Project Name:** Vibe Coding Guide
+**Project Name:** Workflow Kitt V2
 
-**One-Line Description:** An interactive step-by-step guide that teaches non-technical creators how to build apps using the vibe coding workflow with AI.
+**One-Line Description:** An interactive step-by-step guide that teaches non-technical creators how to build apps using AI (Claude Code), step by step.
 
 **Target User:** Non-technical founders, creators, and makers who want to build apps with AI assistance.
 
@@ -21,9 +21,9 @@ This file is read automatically by Claude Code at the start of every session. It
 
 **Framework:** React 18.2.0 (via CDN)
 
-**Language:** JavaScript with JSX
+**Language:** JavaScript (pre-transpiled from JSX via Babel)
 
-**Styling:** Tailwind CSS 3.x (via CDN)
+**Styling:** Inline styles via React `style` prop + CSS custom properties (`:root` variables)
 
 **UI Library:** Custom components (no external library)
 
@@ -38,25 +38,22 @@ This file is read automatically by Claude Code at the start of every session. It
 ## Project Structure
 
 ```
-vibe-coding-template/
-├── Vibe-Coding-Guide.html    # THE DELIVERABLE - standalone guide
+WorkflowKitt-template/
+├── Workflow-Kitt-V2.html     # THE DELIVERABLE - standalone guide
+├── Workflow Kitt.html        # V1 (legacy, replaced by V2)
+├── index.html                # Redirect to V2
 ├── vibe-coding-guide.jsx     # Source reference (not runnable alone)
+├── WorkflowKitt-Icon.svg     # App icon
 ├── CLAUDE.md                 # This file - AI reads first
+├── REBUILD_SPEC.md           # V2 rebuild specification
+├── BUILD_SUMMARY.md          # Build summary
 ├── progress.txt              # Session tracking
 ├── PROJECT_CHECKLIST.md      # Overall workflow checklist
-├── 00-planning/
-│   ├── notes/
-│   │   └── interrogation-answers.md  # User requirements
-│   └── ...
-├── 01-docs/
-│   ├── PRD.md               # Product requirements
-│   ├── APP_FLOW.md          # User flows
-│   ├── TECH_STACK.md        # Technology choices
-│   ├── FRONTEND_GUIDELINES.md # Design system
-│   ├── BACKEND_STRUCTURE.md # Data persistence
-│   └── IMPLEMENTATION_PLAN.md # Build sequence
-├── 02-design/
-│   └── references/          # Inspiration images
+├── TROUBLESHOOTING.md        # Common issues
+├── README-V2.md              # README for V2
+├── 00-planning/              # Planning docs
+├── 01-docs/                  # Product docs (PRD, flows, etc.)
+├── 02-design/                # Design references
 ├── 03-code/                  # Empty (code is in HTML file)
 └── 04-assets/                # Images, fonts, etc.
 ```
@@ -69,10 +66,12 @@ vibe-coding-template/
 
 - Keep everything in a single HTML file
 - Use inline SVG icons (no icon libraries)
-- Use Tailwind classes for styling
-- Follow the color system in FRONTEND_GUIDELINES.md
+- Use the `colors` JS object for inline styles; mirror values in `:root` CSS custom properties
+- Use CSS classes for hover/focus/active states (not JS onMouseEnter/onMouseLeave)
+- Use ARIA attributes (`role`, `tabIndex`, `aria-expanded`) on interactive non-button elements
 - Handle localStorage gracefully (try/catch)
 - Write for non-technical users (plain English)
+- Use stable unique IDs (not array indices) as React keys for dynamic lists
 - Update progress.txt after features complete
 
 ### NEVER:
@@ -80,31 +79,41 @@ vibe-coding-template/
 - Install npm packages (everything via CDN)
 - Create separate CSS/JS files
 - Use external APIs
-- Hardcode colors (use the colors object)
+- Hardcode colors (use the colors object and CSS custom properties)
 - Assume technical knowledge in content
 - Skip error handling on localStorage
+- Use JS event handlers for hover states (use CSS hover classes instead)
 
 ---
 
 ## Design System Reference
 
-### Colors (Warm Neutrals)
+### Colors (Purple Palette)
 ```javascript
 const colors = {
-  bg: '#FAFAF9',           // Page background
+  bg: '#FEFDFB',           // Page background
   surface: '#FFFFFF',       // Cards, panels
-  surfaceHover: '#F5F5F4',  // Hover states, code blocks
-  border: '#E7E5E4',        // Card borders
-  borderLight: '#F5F5F4',   // Subtle separators
-  text: '#1C1917',          // Primary text
-  textMuted: '#78716C',     // Secondary text
-  textLight: '#A8A29E',     // Tertiary text
-  accent: '#78716C',        // Icons, progress
-  accentHover: '#57534E',   // Hover accent
-  success: '#16A34A',       // Complete states
-  successBg: '#F0FDF4',     // Success tint
+  surfaceHover: '#F8F7FF',  // Hover states
+  border: '#E0D9F0',        // Card borders
+  borderLight: '#F0EDF7',   // Subtle separators
+  text: '#1A0F2E',          // Primary text
+  textMuted: '#5B4A75',     // Secondary text
+  textLight: '#8B7BA8',     // Tertiary text
+  accent: '#7B5FCC',        // Primary purple
+  accentHover: '#9D7FEA',   // Hover purple
+  accentDark: '#5B3FA8',    // Dark purple (gradients)
+  success: '#059669',       // Complete states
+  successBg: '#D1FAE5',     // Success tint
+  warning: '#D97706',       // Warning states
+  warningBg: '#FEF3C7',     // Warning tint
+  error: '#DC2626',         // Error/danger states
+  errorBg: '#FEE2E2',       // Error tint
+  codeBg: '#F5F3F7',        // Code block background
+  divider: '#E9E4F0',       // Section dividers
 };
 ```
+
+These values are also available as CSS custom properties (`:root` vars) for use in hover/focus styles.
 
 ### Spacing Scale
 ```
@@ -131,59 +140,74 @@ Mono: SF Mono, Fira Code, Consolas
 
 ## Key Features
 
-1. **6-Phase Journey:** Planning → Docs → Design → Build → Assets → Ship
-2. **20 Steps Total:** Expandable with details, prompts, expected outputs
-3. **Progress Tracking:** Checkboxes persist to localStorage
-4. **Copy Prompts:** One-click copy with "Copied!" feedback
-5. **Beginner/Advanced Toggle:** Adaptive detail levels
-6. **Troubleshooting:** Help when stuck on key steps
-7. **Drag-Drop Visuals:** Animated file operation diagrams
+1. **4-Phase Journey:** Planning (4 steps) → Build (5 steps) → Polish (4 steps) → Ship (2 steps)
+2. **15 Steps Total:** 12 sequential + 3 toolkit (use-when-needed). Expandable with details, prompts, expected outputs
+3. **Editable Prompts:** `{{field}}` template system lets users fill in project-specific details before copying
+4. **Progress Tracking:** Checkboxes persist to localStorage. Toolkit steps excluded from progress percentage
+5. **Copy Prompts:** One-click copy with "Copied!" feedback
+6. **Quick Copy Drawer:** Floating action button opens slide-out panel with all prompts for quick access
+7. **Template ZIP Download:** Generates a project folder with CLAUDE.md, docs, and folder structure
+8. **Favorites:** Star any prompt to save it to a dedicated section
+9. **My Projects:** CRUD interface to track multiple projects with status and notes
+10. **Learning Stories:** Store and review learning documents from completed projects
+11. **Troubleshooting:** Issue/solution pairs for steps where users commonly get stuck
+12. **Drag-Drop Visuals:** Animated file operation diagrams
 
 ---
 
 ## Component Patterns
 
 ### File Naming
-- Components are inline in the HTML file
+- Components are inline in the HTML file (pre-transpiled from JSX)
 - Use PascalCase for component functions
 
-### Component Template
-```jsx
-const ComponentName = ({ prop1, prop2 }) => {
-  const [state, setState] = useState(initialValue);
-
-  return (
-    <div style={{ /* inline styles using colors object */ }}>
-      {/* JSX */}
-    </div>
-  );
-};
+### Component Hierarchy
 ```
+WorkflowKitt (root)
+  ├── Header (inline)
+  ├── Download Template Button
+  ├── PhaseSection (x4)
+  │     └── StepCard (variable per phase)
+  │           ├── EditablePrompt
+  │           └── DragDropVisual
+  ├── FavoritesSection
+  ├── ProjectsSection
+  ├── LearningStoriesSection
+  ├── QuickCopyDrawer (floating)
+  └── Footer (inline)
+```
+
+### Hover/Interactive States
+Use CSS classes defined in the `<style>` block rather than JS event handlers:
+- `.btn-copy` / `.btn-copy.copied` — prompt copy buttons
+- `.btn-fab` — floating action button
+- `.btn-drawer-item` — quick copy drawer items
+- `.btn-clear` — clear data button
+- `.btn-download` — download template button
 
 ---
 
 ## Current Session Context
 
-**Last Updated:** February 7, 2026
+**Last Updated:** February 9, 2026
 
-**Current Phase:** REBUILD - Creating Workflow Kitt V2
+**Current Phase:** V2 COMPLETE — Iterating and polishing
 
-**Status:** Specification complete, ready for implementation
+**Status:** Workflow Kitt V2 is fully built and deployed. Ongoing quality improvements.
 
-**Current Focus:** Building new version with:
-- Purple color scheme (high contrast)
-- 4-phase structure (15 steps)
-- Inline editable prompts
-- Complete workflow CLAUDE.md template
-- Kittech logo integration
+**Recent Changes:**
+- Fixed hardcoded personal name in learning story prompt (now uses editable field)
+- Quick Copy Drawer no longer copies raw placeholders
+- Progress bars exclude toolkit steps (users can reach 100%)
+- Full keyboard accessibility (ARIA attributes, tabIndex, keyboard handlers)
+- CSS custom properties + hover classes replace all JS hover handlers
+- Stable unique IDs for Projects and Learning Stories (no array index keys)
+- Responsive drawer width via CSS
+- Pre-transpiled JSX (removed Babel standalone runtime dependency)
+- Extracted shared styles to module level
+- Dead imports cleaned up
 
-**Spec Location:** `/Users/kittechsix/Desktop/AI Projects/WorkflowKitt-template/REBUILD_SPEC.md`
-
-**Next Steps:**
-Build Workflow-Kitt-V2.html following REBUILD_SPEC.md exactly.
-Logo file: /Users/kittechsix/Desktop/Automation.png
-
-**Original Guide:** Workflow Kitt.html (functional, being replaced with V2)
+**Original Guide:** Workflow Kitt.html (V1, replaced by V2)
 
 ---
 
