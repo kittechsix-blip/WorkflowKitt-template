@@ -2003,6 +2003,7 @@ const defaultToolkitItems = [
   {id:'default-4',title:'Add Brave Search MCP Server',command:'claude mcp add brave-search -- npx -y @modelcontextprotocol/server-brave-search',category:'mcp'},
   {id:'default-5',title:'Add Firecrawl MCP (Web Scraping)',command:'claude mcp add firecrawl -e FIRECRAWL_API_KEY=your-api-key -- npx -y firecrawl-mcp',category:'mcp'},
   {id:'default-6',title:'Add Playwright MCP (Browser Automation)',command:'claude mcp add playwright -- npx -y @playwright/mcp@latest',category:'mcp'},
+  {id:'default-9',title:'Add Claude Memory (Persistent Memory)',command:'npx -y @anthropic-ai/claude-code-mcp@latest install github.com/thedotmack/claude-mem',category:'mcp'},
   {id:'default-7',title:'Create Custom Slash Command',command:'mkdir -p .claude/commands && echo "Your prompt here" > .claude/commands/my-command.md',category:'skill'},
   {id:'default-8',title:'Add Pre-Commit Hook (lint)',command:'echo \'{"hooks":{"PreToolUse":[{"matcher":"Bash","hooks":[{"type":"command","command":"echo Checking..."}]}]}}\' > .claude/settings.json',category:'hook'},
 ];
