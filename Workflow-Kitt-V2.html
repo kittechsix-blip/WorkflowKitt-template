@@ -331,10 +331,10 @@ const phases = [
         id:'4.2', title:'Create Your Learning Story',
         description:'Ask Claude to document everything you learned.',
         whyItMatters:'Building is great, but understanding what you built makes you a better builder. This document captures your journey so you can learn from it and reference it later.',
-        expectedOutput:'Claude creates FOR[Andykitlowski].md \u2014 a friendly, engaging explanation of your entire project with lessons learned, mental models, and growth opportunities.',
+        expectedOutput:'Claude creates your personal learning document \u2014 a friendly, engaging explanation of your entire project with lessons learned, mental models, and growth opportunities.',
         prompt:{
-          template:'The project is complete! Please create my FOR[Andykitlowski].md learning document.\n\nThis should explain the entire project in plain language, including:\n- Technical architecture and how it\u2019s structured\n- How the various parts are connected\n- Technologies used and why we chose them\n- Lessons I can learn from this project:\n  * Bugs we ran into and how we fixed them\n  * Potential pitfalls and how to avoid them in the future\n  * New technologies/concepts introduced\n  * How good engineers think and work\n  * Best practices demonstrated in this project\n\nMake it engaging and memorable \u2014 use technical terms appropriately, but also use analogies and anecdotes to make concepts stick. Don\u2019t make it sound like boring technical documentation.\n\nThis is a learning tool to help me grow as a builder.',
-          fields:[]
+          template:'The project is complete! Please create my FOR[{{yourName}}].md learning document.\n\nThis should explain the entire project in plain language, including:\n- Technical architecture and how it\u2019s structured\n- How the various parts are connected\n- Technologies used and why we chose them\n- Lessons I can learn from this project:\n  * Bugs we ran into and how we fixed them\n  * Potential pitfalls and how to avoid them in the future\n  * New technologies/concepts introduced\n  * How good engineers think and work\n  * Best practices demonstrated in this project\n\nMake it engaging and memorable \u2014 use technical terms appropriately, but also use analogies and anecdotes to make concepts stick. Don\u2019t make it sound like boring technical documentation.\n\nThis is a learning tool to help me grow as a builder.',
+          fields:[{name:'yourName',label:'Your Name',type:'text',placeholder:'e.g., Andy'}]
         },
         whatToDo:'Read it! This is your personal knowledge base. Refer back to it when building your next project.',
       },
@@ -454,8 +454,8 @@ const StepCard = ({step,isExpanded,onToggle,isCompleted,onComplete,isFavorited,o
   const isToolkit = step.toolkit;
   return (
   <div className="fade-in" style={{background:colors.surface,border:(isToolkit?'1px dashed ':'1px solid ')+(isCompleted?colors.success+'44':isToolkit?colors.textLight+'66':colors.border),borderRadius:12,marginBottom:10,overflow:'hidden',transition:'border-color 0.2s, box-shadow 0.2s',boxShadow:isExpanded?'0 4px 20px '+colors.accent+'11':'none'}}>
-    <div onClick={onToggle} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 18px',cursor:'pointer',userSelect:'none',background:isExpanded?colors.surfaceHover:'transparent',transition:'background 0.2s'}}>
-      {!isToolkit&&<div onClick={e=>{e.stopPropagation();onComplete();}}
+    <div role="button" tabIndex={0} aria-expanded={isExpanded} onClick={onToggle} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onToggle();}}} style={{display:'flex',alignItems:'center',gap:12,padding:'14px 18px',cursor:'pointer',userSelect:'none',background:isExpanded?colors.surfaceHover:'transparent',transition:'background 0.2s'}}>
+      {!isToolkit&&<div role="checkbox" tabIndex={0} aria-checked={isCompleted} aria-label={'Mark '+step.title+(isCompleted?' incomplete':' complete')} onClick={e=>{e.stopPropagation();onComplete();}} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();onComplete();}}}
         style={{width:22,height:22,borderRadius:6,flexShrink:0,border:'2px solid '+(isCompleted?colors.success:colors.border),background:isCompleted?colors.successBg:'transparent',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',transition:'all 0.2s'}}>
         {isCompleted&&Icons.check(14,colors.success)}
       </div>}
@@ -560,12 +560,13 @@ const StepCard = ({step,isExpanded,onToggle,isCompleted,onComplete,isFavorited,o
    ═══════════════════════════════════════════ */
 const PhaseSection = ({phase,completedSteps,expandedSteps,onToggleStep,onCompleteStep,favorites,onFavorite}) => {
   const [isOpen,setIsOpen] = useState(true);
-  const done = phase.steps.filter(s=>completedSteps.includes(s.id)).length;
-  const pct = (done/phase.steps.length)*100;
+  const coreSteps = phase.steps.filter(s=>!s.toolkit);
+  const done = coreSteps.filter(s=>completedSteps.includes(s.id)).length;
+  const pct = coreSteps.length>0?(done/coreSteps.length)*100:0;
 
   return (
     <div style={{marginBottom:24}}>
-      <div onClick={()=>setIsOpen(!isOpen)}
+      <div role="button" tabIndex={0} aria-expanded={isOpen} onClick={()=>setIsOpen(!isOpen)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}}}
         style={{display:'flex',alignItems:'center',gap:14,padding:'16px 20px',background:colors.surface,borderRadius:16,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none',transition:'box-shadow 0.2s',boxShadow:isOpen?'0 2px 12px '+colors.accent+'11':'none'}}>
         <div style={{width:42,height:42,borderRadius:12,flexShrink:0,background:'linear-gradient(135deg,'+phase.color+','+phase.color+'cc)',display:'flex',alignItems:'center',justifyContent:'center'}}>
           {phaseIcons[phase.number](20,'#fff')}
@@ -574,10 +575,10 @@ const PhaseSection = ({phase,completedSteps,expandedSteps,onToggleStep,onComplet
           <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
             <span style={{fontSize:11,fontWeight:700,color:colors.textLight,textTransform:'uppercase',letterSpacing:'0.08em'}}>Phase {phase.number}</span>
             <span style={{fontSize:18,fontWeight:700,color:colors.text}}>{phase.title}</span>
-            <span style={{fontSize:11,fontWeight:600,color:done===phase.steps.length?colors.success:colors.textMuted,background:done===phase.steps.length?colors.successBg:colors.codeBg,padding:'2px 8px',borderRadius:10}}>{done}/{phase.steps.length}</span>
+            <span style={{fontSize:11,fontWeight:600,color:done===coreSteps.length?colors.success:colors.textMuted,background:done===coreSteps.length?colors.successBg:colors.codeBg,padding:'2px 8px',borderRadius:10}}>{done}/{coreSteps.length}</span>
           </div>
           <div style={{height:4,background:colors.borderLight,borderRadius:2,marginTop:8,overflow:'hidden'}}>
-            <div style={{height:'100%',borderRadius:2,transition:'width 0.4s ease',width:pct+'%',background:done===phase.steps.length?'linear-gradient(90deg,'+colors.success+',#34d399)':'linear-gradient(90deg,'+phase.color+','+colors.accentHover+')'}}/>
+            <div style={{height:'100%',borderRadius:2,transition:'width 0.4s ease',width:pct+'%',background:done===coreSteps.length?'linear-gradient(90deg,'+colors.success+',#34d399)':'linear-gradient(90deg,'+phase.color+','+colors.accentHover+')'}}/>
           </div>
         </div>
         <div style={{flexShrink:0,transition:'transform 0.2s',transform:isOpen?'rotate(180deg)':'rotate(0)'}}>
@@ -639,7 +640,7 @@ const FavoritesSection = ({favorites,onRemove}) => {
   if(favSteps.length===0&&!isOpen) return null;
   return (
     <div style={{marginBottom:16}}>
-      <div onClick={()=>setIsOpen(!isOpen)}
+      <div role="button" tabIndex={0} aria-expanded={isOpen} onClick={()=>setIsOpen(!isOpen)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}}}
         style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
         {Icons.starFilled(18,colors.accent)}
         <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>My Favorites ({favSteps.length})</span>
@@ -689,7 +690,7 @@ const ProjectsSection = () => {
 
   return (
     <div style={{marginBottom:16}}>
-      <div onClick={()=>setIsOpen(!isOpen)}
+      <div role="button" tabIndex={0} aria-expanded={isOpen} onClick={()=>setIsOpen(!isOpen)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}}}
         style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
         {Icons.folder(18,colors.accent)}
         <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>My Projects ({projects.length})</span>
@@ -759,7 +760,7 @@ const LearningStoriesSection = () => {
 
   return (
     <div style={{marginBottom:16}}>
-      <div onClick={()=>setIsOpen(!isOpen)}
+      <div role="button" tabIndex={0} aria-expanded={isOpen} onClick={()=>setIsOpen(!isOpen)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setIsOpen(!isOpen);}}}
         style={{display:'flex',alignItems:'center',gap:10,padding:'14px 18px',background:colors.surface,borderRadius:12,border:'1px solid '+colors.border,cursor:'pointer',userSelect:'none'}}>
         {Icons.book(18,colors.success)}
         <span style={{flex:1,fontSize:15,fontWeight:600,color:colors.text}}>Learning Stories ({stories.length})</span>
@@ -769,7 +770,7 @@ const LearningStoriesSection = () => {
         <div style={{padding:'12px 0'}}>
           {stories.map((s,i)=>(
             <div key={i} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,marginBottom:8,overflow:'hidden'}}>
-              <div onClick={()=>setExpanded(expanded===i?null:i)}
+              <div role="button" tabIndex={0} aria-expanded={expanded===i} onClick={()=>setExpanded(expanded===i?null:i)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setExpanded(expanded===i?null:i);}}}
                 style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px',cursor:'pointer',userSelect:'none'}}>
                 <div>
                   <span style={{fontSize:14,fontWeight:600,color:colors.text}}>{s.title}</span>
@@ -790,7 +791,7 @@ const LearningStoriesSection = () => {
           <div style={{background:colors.codeBg,borderRadius:10,padding:16,border:'1px solid '+colors.border}}>
             <div style={{fontSize:13,fontWeight:600,color:colors.text,marginBottom:12}}>Add Learning Story</div>
             <input placeholder="Story title (e.g., My Recipe App)" value={title} onChange={e=>setTitle(e.target.value)} style={inputStyle}/>
-            <textarea placeholder="Paste your LEARNING_STORY.md or FOR[Name].md content here..." value={content} onChange={e=>setContent(e.target.value)} rows={6} style={{...inputStyle,resize:'vertical'}}/>
+            <textarea placeholder="Paste your LEARNING_STORY.md or learning document content here..." value={content} onChange={e=>setContent(e.target.value)} rows={6} style={{...inputStyle,resize:'vertical'}}/>
             <button onClick={add} style={{padding:'8px 16px',fontSize:13,fontWeight:600,background:colors.success,color:'#fff',border:'none',borderRadius:8,cursor:'pointer'}}>Save Story</button>
           </div>
         </div>
@@ -807,10 +808,15 @@ const QuickCopyDrawer = () => {
   const [copiedId,setCopiedId] = useState(null);
   const allPrompts = useMemo(()=>{
     const out=[];
-    phases.forEach(p=>p.steps.forEach(s=>{if(s.prompt)out.push({id:s.id,title:s.title,template:s.prompt.template,phase:p.title});}));
+    phases.forEach(p=>p.steps.forEach(s=>{if(s.prompt)out.push({id:s.id,title:s.title,template:s.prompt.template,fields:s.prompt.fields||[],phase:p.title});}));
     return out;
   },[]);
-  const handleCopy=async(id,text)=>{const ok=await copyText(text);if(ok){setCopiedId(id);setTimeout(()=>setCopiedId(null),2000);}};
+  const fillPlaceholders=(template,fields)=>{
+    let text=template;
+    fields.forEach(f=>{text=text.replace(new RegExp('\\{\\{'+f.name+'\\}\\}','g'),'[FILL IN: '+f.label+']');});
+    return text;
+  };
+  const handleCopy=async(id,text,fields)=>{const filled=fields.length?fillPlaceholders(text,fields):text;const ok=await copyText(filled);if(ok){setCopiedId(id);setTimeout(()=>setCopiedId(null),2000);}};
 
   return (
     <>
@@ -831,6 +837,7 @@ const QuickCopyDrawer = () => {
           <button onClick={()=>setIsOpen(false)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.x(20,colors.textMuted)}</button>
         </div>
         <div style={{flex:1,overflow:'auto',padding:16}}>
+          <div style={{fontSize:11,color:colors.textLight,marginBottom:12,fontStyle:'italic'}}>* = has fill-in fields. Use the full step card to customize before copying.</div>
           {['PLANNING','BUILD','POLISH','SHIP'].map(pn=>{
             const pp=allPrompts.filter(p=>p.phase===pn);
             if(!pp.length)return null;
@@ -838,7 +845,7 @@ const QuickCopyDrawer = () => {
               <div key={pn} style={{marginBottom:20}}>
                 <div style={{fontSize:11,fontWeight:700,color:colors.accent,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}}>{pn}</div>
                 {pp.map(p=>(
-                  <button key={p.id} onClick={()=>handleCopy(p.id,p.template)}
+                  <button key={p.id} onClick={()=>handleCopy(p.id,p.template,p.fields)}
                     style={{display:'flex',alignItems:'center',gap:10,width:'100%',textAlign:'left',padding:'10px 14px',
                       background:copiedId===p.id?colors.successBg:colors.codeBg,
                       border:'1px solid '+(copiedId===p.id?colors.success+'44':colors.borderLight),
@@ -846,7 +853,7 @@ const QuickCopyDrawer = () => {
                     onMouseEnter={e=>{if(copiedId!==p.id)e.currentTarget.style.background=colors.surfaceHover;}}
                     onMouseLeave={e=>{if(copiedId!==p.id)e.currentTarget.style.background=colors.codeBg;}}>
                     <span style={{flexShrink:0,fontSize:11,fontWeight:700,color:colors.accent}}>{p.id}</span>
-                    <span style={{flex:1,fontWeight:500}}>{p.title}</span>
+                    <span style={{flex:1,fontWeight:500}}>{p.title}{p.fields.length>0&&<span style={{fontSize:10,color:colors.textLight,marginLeft:6}} title="Has fields to fill in — use the full step card for best results">*</span>}</span>
                     <span style={{flexShrink:0}}>{copiedId===p.id?Icons.check(14,colors.success):Icons.clipboard(14,colors.textLight)}</span>
                   </button>
                 ))}
@@ -893,8 +900,8 @@ function WorkflowKitt() {
   const [expandedSteps,setExpandedSteps] = useState([]);
   const [dlPulse,setDlPulse] = useState(false);
 
-  const totalSteps = phases.reduce((a,p)=>a+p.steps.length,0);
-  const totalDone = completedSteps.length;
+  const totalSteps = phases.reduce((a,p)=>a+p.steps.filter(s=>!s.toolkit).length,0);
+  const totalDone = phases.reduce((a,p)=>a+p.steps.filter(s=>!s.toolkit&&completedSteps.includes(s.id)).length,0);
   const pct = Math.round((totalDone/totalSteps)*100);
 
   const toggleStep = id => setExpandedSteps(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
