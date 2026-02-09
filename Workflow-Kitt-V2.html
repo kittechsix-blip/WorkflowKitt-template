@@ -10,10 +10,20 @@
     <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
+      :root {
+        --bg:#FEFDFB; --surface:#FFFFFF; --surface-hover:#F8F7FF;
+        --border:#E0D9F0; --border-light:#F0EDF7;
+        --text:#1A0F2E; --text-muted:#5B4A75; --text-light:#8B7BA8;
+        --accent:#7B5FCC; --accent-hover:#9D7FEA; --accent-dark:#5B3FA8;
+        --success:#059669; --success-bg:#D1FAE5;
+        --warning:#D97706; --warning-bg:#FEF3C7;
+        --error:#DC2626; --error-bg:#FEE2E2;
+        --code-bg:#F5F3F7; --divider:#E9E4F0;
+      }
       *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
       body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        background: #FEFDFB; color: #1A0F2E; line-height: 1.6;
+        background: var(--bg); color: var(--text); line-height: 1.6;
         -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
       }
       ::selection { background: rgba(123,95,204,0.2); }
@@ -22,19 +32,25 @@
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #E0D9F0; border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: #7B5FCC; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
       @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
       @keyframes bounceFile { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
       .fade-in { animation: fadeIn 0.3s ease-out forwards; }
       button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
-        outline: 2px solid #7B5FCC; outline-offset: 2px;
+        outline: 2px solid var(--accent); outline-offset: 2px;
       }
+      .btn-copy:hover { background: var(--accent-hover) !important; }
+      .btn-copy.copied:hover { background: var(--success) !important; }
+      .btn-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(123,95,204,0.4) !important; }
+      .btn-drawer-item:hover:not(.copied) { background: var(--surface-hover) !important; }
+      .btn-clear:hover { color: var(--error) !important; border-color: var(--error) !important; }
+      .btn-download:hover { box-shadow: 0 6px 28px rgba(123,95,204,0.33) !important; transform: translateY(-1px) !important; }
     </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect, useRef, useCallback, useMemo } = React;
+const { useState, useEffect, useMemo } = React;
 
 /* ═══════════════════════════════════════════
    COLOR SYSTEM
@@ -407,10 +423,8 @@ const EditablePrompt = ({template, fields, stepId, onFavorite, isFavorited}) => 
         </pre>
       )}
       <div style={{display:'flex',gap:8,marginTop:12,flexWrap:'wrap'}}>
-        <button onClick={handleCopy}
-          style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 16px',fontSize:13,fontWeight:600,background:copied?colors.success:colors.accent,color:'#fff',border:'none',borderRadius:8,cursor:'pointer',transition:'all 0.2s'}}
-          onMouseEnter={e=>{if(!copied)e.currentTarget.style.background=colors.accentHover}}
-          onMouseLeave={e=>{if(!copied)e.currentTarget.style.background=colors.accent}}>
+        <button onClick={handleCopy} className={'btn-copy'+(copied?' copied':'')}
+          style={{display:'inline-flex',alignItems:'center',gap:6,padding:'8px 16px',fontSize:13,fontWeight:600,background:copied?colors.success:colors.accent,color:'#fff',border:'none',borderRadius:8,cursor:'pointer',transition:'all 0.2s'}}>
           {copied?Icons.check(14,'#fff'):Icons.clipboard(14,'#fff')}
           {copied?'Copied!':(hasFields?'Copy Filled Prompt':'Copy Prompt')}
         </button>
@@ -683,9 +697,9 @@ const ProjectsSection = () => {
     polishing:{bg:'#E0F2FE',fg:'#0284C7',label:'Polishing'},
     shipped:{bg:colors.successBg,fg:colors.success,label:'Shipped'},
   };
-  const save=()=>{if(!form.name.trim())return;if(editing!==null){setProjects(p=>p.map((x,i)=>i===editing?{...form}:x));setEditing(null);}else{setProjects(p=>[...p,{...form}]);}setForm({name:'',description:'',status:'planning',notes:'',whatILearned:''});};
-  const del=(i)=>setProjects(p=>p.filter((_,j)=>j!==i));
-  const startEdit=(i)=>{setForm({...projects[i]});setEditing(i);};
+  const save=()=>{if(!form.name.trim())return;if(editing!==null){setProjects(p=>p.map(x=>x.id===editing?{...form,id:editing}:x));setEditing(null);}else{setProjects(p=>[...p,{...form,id:Date.now()}]);}setForm({name:'',description:'',status:'planning',notes:'',whatILearned:''});};
+  const del=(id)=>setProjects(p=>p.filter(x=>x.id!==id));
+  const startEdit=(proj)=>{setForm({name:proj.name,description:proj.description,status:proj.status,notes:proj.notes,whatILearned:proj.whatILearned});setEditing(proj.id);};
   const inputStyle = {width:'100%',padding:'8px 12px',fontSize:13,border:'1px solid '+colors.border,borderRadius:6,marginBottom:8,background:colors.surface,color:colors.text};
 
   return (
@@ -698,8 +712,8 @@ const ProjectsSection = () => {
       </div>
       {isOpen&&(
         <div style={{padding:'12px 0'}}>
-          {projects.map((proj,i)=>(
-            <div key={i} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,padding:16,marginBottom:10}}>
+          {projects.map(proj=>(
+            <div key={proj.id||proj.name} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,padding:16,marginBottom:10}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
                 <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
                   <span style={{fontSize:15,fontWeight:600,color:colors.text}}>{proj.name}</span>
@@ -708,8 +722,8 @@ const ProjectsSection = () => {
                   </span>
                 </div>
                 <div style={{display:'flex',gap:4}}>
-                  <button onClick={()=>startEdit(i)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.edit(14,colors.textMuted)}</button>
-                  <button onClick={()=>del(i)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.trash(14,colors.error)}</button>
+                  <button onClick={()=>startEdit(proj)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.edit(14,colors.textMuted)}</button>
+                  <button onClick={()=>del(proj.id)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.trash(14,colors.error)}</button>
                 </div>
               </div>
               {proj.description&&<p style={{fontSize:13,color:colors.textMuted,marginBottom:8}}>{proj.description}</p>}
@@ -754,8 +768,8 @@ const LearningStoriesSection = () => {
   const [title,setTitle] = useState('');
   const [content,setContent] = useState('');
   const [expanded,setExpanded] = useState(null);
-  const add=()=>{if(!title.trim()||!content.trim())return;setStories(s=>[...s,{title:title.trim(),content:content.trim(),date:new Date().toLocaleDateString()}]);setTitle('');setContent('');};
-  const del=(i)=>setStories(s=>s.filter((_,j)=>j!==i));
+  const add=()=>{if(!title.trim()||!content.trim())return;setStories(s=>[...s,{id:Date.now(),title:title.trim(),content:content.trim(),date:new Date().toLocaleDateString()}]);setTitle('');setContent('');};
+  const del=(id)=>setStories(s=>s.filter(x=>x.id!==id));
   const inputStyle={width:'100%',padding:'8px 12px',fontSize:13,border:'1px solid '+colors.border,borderRadius:6,marginBottom:8,background:colors.surface,color:colors.text};
 
   return (
@@ -768,20 +782,20 @@ const LearningStoriesSection = () => {
       </div>
       {isOpen&&(
         <div style={{padding:'12px 0'}}>
-          {stories.map((s,i)=>(
-            <div key={i} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,marginBottom:8,overflow:'hidden'}}>
-              <div role="button" tabIndex={0} aria-expanded={expanded===i} onClick={()=>setExpanded(expanded===i?null:i)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setExpanded(expanded===i?null:i);}}}
+          {stories.map(s=>(
+            <div key={s.id||s.title} style={{background:colors.surface,border:'1px solid '+colors.borderLight,borderRadius:10,marginBottom:8,overflow:'hidden'}}>
+              <div role="button" tabIndex={0} aria-expanded={expanded===s.id} onClick={()=>setExpanded(expanded===s.id?null:s.id)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();setExpanded(expanded===s.id?null:s.id);}}}
                 style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px',cursor:'pointer',userSelect:'none'}}>
                 <div>
                   <span style={{fontSize:14,fontWeight:600,color:colors.text}}>{s.title}</span>
                   <span style={{fontSize:11,color:colors.textLight,marginLeft:8}}>{s.date}</span>
                 </div>
                 <div style={{display:'flex',gap:4,alignItems:'center'}}>
-                  <button onClick={e=>{e.stopPropagation();del(i);}} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.trash(14,colors.error)}</button>
-                  <div style={{transition:'transform 0.2s',transform:expanded===i?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(16,colors.textLight)}</div>
+                  <button onClick={e=>{e.stopPropagation();del(s.id);}} style={{background:'none',border:'none',cursor:'pointer',padding:4}}>{Icons.trash(14,colors.error)}</button>
+                  <div style={{transition:'transform 0.2s',transform:expanded===s.id?'rotate(180deg)':'rotate(0)'}}>{Icons.chevronDown(16,colors.textLight)}</div>
                 </div>
               </div>
-              {expanded===i&&(
+              {expanded===s.id&&(
                 <div style={{padding:'0 14px 14px'}}>
                   <pre style={{background:colors.codeBg,borderRadius:8,padding:14,fontSize:13,lineHeight:1.6,whiteSpace:'pre-wrap',wordBreak:'break-word',color:colors.text,maxHeight:400,overflow:'auto'}}>{s.content}</pre>
                 </div>
@@ -820,16 +834,14 @@ const QuickCopyDrawer = () => {
 
   return (
     <>
-      <button onClick={()=>setIsOpen(true)} title="Quick Copy All Prompts"
+      <button onClick={()=>setIsOpen(true)} title="Quick Copy All Prompts" className="btn-fab"
         style={{position:'fixed',bottom:24,right:24,zIndex:998,width:52,height:52,borderRadius:14,
           background:'linear-gradient(135deg,'+colors.accent+','+colors.accentDark+')',border:'none',cursor:'pointer',color:'#fff',
-          display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 20px '+colors.accent+'44',transition:'transform 0.2s, box-shadow 0.2s'}}
-        onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.08)';e.currentTarget.style.boxShadow='0 6px 28px '+colors.accent+'66';}}
-        onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.boxShadow='0 4px 20px '+colors.accent+'44';}}>
+          display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 20px '+colors.accent+'44',transition:'transform 0.2s, box-shadow 0.2s'}}>
         {Icons.clipboard(22,'#fff')}
       </button>
       {isOpen&&<div onClick={()=>setIsOpen(false)} style={{position:'fixed',inset:0,zIndex:999,background:'rgba(26,15,46,0.4)',backdropFilter:'blur(2px)'}}/>}
-      <div style={{position:'fixed',top:0,right:0,bottom:0,zIndex:1000,width:Math.min(420,window.innerWidth-20),
+      <div style={{position:'fixed',top:0,right:0,bottom:0,zIndex:1000,width:'calc(100vw - 20px)',maxWidth:420,
         background:colors.surface,boxShadow:'-8px 0 32px rgba(0,0,0,0.12)',
         transform:isOpen?'translateX(0)':'translateX(100%)',transition:'transform 0.3s cubic-bezier(0.4,0,0.2,1)',display:'flex',flexDirection:'column'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'18px 20px',borderBottom:'1px solid '+colors.border}}>
@@ -845,13 +857,11 @@ const QuickCopyDrawer = () => {
               <div key={pn} style={{marginBottom:20}}>
                 <div style={{fontSize:11,fontWeight:700,color:colors.accent,textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:8}}>{pn}</div>
                 {pp.map(p=>(
-                  <button key={p.id} onClick={()=>handleCopy(p.id,p.template,p.fields)}
+                  <button key={p.id} onClick={()=>handleCopy(p.id,p.template,p.fields)} className={'btn-drawer-item'+(copiedId===p.id?' copied':'')}
                     style={{display:'flex',alignItems:'center',gap:10,width:'100%',textAlign:'left',padding:'10px 14px',
                       background:copiedId===p.id?colors.successBg:colors.codeBg,
                       border:'1px solid '+(copiedId===p.id?colors.success+'44':colors.borderLight),
-                      borderRadius:8,marginBottom:6,cursor:'pointer',transition:'all 0.2s',fontSize:13,color:colors.text}}
-                    onMouseEnter={e=>{if(copiedId!==p.id)e.currentTarget.style.background=colors.surfaceHover;}}
-                    onMouseLeave={e=>{if(copiedId!==p.id)e.currentTarget.style.background=colors.codeBg;}}>
+                      borderRadius:8,marginBottom:6,cursor:'pointer',transition:'all 0.2s',fontSize:13,color:colors.text}}>
                     <span style={{flexShrink:0,fontSize:11,fontWeight:700,color:colors.accent}}>{p.id}</span>
                     <span style={{flex:1,fontWeight:500}}>{p.title}{p.fields.length>0&&<span style={{fontSize:10,color:colors.textLight,marginLeft:6}} title="Has fields to fill in — use the full step card for best results">*</span>}</span>
                     <span style={{flexShrink:0}}>{copiedId===p.id?Icons.check(14,colors.success):Icons.clipboard(14,colors.textLight)}</span>
@@ -935,24 +945,20 @@ function WorkflowKitt() {
             </div>
           </div>
         )}
-        <button onClick={handleClearData}
+        <button onClick={handleClearData} className="btn-clear"
           style={{marginTop:12,background:'none',border:'1px solid '+colors.borderLight,borderRadius:8,padding:'6px 14px',
-            fontSize:12,color:colors.textLight,cursor:'pointer',transition:'all 0.2s'}}
-          onMouseEnter={e=>{e.currentTarget.style.color=colors.error;e.currentTarget.style.borderColor=colors.error;}}
-          onMouseLeave={e=>{e.currentTarget.style.color=colors.textLight;e.currentTarget.style.borderColor=colors.borderLight;}}>
+            fontSize:12,color:colors.textLight,cursor:'pointer',transition:'all 0.2s'}}>
           Clear All Data
         </button>
       </header>
 
       {/* ─── MAIN ─── */}
       <main style={{maxWidth:720,margin:'0 auto',padding:'24px 16px 80px'}}>
-        <button onClick={handleDownload}
+        <button onClick={handleDownload} className="btn-download"
           style={{display:'flex',alignItems:'center',justifyContent:'center',gap:10,width:'100%',padding:'16px 24px',marginBottom:32,
             background:'linear-gradient(135deg,'+colors.accent+','+colors.accentDark+')',color:'#fff',border:'none',borderRadius:14,
             fontSize:16,fontWeight:700,cursor:'pointer',boxShadow:'0 4px 20px '+colors.accent+'33',transition:'all 0.2s',
-            transform:dlPulse?'scale(0.97)':'scale(1)'}}
-          onMouseEnter={e=>{e.currentTarget.style.boxShadow='0 6px 28px '+colors.accent+'55';e.currentTarget.style.transform='translateY(-1px)';}}
-          onMouseLeave={e=>{e.currentTarget.style.boxShadow='0 4px 20px '+colors.accent+'33';e.currentTarget.style.transform='scale(1)';}}>
+            transform:dlPulse?'scale(0.97)':'scale(1)'}}>
           {Icons.download(20,'#fff')} Download Template Folder
         </button>
 
